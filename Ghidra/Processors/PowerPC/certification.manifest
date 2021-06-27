@@ -43,7 +43,12 @@ data/languages/ppc_64_le.slaspec||GHIDRA||||END|
 data/languages/ppc_a2.sinc||GHIDRA||||END|
 data/languages/ppc_common.sinc||GHIDRA||||END|
 data/languages/ppc_embedded.sinc||GHIDRA||||END|
+data/languages/ppc_gekko_broadway.cspec||GHIDRA||||END|
+data/languages/ppc_gekko_broadway.ldefs||GHIDRA||||END|
+data/languages/ppc_gekko_broadway.pspec||GHIDRA||||END|
+data/languages/ppc_gekko_broadway.slaspec||GHIDRA||||END|
 data/languages/ppc_instructions.sinc||GHIDRA||||END|
+data/languages/ppc_instructions_gekko_broadway.sinc||GHIDRA||||END|
 data/languages/ppc_isa.sinc||GHIDRA||||END|
 data/languages/ppc_vle.sinc||GHIDRA||||END|
 data/languages/quicciii.sinc||GHIDRA||||END|
