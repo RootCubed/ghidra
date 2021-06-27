@@ -17,7 +17,6 @@ package ghidra.program.emulation;
 
 import ghidra.pcode.emulate.Emulate;
 import ghidra.pcode.emulate.EmulateInstructionStateModifier;
-import ghidra.pcode.emulate.callother.CountLeadingZerosOpBehavior;
 import ghidra.pcode.error.LowlevelError;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.lang.Register;
@@ -43,8 +42,6 @@ public class ARMEmulateInstructionStateModifier extends EmulateInstructionStateM
 		}
 		tMode = new RegisterValue(TModeReg, BigInteger.ONE);
 		aMode = new RegisterValue(TModeReg, BigInteger.ZERO);
-
-		registerPcodeOpBehavior("count_leading_zeroes", new CountLeadingZerosOpBehavior());
 
 		/**
 		 * We could registerPcodeOpBehavior for one or more of the following pcodeop's:
@@ -83,7 +80,6 @@ public class ARMEmulateInstructionStateModifier extends EmulateInstructionStateM
 		  coprocessor_store2
 		  coprocessor_storelong
 		  coprocessor_storelong2
-		  count_leading_zeroes
 		  disableDataAbortInterrupts
 		  disableFIQinterrupts
 		  disableIRQinterrupts
