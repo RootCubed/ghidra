@@ -15,17 +15,12 @@
  */
 package ghidra.file.formats.ext4;
 
-import ghidra.app.util.bin.BinaryReader;
-import ghidra.app.util.bin.ByteProvider;
-import ghidra.app.util.bin.StructConverter;
-import ghidra.program.model.data.ArrayDataType;
-import ghidra.program.model.data.DataType;
-import ghidra.program.model.data.Structure;
-import ghidra.program.model.data.StructureDataType;
-import ghidra.util.exception.DuplicateNameException;
-
 import java.io.IOException;
 import java.util.*;
+
+import ghidra.app.util.bin.*;
+import ghidra.program.model.data.*;
+import ghidra.util.exception.DuplicateNameException;
 
 public class Ext4IBlock implements StructConverter {
 	
@@ -36,6 +31,21 @@ public class Ext4IBlock implements StructConverter {
 	
 	private boolean isExtentTree;
 	
+	/**
+	 * Reads an IBlock that is expected to contain extents
+	 * 
+	 * @param provider {@link ByteProvider} to read from
+	 * @param offset offset of the extent header
+	 * @return new Ext4IBlock
+	 * @throws IOException if error
+	 */
+	public static Ext4IBlock readIBlockWithExtents(ByteProvider provider, long offset)
+			throws IOException {
+		BinaryReader reader = new BinaryReader(provider, true);
+		reader.setPointerIndex(offset);
+		return new Ext4IBlock(reader, true);
+	}
+
 	public Ext4IBlock(ByteProvider provider, boolean isExtentTree) throws IOException {
 		this( new BinaryReader( provider, true ), isExtentTree );
 	}
@@ -43,32 +53,33 @@ public class Ext4IBlock implements StructConverter {
 	public Ext4IBlock(BinaryReader reader, boolean isExtentTree) throws IOException {
 		this.isExtentTree = isExtentTree;
 		int count = 0;
-		if( isExtentTree ) {
+		if (isExtentTree) {
 			header = new Ext4ExtentHeader(reader);
 			count++;
 			short numEntries = header.getEh_entries();
-			if( header.getEh_depth() > 0 ) {
-				indexEntries = new ArrayList<Ext4ExtentIdx>();
-				for( int i = 0; i < numEntries; i++ ) {
-					indexEntries.add( new Ext4ExtentIdx(reader) );
-					count++;
-				}
+			boolean isIdxEntries = header.getEh_depth() > 0;
+			if (isIdxEntries) {
+				indexEntries = new ArrayList<>();
 			}
 			else {
-				extentEntries = new ArrayList<Ext4Extent>();
-				for( int i = 0; i < numEntries; i++ ) {
-					extentEntries.add( new Ext4Extent(reader) );
-					count++;
+				extentEntries = new ArrayList<>();
+			}
+			for (int i = 0; i < numEntries; i++, count++) {
+				if (isIdxEntries) {
+					indexEntries.add(new Ext4ExtentIdx(reader));
+				}
+				else {
+					extentEntries.add(new Ext4Extent(reader));
 				}
 			}
 		}
-		
+
 		int extraBytes = 60 - (count * 12);
-		if ( extraBytes > 0 ) {
+		if (extraBytes > 0) {
 			extra = reader.readNextByteArray(extraBytes);
 		}
 		else {
-			extra = new byte[ 0 ];
+			extra = new byte[0];
 		}
 	}
 
