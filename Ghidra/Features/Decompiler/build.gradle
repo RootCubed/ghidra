@@ -533,11 +533,11 @@ model {
 	
 	binaries {
 		all{ b ->
-			if (b.toolChain in Gcc) {
+			/*if (b.toolChain in Gcc) {
 				b.cppCompiler.args "-std=c++11"
 				b.cppCompiler.args "-Wall"
-				b.cppCompiler.args "-O2"			// for DEBUG, comment this line out
-				// b.cppCompiler.args "-g"			// for DEBUG, uncomment	this line
+				// b.cppCompiler.args "-O2"			// for DEBUG, comment this line out
+				b.cppCompiler.args "-g"			// for DEBUG, uncomment	this line
 				b.cppCompiler.args "-Wno-sign-compare"
 				if (b.targetPlatform.operatingSystem.linux) {
 //					b.linker.args "-static"
@@ -545,7 +545,7 @@ model {
 					b.cppCompiler.define "_LINUX"
 				}
 			}
-		 	else if (b.toolChain in VisualCpp) {
+		 	else */if (b.toolChain in VisualCpp) {
 				b.cppCompiler.args "/EHsc"
 				b.cppCompiler.define "_SECURE_SCL=0"
 				b.cppCompiler.define "_HAS_ITERATOR_DEBUGGING=0"
