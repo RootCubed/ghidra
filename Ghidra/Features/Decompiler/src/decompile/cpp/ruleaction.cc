@@ -9212,7 +9212,7 @@ int4 RuleCountLeadingZerosShiftBool::applyOp(PcodeOp *op,Funcdata &data)
       // Becomes a comparison with zero
       PcodeOp* newOp = data.newOp(2, baseOp->getAddr());
       data.opSetOpcode(newOp, CPUI_INT_EQUAL);
-      Varnode* b = data.newConstant(outVn->getSize(), 0);
+      Varnode* b = data.newConstant(op->getIn(0)->getSize(), 0);
       data.opSetInput(newOp, op->getIn(0), 0);
       data.opSetInput(newOp, b, 1);
 
