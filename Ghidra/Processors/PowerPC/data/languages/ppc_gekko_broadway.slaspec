@@ -131,11 +131,24 @@ define register offset=0x4000 size=8 [
 	f16 f17 f18 f19 f20 f21 f22 f23 f24 f25 f26 f27 f28 f29 f30 f31 ];
 
 # Paired singles registers
-define register offset=0x4000 size=4 [
-	 ps0_0  ps0_1  ps1_0  ps1_1  ps2_0  ps2_1  ps3_0  ps3_1  ps4_0  ps4_1  ps5_0  ps5_1  ps6_0  ps6_1  ps7_0  ps7_1
-	 ps8_0  ps8_1  ps9_0  ps9_1 ps10_0 ps10_1 ps11_0 ps11_1 ps12_0 ps12_1 ps13_0 ps13_1 ps14_0 ps14_1 ps15_0 ps15_1
-	ps16_0 ps16_1 ps17_0 ps17_1 ps18_0 ps18_1 ps19_0 ps19_1 ps20_0 ps20_1 ps21_0 ps21_1 ps22_0 ps22_1 ps23_0 ps23_1
-	ps24_0 ps24_1 ps25_0 ps25_1 ps26_0 ps26_1 ps27_0 ps27_1 ps28_0 ps28_1 ps29_0 ps29_1 ps30_0 ps30_1 ps31_0 ps31_1 ];
+#define register offset=0x4000 size=4 [
+#	 ps0_0  ps0_1  ps1_0  ps1_1  ps2_0  ps2_1  ps3_0  ps3_1  ps4_0  ps4_1  ps5_0  ps5_1  ps6_0  ps6_1  ps7_0  ps7_1
+#	 ps8_0  ps8_1  ps9_0  ps9_1 ps10_0 ps10_1 ps11_0 ps11_1 ps12_0 ps12_1 ps13_0 ps13_1 ps14_0 ps14_1 ps15_0 ps15_1
+#	ps16_0 ps16_1 ps17_0 ps17_1 ps18_0 ps18_1 ps19_0 ps19_1 ps20_0 ps20_1 ps21_0 ps21_1 ps22_0 ps22_1 ps23_0 ps23_1
+#	ps24_0 ps24_1 ps25_0 ps25_1 ps26_0 ps26_1 ps27_0 ps27_1 ps28_0 ps28_1 ps29_0 ps29_1 ps30_0 ps30_1 ps31_0 ps31_1 ];
+
+# Paired single lower (ps0) registers
+# XXX: treated as double-precision for consistency with floating-point registers
+#define register offset=0x4000 size=8 [
+#	ps0_0 ps1_0 ps2_0 ps3_0 ps4_0 ps5_0 ps6_0 ps7_0 ps8_0 ps9_0 ps10_0 ps11_0 ps12_0 ps13_0 ps14_0 ps15_0
+#	ps16_0 ps17_0 ps18_0 ps19_0 ps20_0 ps21_0 ps22_0 ps23_0 ps24_0 ps25_0 ps26_0 ps27_0 ps28_0 ps29_0 ps30_0 ps31_0
+#];
+
+# Paired single upper (ps1) registers
+define register offset=0x4800 size=4 [
+	ps0_1 ps1_1 ps2_1 ps3_1 ps4_1 ps5_1 ps6_1 ps7_1 ps8_1 ps9_1 ps10_1 ps11_1 ps12_1 ps13_1 ps14_1 ps15_1
+	ps16_1 ps17_1 ps18_1 ps19_1 ps20_1 ps21_1 ps22_1 ps23_1 ps24_1 ps25_1 ps26_1 ps27_1 ps28_1 ps29_1 ps30_1 ps31_1
+];
 
 # Define context bits
 define register offset=0x6000 size=4   contextreg;
@@ -149,10 +162,15 @@ define context contextreg
   lsmul=(3,7) noflow	   # Used for Load/store multiple parsing
   regp=(8,12) noflow	   # Used in powerISA quad word instructions
   regpset=(8,12) noflow	   # Used in powerISA quad word instructions
+
+  # paired-single enable context
+  pse=(13,13)
 ;
 
 @define NOTVLE "vle=0"
 @define ISVLE  "vle=1"
+@define NOTPSE "pse=0"
+@define ISPSE "pse=1"
 
 # Define Device Control Registers (specific to IBM PowerPC Embedded Controller, see instructions mfdcr/mtdcr)
 # Device Control Registers are defined with generic names
@@ -577,10 +595,10 @@ attach variables [ fD fB fA fC fS fT ]
 
 # Paired singles (individual components)
 attach variables [ ps0D ps0B ps0A ps0C ps0S ]
-                 [  ps0_0  ps1_0  ps2_0  ps3_0  ps4_0  ps5_0  ps6_0  ps7_0
-                    ps8_0  ps9_0 ps10_0 ps11_0 ps12_0 ps13_0 ps14_0 ps15_0
-                   ps16_0 ps17_0 ps18_0 ps19_0 ps20_0 ps21_0 ps22_0 ps23_0
-                   ps24_0 ps25_0 ps26_0 ps27_0 ps28_0 ps29_0 ps30_0 ps31_0 ];
+                 [  f0  f1  f2  f3  f4  f5  f6  f7
+                    f8  f9 f10 f11 f12 f13 f14 f15
+                   f16 f17 f18 f19 f20 f21 f22 f23
+                   f24 f25 f26 f27 f28 f29 f30 f31 ];
 
 attach variables [ ps1D ps1B ps1A ps1C ps1S ]
                  [  ps0_1  ps1_1  ps2_1  ps3_1  ps4_1  ps5_1  ps6_1  ps7_1
@@ -1177,6 +1195,7 @@ define pcodeop __psq_l1;
 {
 	EA:4 = dPlusRaAddressPS;
 	A = EA;
+	
 	wFlag:1 = W;
 	type:1 = 0;
 	scale:1 = 0;
@@ -1196,7 +1215,7 @@ define pcodeop __psq_l1;
 	ps1D = dequantize(EA + 2, type, scale);
 	goto inst_next;
 	<none>
-	ps0D = *:4(EA);
+	ps0D = float2float(*:4(EA));
 	ps1D = *:4(EA + 4);
 	if (wFlag == 0) goto inst_next;
 	<wIsOne>
@@ -1228,7 +1247,7 @@ define pcodeop __psq_l1;
 	ps1D = dequantize(EA + 2, type, scale);
 	goto inst_next;
 	<none>
-	ps0D = *:4(EA);
+	ps0D = float2float(*:4(EA));
 	ps1D = *:4(EA + 4);
 	if (wFlag == 0) goto inst_next;
 	<wIsOne>
@@ -1259,7 +1278,7 @@ define pcodeop __psq_l1;
 	ps1D = dequantize(EA + 2, type, scale);
 	goto inst_next;
 	<none>
-	ps0D = *:4(EA);
+	ps0D = float2float(*:4(EA));
 	ps1D = *:4(EA + 4);
 	if (wFlag == 0) goto inst_next;
 	<wIsOne>
@@ -1368,27 +1387,27 @@ define pcodeop __psq_st1;
 
 :ps_abs fD,fB is OP=4 & fD & BITS_16_20=0 & fB & XOP_1_10=264 & Rc=0 & ps0D & ps1D & ps0B & ps1B
 {
-	ps0D = abs(ps0B);
+	ps0D = float2float(abs(ps0B));
 	ps1D = abs(ps1B);
 }
 
 :ps_abs. fD,fB is OP=4 & fD & BITS_16_20=0 & fB & XOP_1_10=264 & Rc=1 & ps0D & ps1D & ps0B & ps1B
 {
-	ps0D = abs(ps0B);
+	ps0D = float2float(abs(ps0B));
 	ps1D = abs(ps1B);
 	cr1flags();
 }
 
 :ps_add fD,fA,fB is OP=4 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps0A f+ ps0B;
+	ps0D = float2float(ps0A f+ ps0B);
 	setFPAddFlags(ps0A, ps0B, ps0D);
 	ps1D = ps1A f+ ps1B;
 }
 
 :ps_add. fD,fA,fB is OP=4 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps0A f+ ps0B;
+	ps0D = float2float(ps0A f+ ps0B);
 	setFPAddFlags(ps0A, ps0B, ps0D);
 	ps1D = ps1A f+ ps1B;
 	cr1flags();
@@ -1432,14 +1451,16 @@ define pcodeop __psq_st1;
 
 :ps_div fD,fA,fB is OP=4 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps0A f/ ps0B;
+	tmp:4 = float2float(ps0A f/ ps0B);
+	ps0D = float2float(tmp);
 	setFPDivFlags(ps0A, ps0B, ps0D);
 	ps1D = ps1A f/ ps1B;
 }
 
 :ps_div. fD,fA,fB is OP=4 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps0A f/ ps0B;
+	tmp:4 = float2float(ps0A f/ ps0B);
+	ps0D = float2float(tmp);
 	setFPDivFlags(ps0A, ps0B, ps0D);
 	ps1D = ps1A f/ ps1B;
 	cr1flags();
@@ -1447,8 +1468,8 @@ define pcodeop __psq_st1;
 
 :ps_madd fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=29 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	ps0D = tmp1 f+ ps0B;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	ps0D = float2float(tmp1) f+ ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps0C) | nan(ps0B);
@@ -1459,8 +1480,8 @@ define pcodeop __psq_st1;
 
 :ps_madd. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=29 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	ps0D = tmp1 f+ ps0B;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	ps0D = float2float(tmp1) f+ ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps0C) | nan(ps0B);
@@ -1472,33 +1493,33 @@ define pcodeop __psq_st1;
 
 :ps_madds0 fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=14 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	ps0D = tmp1 f+ ps0B;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	ps0D = float2float(tmp1) f+ ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps0C) | nan(ps0B);
 	setSummaryFPSCR();
-	tmp2:4 = ps1A f* ps0C;
+	tmp2:4 = ps1A f* float2float(ps0C);
 	ps1D = tmp2 f+ ps1B;
 }
 
 :ps_madds0. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=14 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	ps0D = tmp1 f+ ps0B;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	ps0D = float2float(tmp1) f+ ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps0C) | nan(ps0B);
 	setSummaryFPSCR();
-	tmp2:4 = ps1A f* ps0C;
+	tmp2:4 = ps1A f* float2float(ps0C);
 	ps1D = tmp2 f+ ps1B;
 	cr1flags();
 }
 
 :ps_madds1 fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=15 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps1C;
-	ps0D = tmp1 f+ ps0B;
+	tmp1:4 = float2float(ps0A) f* ps1C;
+	ps0D = float2float(tmp1) f+ ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps1C) | nan(ps0B);
@@ -1509,8 +1530,8 @@ define pcodeop __psq_st1;
 
 :ps_madds1. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=15 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps1C;
-	ps0D = tmp1 f+ ps0B;
+	tmp1:4 = float2float(ps0A) f* ps1C;
+	ps0D = float2float(tmp1) f+ ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps1C) | nan(ps0B);
@@ -1523,13 +1544,13 @@ define pcodeop __psq_st1;
 :ps_merge00 fD,fA,fB is OP=4 & fD & fA & fB & XOP_1_10=528 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
 	ps0D = ps0A;
-	ps1D = ps0B;
+	ps1D = float2float(ps0B);
 }
 
 :ps_merge00. fD,fA,fB is OP=4 & fD & fA & fB & XOP_1_10=528 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
 	ps0D = ps0A;
-	ps1D = ps0B;
+	ps1D = float2float(ps0B);
 	cr1flags();
 }
 
@@ -1548,26 +1569,26 @@ define pcodeop __psq_st1;
 
 :ps_merge10 fD,fA,fB is OP=4 & fD & fA & fB & XOP_1_10=592 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps1A;
-	ps1D = ps0B;
+	ps0D = float2float(ps1A);
+	ps1D = float2float(ps0B);
 }
 
 :ps_merge10. fD,fA,fB is OP=4 & fD & fA & fB & XOP_1_10=592 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps1A;
-	ps1D = ps0B;
+	ps0D = float2float(ps1A);
+	ps1D = float2float(ps0B);
 	cr1flags();
 }
 
 :ps_merge11 fD,fA,fB is OP=4 & fD & fA & fB & XOP_1_10=624 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps1A;
+	ps0D = float2float(ps1A);
 	ps1D = ps1B;
 }
 
 :ps_merge11. fD,fA,fB is OP=4 & fD & fA & fB & XOP_1_10=624 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A
 {
-	ps0D = ps1A;
+	ps0D = float2float(ps1A);
 	ps1D = ps1B;
 	cr1flags();
 }
@@ -1587,8 +1608,8 @@ define pcodeop __psq_st1;
 
 :ps_msub fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=28 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	ps0D = tmp1 f- ps0B;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	ps0D = float2float(tmp1) f- ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(fA) | nan(fC) | nan(fB);
@@ -1599,8 +1620,8 @@ define pcodeop __psq_st1;
 
 :ps_msub. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=28 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	ps0D = tmp1 f- ps0B;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	ps0D = float2float(tmp1) f- ps0B;
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(fA) | nan(fC) | nan(fB);
@@ -1619,7 +1640,7 @@ define pcodeop __psq_st1;
 
 :ps_mul. fD,fA,fC is OP=4 & fD & fA & BITS_11_15=0 & fC & XOP_1_5=25 & Rc=1 & ps0D & ps1D & ps0A & ps1A & ps0C & ps1C
 {
-	ps0D = ps0A f* ps0C;
+	ps0D = ps0A f* ps0C; # FIXME: In this and many other instructions, result must be in single-precision.
 	setFPMulFlags(ps0A, ps0C, ps0D);
 	ps1D = ps1A f* ps1C;
 	cr1flags();
@@ -1629,27 +1650,27 @@ define pcodeop __psq_st1;
 {
 	ps0D = ps0A f* ps0C;
 	setFPMulFlags(ps0A, ps0C, ps0D);
-	ps1D = ps1A f* ps0C;
+	ps1D = ps1A f* float2float(ps0C);
 }
 
 :ps_muls0. fD,fA,fC is OP=4 & fD & fA & BITS_11_15=0 & fC & XOP_1_5=12 & Rc=1 & ps0D & ps1D & ps0A & ps1A & ps0C & ps1C
 {
 	ps0D = ps0A f* ps0C;
 	setFPMulFlags(ps0A, ps0C, ps0D);
-	ps1D = ps1A f* ps0C;
+	ps1D = ps1A f* float2float(ps0C);
 	cr1flags();
 }
 
 :ps_muls1 fD,fA,fC is OP=4 & fD & fA & BITS_11_15=0 & fC & XOP_1_5=13 & Rc=0 & ps0D & ps1D & ps0A & ps1A & ps0C & ps1C
 {
-	ps0D = ps0A f* ps1C;
+	ps0D = ps0A f* float2float(ps1C);
 	setFPMulFlags(ps0A, ps1C, ps0D);
 	ps1D = ps1A f* ps1C;
 }
 
 :ps_muls1. fD,fA,fC is OP=4 & fD & fA & BITS_11_15=0 & fC & XOP_1_5=13 & Rc=1 & ps0D & ps1D & ps0A & ps1A & ps0C & ps1C
 {
-	ps0D = ps0A f* ps1C;
+	ps0D = ps0A f* float2float(ps1C);
 	setFPMulFlags(ps0A, ps1C, ps0D);
 	ps1D = ps1A f* ps1C;
 	cr1flags();
@@ -1683,9 +1704,9 @@ define pcodeop __psq_st1;
 
 :ps_nmadd fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=31 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	tmp1 = tmp1 f+ ps0B;
-	ps0D = f- tmp1;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	tmp1 = tmp1 f+ float2float(ps0B);
+	ps0D = float2float(f- tmp1);
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps0C) | nan(ps0B);
@@ -1697,9 +1718,9 @@ define pcodeop __psq_st1;
 
 :ps_nmadd. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=31 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	tmp1 = tmp1 f+ ps0B;
-	ps0D = f- tmp1;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	tmp1 = tmp1 f+ float2float(ps0B);
+	ps0D = float2float(f- tmp1);
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0A) | nan(ps0C) | nan(ps0B);
@@ -1712,9 +1733,9 @@ define pcodeop __psq_st1;
 
 :ps_nmsub fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=30 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	tmp1 = tmp1 f- ps0B;
-	ps0D = f- tmp1;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	tmp1 = tmp1 f- float2float(ps0B);
+	ps0D = float2float(f- tmp1);
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(fA) | nan(fC) | nan(fB);
@@ -1726,9 +1747,9 @@ define pcodeop __psq_st1;
 
 :ps_nmsub. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=30 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	tmp1:4 = ps0A f* ps0C;
-	tmp1 = tmp1 f- ps0B;
-	ps0D = f- tmp1;
+	tmp1:4 = float2float(ps0A f* ps0C);
+	tmp1 = tmp1 f- float2float(ps0B);
+	ps0D = float2float(f- tmp1);
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(fA) | nan(fC) | nan(fB);
@@ -1743,7 +1764,7 @@ define pcodeop __psq_st1;
 {
 	one:4 = 1;
 	floatOne:4 = int2float(one);
-	tmp1:4 = float2float(floatOne f/ ps0B);
+	tmp1:4 = floatOne f/ float2float(ps0B);
 	ps0D = float2float(tmp1);
 	setFPRF(fD);
 	fp_zx = fp_zx | (fB f== 0);
@@ -1757,7 +1778,7 @@ define pcodeop __psq_st1;
 {
 	one:4 = 1;
 	floatOne:4 = int2float(one);
-	tmp1:4 = float2float(floatOne f/ ps0B);
+	tmp1:4 = floatOne f/ float2float(ps0B);
 	ps0D = float2float(tmp1);
 	setFPRF(fD);
 	fp_zx = fp_zx | (fB f== 0);
@@ -1772,8 +1793,8 @@ define pcodeop __psq_st1;
 {
 	one:4 = 1;
 	floatOne:4 = int2float(one);
-	tmpSqrt1:4 = sqrt(ps0B);
-	ps0D = (floatOne f/ tmpSqrt1);
+	tmpSqrt1:4 = sqrt(float2float(ps0B));
+	ps0D = float2float(floatOne f/ tmpSqrt1);
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0B);
@@ -1786,8 +1807,8 @@ define pcodeop __psq_st1;
 {
 	one:4 = 1;
 	floatOne:4 = int2float(one);
-	tmpSqrt1:4 = sqrt(ps0B);
-	ps0D = (floatOne f/ tmpSqrt1);
+	tmpSqrt1:4 = sqrt(float2float(ps0B));
+	ps0D = float2float(floatOne f/ tmpSqrt1);
 	setFPRF(ps0D);
 	fp_xx = fp_xx | fp_fi;
 	fp_vxsnan = fp_vxsnan | nan(ps0B);
@@ -1802,7 +1823,7 @@ define pcodeop __psq_st1;
 	zero:4 = 0;
 	zeroFloat:4 = int2float(zero);
 	ps0D = ps0C;
-	if (ps0A f>= zeroFloat) goto <ps1test>; 
+	if (float2float(ps0A) f>= zeroFloat) goto <ps1test>; 
 	ps0D = ps0B;
 	<ps1test>
 	ps1D = ps1C;
@@ -1815,7 +1836,7 @@ define pcodeop __psq_st1;
 	zero:4 = 0;
 	zeroFloat:4 = int2float(zero);
 	ps0D = ps0C;
-	if (ps0A f>= zeroFloat) goto <ps1test>; 
+	if (float2float(ps0A) f>= zeroFloat) goto <ps1test>; 
 	ps0D = ps0B;
 	<ps1test>
 	ps1D = ps1C;
@@ -1842,14 +1863,14 @@ define pcodeop __psq_st1;
 
 :ps_sum0 fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=10 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	ps0D = ps0A f+ ps1B;
+	ps0D = ps0A f+ float2float(ps1B);
 	setFPAddFlags(ps0A, ps1B, ps0D);
 	ps1D = ps1C;
 }
 
 :ps_sum0. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=10 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
-	ps0D = ps0A f+ ps1B;
+	ps0D = ps0A f+ float2float(ps1B);
 	setFPAddFlags(ps0A, ps1B, ps0D);
 	ps1D = ps1C;
 	cr1flags();
@@ -1858,14 +1879,14 @@ define pcodeop __psq_st1;
 :ps_sum1 fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=11 & Rc=0 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
 	ps0D = ps0C;
-	ps1D = ps0A f+ ps1B;
+	ps1D = float2float(ps0A) f+ ps1B;
 	setFPAddFlags(ps0A, ps1B, ps1D);
 }
 
 :ps_sum1. fD,fA,fC,fB is OP=4 & fD & fA & fB & fC & XOP_1_5=11 & Rc=1 & ps0D & ps1D & ps0B & ps1B & ps0A & ps1A & ps0C & ps1C
 {
 	ps0D = ps0C;
-	ps1D = ps0A f+ ps1B;
+	ps1D = float2float(ps0A) f+ ps1B;
 	setFPAddFlags(ps0A, ps1B, ps1D);
 	cr1flags();
 }
