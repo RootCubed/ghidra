@@ -9185,15 +9185,21 @@ int4 RuleXorSwap::applyOp(PcodeOp *op,Funcdata &data)
 void RuleCountLeadingZerosShiftBool::getOpList(vector<uint4> &oplist) const
 
 {
-  oplist.push_back(CPUI_COUNTLEADINGZEROS);
+  oplist.push_back(CPUI_INT_RIGHT);
+  oplist.push_back(CPUI_INT_SRIGHT);
 }
 
 int4 RuleCountLeadingZerosShiftBool::applyOp(PcodeOp *op,Funcdata &data)
 
 {
-  Varnode *outVn = op->getOut();
-  list<PcodeOp *>::const_iterator iter, iter2;
-  uintb max_return = 8 * op->getIn(0)->getSize();
+  // must be constant shift right
+  if (!op->getIn(1)->isConstant()) return 0;
+  if (!op->getIn(0)->isWritten()) return 0;
+
+  PcodeOp *clzOp = op->getIn(0)->getDef();
+  if (clzOp->code() != CPUI_COUNTLEADINGZEROS) return 0;
+
+  uintb max_return = 8 * clzOp->getIn(0)->getSize();
   if (popcount(max_return) != 1) {
     // This rule only makes sense with sizes that are powers of 2; if the maximum value
     // returned by countLeadingZeros was, say, 24, then both 16 >> 4 and 24 >> 4
@@ -9201,30 +9207,29 @@ int4 RuleCountLeadingZerosShiftBool::applyOp(PcodeOp *op,Funcdata &data)
     // use countLeadingZeros for checking equality in any case.)
     return 0;
   }
+  uintb shift = op->getIn(1)->getOffset();
+  if ((max_return >> shift) != 1) return 0;
 
-  for(iter=outVn->beginDescend();iter!=outVn->endDescend();++iter) {
-    PcodeOp *baseOp = *iter;
-    if (baseOp->code() != CPUI_INT_RIGHT && baseOp->code() != CPUI_INT_SRIGHT) continue;
-    Varnode *vn1 = baseOp->getIn(1);
-    if (!vn1->isConstant()) continue;
-    uintb shift = vn1->getOffset();
-    if ((max_return >> shift) == 1) {
-      // Becomes a comparison with zero
-      PcodeOp* newOp = data.newOp(2, baseOp->getAddr());
-      data.opSetOpcode(newOp, CPUI_INT_EQUAL);
-      Varnode* b = data.newConstant(outVn->getSize(), 0);
-      data.opSetInput(newOp, op->getIn(0), 0);
-      data.opSetInput(newOp, b, 1);
+  // Becomes a comparison with zero
+  PcodeOp *eqOp = data.newOp(2, clzOp->getAddr());
+  data.opSetOpcode(eqOp, CPUI_INT_EQUAL);
 
-      Varnode* oldOut = baseOp->getOut();
-      // Use a size of 1 to produce a bool (even though the actual result size is oldOut->getSize())
-      Varnode* newOut = data.newUniqueOut(1, newOp);
-      data.opSetOutput(newOp, newOut);
-      data.opInsertBefore(newOp, baseOp);
-      data.totalReplace(oldOut, newOut);
-      data.opDestroy(baseOp);
-      return 1;
-    }
-  }
-  return 0;
+  data.opSetInput(eqOp, clzOp->getIn(0), 0);
+
+  Varnode *b = data.newConstant(clzOp->getIn(0)->getSize(), 0);
+  data.opSetInput(eqOp, b, 1);
+
+  Varnode *outVn = data.newUniqueOut(1, eqOp);
+  Datatype *ct = data.getArch()->types->getBase(1, TYPE_BOOL);
+  outVn->updateType(ct, false, true);
+
+  data.opSetOutput(eqOp, outVn);
+  data.opInsertBefore(eqOp, op);
+
+  data.opSetOpcode(op, CPUI_INT_ZEXT);
+  data.opRemoveInput(op, 1);
+  data.opSetInput(op, outVn, 0);
+
+
+  return 1;
 }
