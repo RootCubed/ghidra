@@ -9192,7 +9192,7 @@ int4 RuleCountLeadingZerosShiftBool::applyOp(PcodeOp *op,Funcdata &data)
 
 {
   Varnode *outVn = op->getOut();
-  list<PcodeOp *>::const_iterator iter, iter2;
+  list<PcodeOp *>::const_iterator iter;
   uintb max_return = 8 * op->getIn(0)->getSize();
   if (popcount(max_return) != 1) {
     // This rule only makes sense with sizes that are powers of 2; if the maximum value
@@ -9216,13 +9216,18 @@ int4 RuleCountLeadingZerosShiftBool::applyOp(PcodeOp *op,Funcdata &data)
       data.opSetInput(newOp, op->getIn(0), 0);
       data.opSetInput(newOp, b, 1);
 
-      Varnode* oldOut = baseOp->getOut();
-      // Use a size of 1 to produce a bool (even though the actual result size is oldOut->getSize())
-      Varnode* newOut = data.newUniqueOut(1, newOp);
-      data.opSetOutput(newOp, newOut);
+      // CPUI_INT_EQUAL must produce a boolean result
+      Varnode* eqResVn = data.newUniqueOut(1, newOp);
+      data.opSetOutput(newOp, eqResVn);
+
       data.opInsertBefore(newOp, baseOp);
-      data.totalReplace(oldOut, newOut);
-      data.opDestroy(baseOp);
+
+      // Because the old output had size op->getIn(0)->getSize(),
+      // we have to guarantee that a Varnode of this size gets outputted
+      // to the descending PcodeOps. This is handled here with CPUI_INT_ZEXT.
+      data.opRemoveInput(baseOp, 1);
+      data.opSetOpcode(baseOp, CPUI_INT_ZEXT);
+      data.opSetInput(baseOp, eqResVn, 0);
       return 1;
     }
   }
