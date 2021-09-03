@@ -1181,9 +1181,9 @@ define pcodeop __psq_l1;
 {
 	EA:4 = dPlusRaOrZeroAddressPS;
 	wFlag:1 = W;
-	ps0D = __psq_l0(EA, I);
+	ps0D = __psq_l0(*:4(EA), I);
 	if (wFlag == 1) goto <wIsOne>;
-	ps1D = __psq_l1(EA, I);
+	ps1D = __psq_l1(*:4(EA), I);
 	goto inst_next;
 	<wIsOne>
 	one:1 = 1;
@@ -1205,14 +1205,14 @@ define pcodeop __psq_l1;
 	if (type == 5 || type == 7) goto <int16>;
 	goto <none>;
 	<int8>
-	ps0D = dequantize(EA, type, scale);
+	ps0D = dequantize(*:4(EA), type, scale);
 	if (wFlag == 1) goto <wIsOne>;
-	ps1D = dequantize(EA + 1, type, scale);
+	ps1D = dequantize(*:4(EA + 1), type, scale);
 	goto inst_next;
 	<int16>
-	ps0D = dequantize(EA, type, scale);
+	ps0D = dequantize(*:4(EA), type, scale);
 	if (wFlag == 1) goto <wIsOne>;
-	ps1D = dequantize(EA + 2, type, scale);
+	ps1D = dequantize(*:4(EA + 2), type, scale);
 	goto inst_next;
 	<none>
 	ps0D = float2float(*:4(EA));
@@ -1237,14 +1237,14 @@ define pcodeop __psq_l1;
 	if (type == 5 || type == 7) goto <int16>;
 	goto <none>;
 	<int8>
-	ps0D = dequantize(EA, type, scale);
+	ps0D = dequantize(*:4(EA), type, scale);
 	if (wFlag == 1) goto <wIsOne>;
-	ps1D = dequantize(EA + 1, type, scale);
+	ps1D = dequantize(*:4(EA + 1), type, scale);
 	goto inst_next;
 	<int16>
-	ps0D = dequantize(EA, type, scale);
+	ps0D = dequantize(*:4(EA), type, scale);
 	if (wFlag == 1) goto <wIsOne>;
-	ps1D = dequantize(EA + 2, type, scale);
+	ps1D = dequantize(*:4(EA + 2), type, scale);
 	goto inst_next;
 	<none>
 	ps0D = float2float(*:4(EA));
@@ -1268,14 +1268,14 @@ define pcodeop __psq_l1;
 	if (type == 5 || type == 7) goto <int16>;
 	goto <none>;
 	<int8>
-	ps0D = dequantize(EA, type, scale);
+	ps0D = dequantize(*:4(EA), type, scale);
 	if (wFlag == 1) goto <wIsOne>;
-	ps1D = dequantize(EA + 1, type, scale);
+	ps1D = dequantize(*:4(EA + 1), type, scale);
 	goto inst_next;
 	<int16>
-	ps0D = dequantize(EA, type, scale);
+	ps0D = dequantize(*:4(EA), type, scale);
 	if (wFlag == 1) goto <wIsOne>;
-	ps1D = dequantize(EA + 2, type, scale);
+	ps1D = dequantize(*:4(EA + 2), type, scale);
 	goto inst_next;
 	<none>
 	ps0D = float2float(*:4(EA));
@@ -1293,9 +1293,9 @@ define pcodeop __psq_st1;
 {
 	EA:4 = dPlusRaOrZeroAddressPS;
 	wFlag:1 = W;
-	__psq_st0(EA, ps0S, I);
+	__psq_st0(*:4(EA), ps0S, I);
 	if (wFlag == 1) goto inst_next;
-	__psq_st1(EA, ps1S, I);
+	__psq_st1(*:4(EA), ps1S, I);
 }
 
 :psq_stu fS,dPlusRaAddressPS,W,I is OP=61 & fS & A & W & I & dPlusRaAddressPS & ps0S & ps1S
