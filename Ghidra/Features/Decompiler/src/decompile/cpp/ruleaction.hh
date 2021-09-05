@@ -1500,4 +1500,15 @@ public:
   virtual void getOpList(vector<uint4> &oplist) const;
   virtual int4 applyOp(PcodeOp *op,Funcdata &data);
 };
+
+class RuleSimplifyPPCInt2Float : public Rule {
+public:
+  RuleSimplifyPPCInt2Float(const string &g) : Rule( g, 0, "simplifyppcint2float") {}	///< Constructor
+  virtual Rule *clone(const ActionGroupList &grouplist) const {
+    if (!grouplist.contains(getGroup())) return (Rule *)0;
+    return new RuleSimplifyPPCInt2Float(getGroup());
+  }
+  virtual void getOpList(vector<uint4> &oplist) const;
+  virtual int4 applyOp(PcodeOp *op,Funcdata &data);
+};
 #endif

@@ -9233,3 +9233,109 @@ int4 RuleCountLeadingZerosShiftBool::applyOp(PcodeOp *op,Funcdata &data)
   }
   return 0;
 }
+
+/// \class RuleSimplifyPPCInt2Float
+/// \brief Simplify the int to float trick that CodeWarrior produces
+///
+void RuleSimplifyPPCInt2Float::getOpList(vector<uint4> &oplist) const
+
+{
+  oplist.push_back(CPUI_FLOAT_SUB);
+}
+
+int4 RuleSimplifyPPCInt2Float::applyOp(PcodeOp *op,Funcdata &data)
+
+{
+  Varnode *leftIn = op->getIn(0);
+  Varnode *rightIn = op->getIn(1);
+  if (leftIn->isConstant()) {
+    leftIn = rightIn;
+    rightIn = op->getIn(0);
+  }
+  if (!rightIn->isConstant()) return 0;
+  if (!leftIn->isWritten()) return 0;
+  if (leftIn->getDef()->code() != CPUI_FLOAT_FLOAT2FLOAT) return 0;
+
+  Varnode *f2fIn = leftIn->getDef()->getIn(0);
+  if (!f2fIn->isWritten()) return 0;
+  if (f2fIn->getDef()->code() != CPUI_PIECE) return 0;
+  
+  PcodeOp *pieceOp = f2fIn->getDef();
+  if (!pieceOp->getIn(0)->isConstant()) return 0;
+
+  Varnode *inVar = pieceOp->getIn(1);
+  
+  uintb signedMask = 0;
+  if (pieceOp->getIn(1)->getDef()->code() == CPUI_INT_XOR) {
+    signedMask = 1UL << (pieceOp->getIn(1)->getSize() * 8 - 1);
+
+    Varnode *xorLeft = pieceOp->getIn(1)->getDef()->getIn(0);
+    Varnode *xorRight = pieceOp->getIn(1)->getDef()->getIn(1);
+
+    if (xorLeft->isConstant()) {
+      if (xorLeft->getAddr().getOffset() != signedMask) 
+        return 0;
+      inVar = xorRight;
+    } else if (xorRight->isConstant()) {
+      if (xorRight->getAddr().getOffset() != signedMask)
+        return 0;
+      inVar = xorLeft;
+    } else {
+      return 0;
+    }
+  }
+
+  int concatpieceSize = pieceOp->getIn(0)->getSize();
+
+  int significandBits;
+  int exponentBias;
+  switch (concatpieceSize) {
+    case 1:
+      // 16-bit float
+      significandBits = 10;
+      exponentBias = 15;
+      break;
+    case 2:
+      // 32-bit float
+      significandBits = 22;
+      exponentBias = 127;
+      break;
+    case 4:
+      // 64-bit float
+      significandBits = 52;
+      exponentBias = 1023;
+      break;
+    default:
+      return 0; // invalid size
+  }
+
+  uintb concatpiece = pieceOp->getIn(0)->getAddr().getOffset();
+
+  uintb exponent = exponentBias + significandBits;
+  if (concatpiece != exponent << (significandBits - concatpieceSize * 8)) return 0;
+
+  double concatValue = 1.0;
+  for (int i = 0; i < significandBits; i++) concatValue *= 2;
+
+  uintb subVal = rightIn->getAddr().getOffset();
+  float subFloat = *(float*) &subVal;
+  
+  subFloat -= signedMask;
+
+  if (abs(subFloat - concatValue) > 1e-9) return 0; // epsilon in case of precision loss
+
+  // add cast
+  Datatype *ct;
+  if (signedMask != 0) {
+    ct = data.getArch()->types->getBase(inVar->getSize(), TYPE_INT);
+  } else {
+    ct = data.getArch()->types->getBase(inVar->getSize(), TYPE_UINT);
+  }
+  inVar->updateType(ct, true, true);
+
+  data.opRemoveInput(op, 1);
+  data.opSetOpcode(op, CPUI_FLOAT_INT2FLOAT);
+  data.opSetInput(op, inVar, 0);
+
+  return 1;
+}
