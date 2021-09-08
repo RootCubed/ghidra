@@ -1162,28 +1162,30 @@
 :fabs fD,fB		is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & ps0B & XOP_1_10=264 & Rc=0
 {
  	fD = abs(fB);
- 	ps0D = abs(ps0B);
+ 	ps0D = float2float(ps0B);
 }
 
 #fabs. fr0,fr1		0xfc 00 02 11
 :fabs. fD,fB	is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & ps0B & XOP_1_10=264 & Rc=1
 {
 	fD = abs(fB);
- 	ps0D = abs(ps0B);
+ 	ps0D = float2float(ps0B);
 	cr1flags();
 }
 
 #fadd fr0,fr0,fr0	0xfc 00 00 2a
-:fadd fD,fA,fB	is $(NOTVLE) & OP=63 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=0
+:fadd fD,fA,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=0
 {
 	fD = fA f+ fB;
+	ps0D = float2float(fD);
 	setFPAddFlags(fA,fB,fD);
 }
 
 #fadd. fr0,fr0,fr0	0xfc 00 00 2b
-:fadd. fD,fA,fB	is $(NOTVLE) & OP=63 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=1
+:fadd. fD,fA,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=1
 {
 	fD = fA f+ fB;
+	ps0D = float2float(fD);
 	setFPAddFlags(fA,fB,fD);
 	cr1flags();
 }
@@ -1300,7 +1302,7 @@
 }
 
 #fctiw fr0,fr0	0xfc 00 00 1c
-:fctiw fD,fB	is $(NOTVLE) & OP=63 & fD & BITS_16_20=0 & fB & XOP_1_10=14 & Rc=0
+:fctiw fD,fB	is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & XOP_1_10=14 & Rc=0
 {
 #	fp_fr = floatToIntRoundedUp(fB);
 #	fp_fi = floatToIntInexact(fB);
@@ -1310,9 +1312,10 @@
 	local intres:4;
 	intres = trunc(fB);
 	fD = sext(intres);
+	ps0D = float2float(fD);
 }
 #fctiw. fr0,fr0	0xfc 00 00 1d
-:fctiw. fD,fB	is $(NOTVLE) & OP=63 & fD & BITS_16_20=0 & fB & XOP_1_10=14 & Rc=1
+:fctiw. fD,fB	is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & XOP_1_10=14 & Rc=1
 {
 #	fp_fr = floatToIntRoundedUp(fB);
 #	fp_fi = floatToIntInexact(fB);
@@ -1324,9 +1327,10 @@
 	local intres:4;
 	intres = trunc(fB);
 	fD = sext(intres);
+	ps0D = float2float(fD);
 }
 #fctiwz fr0,fr0	0xfc 00 00 1e
-:fctiwz fD,fB	is $(NOTVLE) & OP=63 & fD & BITS_16_20=0 & fB & XOP_1_10=15 & Rc=0
+:fctiwz fD,fB	is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & XOP_1_10=15 & Rc=0
 {
 	fp_fr = 0;
 #	fp_fi = floatToIntInexact(fB);
@@ -1336,9 +1340,10 @@
 	local intres:4;
 	intres = trunc(fB);
 	fD = sext(intres);
+	ps0D = float2float(fD);
 }
 #fctiwz. fr0,fr0	0xfc 00 00 1f
-:fctiwz. fD,fB	is $(NOTVLE) & OP=63 & fD & BITS_16_20=0 & fB & XOP_1_10=15 & Rc=1
+:fctiwz. fD,fB	is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & XOP_1_10=15 & Rc=1
 {
 	fp_fr = 0;
 #	fp_fi = floatToIntInexact(fB);
@@ -1350,19 +1355,22 @@
 	local intres:4;
 	intres = trunc(fB);
 	fD = sext(intres);
+	ps0D = float2float(fD);
 }
 
 #fdiv fr0,fr0,fr0  0xfc 00 00 24
-:fdiv fD,fA,fB   is $(NOTVLE) & OP=63 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=0
+:fdiv fD,fA,fB   is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=0
 {
 	fD = fA f/ fB;
+	ps0D = float2float(fD);
 	setFPDivFlags(fA,fB,fD);
 }
 
 #fdiv. fr0,fr0,fr0  0xfc 00 00 25
-:fdiv. fD,fA,fB   is $(NOTVLE) & OP=63 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=1
+:fdiv. fD,fA,fB   is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=1
 {
 	fD = fA f/ fB;
+	ps0D = float2float(fD);
 	setFPDivFlags(fA,fB,fD);
 	cr1flags();
 }
@@ -1391,10 +1399,11 @@
 }
 
 #fmadd fr0,fr0,fr0,fr0	0xfc 00 00 3a
-:fmadd fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=29 & Rc=0
+:fmadd fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=29 & Rc=0
 {
 	tmp:8 = fA f* fC;
 	fD = tmp f+ fB;
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMaddRoundedUp(fA, fC, fB);
 #	fp_fi = floatMaddInexact(fA,fC,fB);
@@ -1408,10 +1417,11 @@
 }
 
 #fmadd. fr0,fr0,fr0,fr0	0xfc 00 00 3b
-:fmadd. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=29 & Rc=1
+:fmadd. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=29 & Rc=1
 {
 	tmp:8 = fA f* fC;
 	fD = tmp f+ fB;
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMaddRoundedUp(fA, fC, fB);
 #	fp_fi = floatMaddInexact(fA,fC,fB);
@@ -1467,25 +1477,28 @@
 }
 
 #fmr fr0,fr0	0xfc 00 00 90
-:fmr fD,fB   		is $(NOTVLE) & OP=63 & fD & BITS_16_20=0 & fB & XOP_1_10=72 & Rc=0
+:fmr fD,fB   		is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & ps0B & XOP_1_10=72 & Rc=0
 {
-	fD = fB;
+	ps0D = ps0B;
+	fD = float2float(ps0D);
 	# ps1 is untouched
 }
 
 #fmr. fr0,fr0	0xfc 00 00 91
-:fmr. fD,fB   		is $(NOTVLE) & OP=63 & fD & BITS_16_20=0 & fB & XOP_1_10=72 & Rc=1
+:fmr. fD,fB   		is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & ps0B & XOP_1_10=72 & Rc=1
 {
-	fD = fB;
+	ps0D = ps0B;
+	fD = float2float(ps0D);
 	# ps1 is untouched
 	cr1flags();
 }
 
 #fmsub fr0,fr0,fr0,fr0	0xfc 00 00 38
-:fmsub fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=28 & Rc=0
+:fmsub fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=28 & Rc=0
 {
 	tmp:8 = fA f* fC;
 	fD = tmp f- fB;
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMsubRoundedUp(fA, fC, fB);
 #	fp_fi = floatMsubInexact(fA,fC,fB);
@@ -1499,10 +1512,11 @@
 }
 
 #fmsub. fr0,fr0,fr0,fr0	0xfc 00 00 39
-:fmsub. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=28 & Rc=1
+:fmsub. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=28 & Rc=1
 {
 	tmp:8 = fA f* fC;
 	fD = tmp f- fB;
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMsubRoundedUp(fA, fC, fB);
 #	fp_fi = floatMsubInexact(fA,fC,fB);
@@ -1558,16 +1572,18 @@
 }
 
 #fmul fr0,fr0,fr0	0xfc 00 00 32
-:fmul fD,fA,fC	is $(NOTVLE) & OP=63 & fD & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=0
+:fmul fD,fA,fC	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=0
 {
 	fD = fA f* fC;
+	ps0D = float2float(fD);
 	setFPMulFlags(fA,fC,fD);
 }
 
 #fmul. fr0,fr0,fr0	0xfc 00 00 33
-:fmul. fD,fA,fC	is $(NOTVLE) & OP=63 & fD & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=1
+:fmul. fD,fA,fC	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=1
 {
 	fD = fA f* fC;
+	ps0D = float2float(fD);
 	setFPMulFlags(fA,fC,fD);
 	cr1flags();
 }
@@ -1609,23 +1625,26 @@
 }
 
 #fneg fr0,fr0	0xfc 00 00 50
-:fneg fD,fB	is $(NOTVLE) & OP=63 & fD & fB & BITS_16_20=0 & XOP_1_10=40 & Rc=0
+:fneg fD,fB	is $(NOTVLE) & OP=63 & fD & fB & ps0D & ps0B & BITS_16_20=0 & XOP_1_10=40 & Rc=0
 {
-	fD = f- fB;
+	ps0D = f- ps0B;
+	fD = float2float(ps0D);
 }
 
 #fneg. fr0,fr0	0xfc 00 00 51
-:fneg. fD,fB	is $(NOTVLE) & OP=63 & fD & fB & BITS_16_20=0 & XOP_1_10=40 & Rc=1
+:fneg. fD,fB	is $(NOTVLE) & OP=63 & fD & fB & ps0D & ps0B & BITS_16_20=0 & XOP_1_10=40 & Rc=1
 {
-	fD = f- fB;
+	ps0D = f- ps0B;
+	fD = float2float(ps0D);
 	cr1flags();
 }
 
 #fnmadd fr0,fr0,fr0,fr0	0xfc 00 00 3e
-:fnmadd fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=31 & Rc=0
+:fnmadd fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=31 & Rc=0
 {
 	tmp:8 = fA f* fC;
 	fD = f- (tmp f+ fB);
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMaddRoundedUp(fA, fC, fB);
 #	fp_fi = floatMaddInexact(fA,fC,fB);
@@ -1639,10 +1658,11 @@
 }
 
 #fnmadd. fr0,fr0,fr0,fr0	0xfc 00 00 3f
-:fnmadd. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=31 & Rc=1
+:fnmadd. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=31 & Rc=1
 {
 	tmp:8 = fA f* fC;
 	fD = f- (tmp f+ fB);
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMaddRoundedUp(fA, fC, fB);
 #	fp_fi = floatMaddInexact(fA,fC,fB);
@@ -1700,10 +1720,11 @@
 }
 
 #fnmsub fr0,fr0,fr0,fr0	0xfc 00 00 3c
-:fnmsub fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=30 & Rc=0
+:fnmsub fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=30 & Rc=0
 {
 	tmp:8 = fA f* fC;
 	fD = f- (tmp f- fB);
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMsubRoundedUp(fA, fC, fB);
 #	fp_fi = floatMsubInexact(fA,fC,fB);
@@ -1717,10 +1738,11 @@
 }
 
 #fnmsub. fr0,fr0,fr0,fr0	0xfc 00 00 3d
-:fnmsub. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fC & fB & XOP_1_5=30 & Rc=1
+:fnmsub. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fC & fB & XOP_1_5=30 & Rc=1
 {
 	tmp:8 = fA f* fC;
 	fD = f- (tmp f- fB);
+	ps0D = float2float(fD);
 	setFPRF(fD);
 #	fp_fr = floatMsubRoundedUp(fA, fC, fB);
 #	fp_fi = floatMsubInexact(fA,fC,fB);
@@ -1776,6 +1798,7 @@
 	setSummaryFPSCR();
 	cr1flags();
 }
+
 #fres fr0,fr0		0xec 00 00 30
 :fres fD,fB	is $(NOTVLE) & OP=59 & fD & ps0D & BITS_16_20 & fB & ps0B & BITS_6_10=0 & XOP_1_5=24 & Rc=0 & ps1D
 {
@@ -1815,7 +1838,6 @@
 	cr1flags();
 }
 
-# assume HID2[PSE] is set
 #frsp fr0,fr0		0xfc 00 00 18
 :frsp fD,fB		is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & ps0B & XOP_1_10=12 & Rc=0
 {
@@ -1858,16 +1880,16 @@
 #frsqrte fr0,fr0		0xfc 00 00 34
 :frsqrte fD,fB	is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20 & fB & ps0B & BITS_6_10=0 & XOP_1_5=26 & Rc=0 & ps1D
 {
-	#one:8 = 1;
-	#floatOne:8 = int2float(one);
-	#tmpSqrt:8 = sqrt(fB);
-	#fD = (floatOne f/ tmpSqrt);
+	one:8 = 1;
+	floatOne:8 = int2float(one);
+	tmpSqrt:8 = sqrt(fB);
+	fD = (floatOne f/ tmpSqrt);
 	
-	one:4 = 1;
-	floatOne:4 = int2float(one);
-	tmpSqrt:4 = sqrt(ps0B);
-	ps0D = floatOne f/ tmpSqrt;
-	ps1D = floatOne f/ tmpSqrt;
+	one4b:4 = 1;
+	floatOne4b:4 = int2float(one);
+	tmpSqrt4b:4 = sqrt(ps0B);
+	ps0D = floatOne4b f/ tmpSqrt4b;
+	ps1D = floatOne4b f/ tmpSqrt4b;
 	setFPRF(fD);
 #	fp_fr = floatDivRoundedUp(floatOne, tmpSqrt);
 #	fp_fi = floatDivInexact(floatOne, tmpSqrt);
@@ -1904,22 +1926,26 @@
 }
 
 #fsel f0r,fr0,fr0,fr0	0xfc 00 00 2e
-:fsel fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fB & fC & XOP_1_5=23 & Rc=0
+:fsel fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & fC & XOP_1_5=23 & Rc=0
 {
 	zero:4=0;
 	fD=fC;
+	ps0D = float2float(fD);
 	if (fA f> int2float(zero)) goto inst_next; 
 	fD=fB; 
+	ps0D = float2float(fD);
 }
 
 #fsel. fr0,fr0,fr0,fr0	0xfc 00 00 2f
-:fsel. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & fA & fB & fC & XOP_1_5=23 & Rc=1
+:fsel. fD,fA,fC,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & fC & XOP_1_5=23 & Rc=1
 {
 	zero:4=0;
 	fD=fC;
+	ps0D = float2float(fD);
 	cr1flags();
 	if (fA f> int2float(zero)) goto inst_next; 
-	fD=fB; 
+	fD=fB;
+	ps0D = float2float(fD); 
 }
 
 #fsqrt f0r,fr0	0xfc 00 00 2c
@@ -1979,16 +2005,18 @@
 } 
 
 #fsub fr0,fr0,fr0	0xfc 00 00 28
-:fsub fD,fA,fB	is $(NOTVLE) & OP=63 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=0
+:fsub fD,fA,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=0
 {
 	fD = fA f- fB;
+	ps0D = float2float(fD);
 	setFPSubFlags(fA,fB,fD);
 }
 
 #fsub. fr0,fr0,fr0	0xfc 00 00 29
-:fsub. fD,fA,fB	is $(NOTVLE) & OP=63 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=1
+:fsub. fD,fA,fB	is $(NOTVLE) & OP=63 & fD & ps0D & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=1
 {
 	fD = fA f- fB;
+	ps0D = float2float(fD);
 	setFPSubFlags(fA,fB,fD);
 	cr1flags();
 }
