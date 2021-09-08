@@ -2709,9 +2709,7 @@ void PrintC::emitBlockIf(const BlockIf *bl)
     emit->tagLine();
     emit->print("}");
     if (bl->getSize() == 3) {
-      emit->tagLine();
-      emit->print("else",EmitXml::keyword_color);
-      emit->spaces(1);
+      emitFormattedElse(id);
       FlowBlock *elseBlock = bl->getBlock(2);
       if (elseBlock->getType() == FlowBlock::t_if) {
       // Attempt to merge the "else" and "if" syntax
@@ -3189,6 +3187,29 @@ int4 PrintC::emitFormattedStartBrace(int4 indent)
   default:
     throw LowlevelError("Unknown indentation style");
   }
+}
+
+/// \brief Emits an opening brace according to the indentation style selected in options
+///
+/// \param indent is the current indent level
+int4 PrintC::emitFormattedElse(int4 indent)
+
+{
+  switch(option_indentationStyle) {
+  case indentation_style_allman:
+    emit->tagLine();
+    break;
+
+  case indentation_style_kr:
+    // don't emit newline
+    emit->spaces(1);
+    break;
+
+  default:
+    throw LowlevelError("Unknown indentation style");
+  }
+  emit->print("else",EmitXml::keyword_color);
+  emit->spaces(1);
 }
 
 /// \brief Create a generic function name base on the entry point address

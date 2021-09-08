@@ -239,6 +239,7 @@ public:
   virtual void emitBlockInfLoop(const BlockInfLoop *bl);
   virtual void emitBlockSwitch(const BlockSwitch *bl);
   virtual int4 emitFormattedStartBrace(int4 indent);
+  virtual int4 emitFormattedElse(int4 indent);
 
   virtual void opCopy(const PcodeOp *op);
   virtual void opLoad(const PcodeOp *op);
