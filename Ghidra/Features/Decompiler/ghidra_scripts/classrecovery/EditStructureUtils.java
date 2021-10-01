@@ -260,6 +260,8 @@ public class EditStructureUtils {
 		int endOfDataTypeInStruct = offset + dataTypeLength;
 
 		int roomForData = structure.getLength() - endOfDataTypeInStruct;
+		
+		// FIXME: This will not worked for structures where packing is enabled - not sure how to handle
 
 		// if structure isn't defined insert
 		if (structure.isNotYetDefined()) {
@@ -343,8 +345,7 @@ public class EditStructureUtils {
 		while (index >= 0) {
 			monitor.checkCanceled();
 			DataTypeComponent component = structure.getComponentAt(index);
-			if (component.getDataType().getName().equals("undefined") &&
-				component.getLength() == 1) {
+			if (component != null && component.getDataType() == DataType.DEFAULT) {
 				index--;
 				numUndefineds++;
 			}
