@@ -3187,6 +3187,7 @@ int4 PrintC::emitFormattedStartBrace(int4 indent)
   default:
     throw LowlevelError("Unknown indentation style");
   }
+  return indent;
 }
 
 /// \brief Emits an opening brace according to the indentation style selected in options
@@ -3210,6 +3211,7 @@ int4 PrintC::emitFormattedElse(int4 indent)
   }
   emit->print("else",EmitXml::keyword_color);
   emit->spaces(1);
+  return indent;
 }
 
 /// \brief Create a generic function name base on the entry point address
