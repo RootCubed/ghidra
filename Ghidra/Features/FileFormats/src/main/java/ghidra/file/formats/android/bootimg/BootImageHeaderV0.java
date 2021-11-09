@@ -19,7 +19,6 @@ import java.io.IOException;
 
 import ghidra.app.util.bin.BinaryReader;
 import ghidra.program.model.data.*;
-import ghidra.util.NumericUtilities;
 import ghidra.util.exception.DuplicateNameException;
 
 /**
@@ -83,9 +82,9 @@ public class BootImageHeaderV0 extends BootImageHeader {
 	/**
 	 * n = (kernel_size + page_size - 1) / page_size
 	 */
+	@Override
 	public int getKernelPageCount() {
-		return (int) NumericUtilities.getUnsignedAlignedValue(Integer.toUnsignedLong(kernel_size),
-			Integer.toUnsignedLong(page_size));
+		return (int) (pageAlign(kernel_size) / page_size);
 	}
 
 	@Override
@@ -95,7 +94,7 @@ public class BootImageHeaderV0 extends BootImageHeader {
 
 	@Override
 	public int getRamdiskOffset() {
-		return page_size + getKernelPageCount() * page_size;//see header comment...
+		return page_size + getKernelPageCount() * page_size;
 	}
 
 	public int getRamdiskAddress() {
@@ -105,9 +104,9 @@ public class BootImageHeaderV0 extends BootImageHeader {
 	/**
 	 * m = (ramdisk_size + page_size - 1) / page_size
 	 */
+	@Override
 	public int getRamdiskPageCount() {
-		return (int) NumericUtilities.getUnsignedAlignedValue(Integer.toUnsignedLong(ramdisk_size),
-			Integer.toUnsignedLong(page_size));
+		return (int) (pageAlign(ramdisk_size) / page_size);
 	}
 
 	@Override
@@ -127,9 +126,9 @@ public class BootImageHeaderV0 extends BootImageHeader {
 	/**
 	 * o = (second_size + page_size - 1) / page_size
 	 */
+	@Override
 	public int getSecondPageCount() {
-		return (int) NumericUtilities.getUnsignedAlignedValue(Integer.toUnsignedLong(second_size),
-			Integer.toUnsignedLong(page_size));
+		return (int) (pageAlign(second_size) / page_size);
 	}
 
 	/**

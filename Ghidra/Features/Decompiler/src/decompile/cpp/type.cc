@@ -16,6 +16,11 @@
 #include "type.hh"
 #include "funcdata.hh"
 
+sub_metatype Datatype::base2sub[11] = {
+    SUB_STRUCT, SUB_ARRAY, SUB_PTR, SUB_FLOAT, SUB_CODE, SUB_BOOL,
+    SUB_UINT_PLAIN, SUB_INT_PLAIN, SUB_UNKNOWN, SUB_SPACEBASE, SUB_VOID
+};
+
 // Some default routines for displaying data
 
 /// Display an array of bytes as a hex dump at a given address.
@@ -138,7 +143,9 @@ Datatype *Datatype::nearestArrayedComponentBackward(uintb off,uintb *newoff,int4
 int4 Datatype::compare(const Datatype &op,int4 level) const
 
 {
-  return compareDependency(op);
+  if (size != op.size) return (op.size - size);
+  if (submeta != op.submeta) return (submeta < op.submeta) ? -1 : 1;
+  return 0;
 }
 
 /// Sort data-types for the main TypeFactory container.  The sort needs to be based on
@@ -152,15 +159,7 @@ int4 Datatype::compareDependency(const Datatype &op) const
 
 {
   if (size != op.size) return (op.size-size);
-  if (metatype != op.metatype) return (metatype < op.metatype) ? -1 : 1;
-  uint4 fl = flags & (~coretype);
-  uint4 opfl = op.flags & (~coretype);
-  // We need to be careful here, we compare flags so that enum types are more specific than base int or uint,
-  // we also want UTF16 and UTF32 to be more specific than int, BUT
-  // we don't want char to be more specific than int1 because char is the default size 1 integer type.
-  fl ^= chartype;
-  opfl ^= chartype;
-  if (fl != opfl) return (opfl < fl) ? -1 : 1;
+  if (submeta != op.submeta) return (submeta < op.submeta) ? -1 : 1;
   return 0;
 }
 
@@ -357,11 +356,11 @@ bool Datatype::isPtrsubMatching(uintb offset) const
       return false;
   }
   else {
-    int4 size = offset;
+    int4 sz = offset;
     int4 typesize = basetype->getSize();
     if ((basetype->metatype != TYPE_ARRAY)&&(basetype->metatype != TYPE_STRUCT))
       return false;	// Not a pointer to a structured type
-    else if ((typesize <= AddrSpace::addressToByteInt(size,wordsize))&&(typesize!=0))
+    else if ((typesize <= AddrSpace::addressToByteInt(sz,wordsize))&&(typesize!=0))
       return false;
   }
   return true;
@@ -374,13 +373,14 @@ void Datatype::restoreXmlBasic(const Element *el)
 
 {
   name = el->getAttributeValue("name");
-  istringstream i(el->getAttributeValue("size"));
-  i.unsetf(ios::dec | ios::hex | ios::oct);
+  istringstream s(el->getAttributeValue("size"));
+  s.unsetf(ios::dec | ios::hex | ios::oct);
   size = -1;
-  i >> size;
+  s >> size;
   if (size < 0)
     throw LowlevelError("Bad size for type "+name);
   metatype = string2metatype( el->getAttributeValue("metatype") );
+  submeta = base2sub[metatype];
   id = 0;
   for(int4 i=0;i<el->getNumAttributes();++i) {
     const string &attribName( el->getAttributeName(i) );
@@ -389,9 +389,9 @@ void Datatype::restoreXmlBasic(const Element *el)
 	flags |= coretype;
     }
     else if (attribName == "id") {
-      istringstream i1(el->getAttributeValue(i));
-      i1.unsetf(ios::dec | ios::hex | ios::oct);
-      i1 >> id;
+      istringstream s1(el->getAttributeValue(i));
+      s1.unsetf(ios::dec | ios::hex | ios::oct);
+      s1 >> id;
     }
     else if (attribName == "varlength") {
       if (xml_readbool(el->getAttributeValue(i)))
@@ -454,6 +454,13 @@ uint8 Datatype::hashSize(uint8 id,int4 size)
   return id;
 }
 
+void TypeChar::restoreXml(const Element *el,TypeFactory &typegrp)
+
+{
+  restoreXmlBasic(el);
+  submeta = (metatype == TYPE_INT) ? SUB_INT_CHAR : SUB_UINT_CHAR;
+}
+
 void TypeChar::saveXml(ostream &s) const
 
 {
@@ -486,12 +493,14 @@ void TypeUnicode::restoreXml(const Element *el,TypeFactory &typegrp)
   restoreXmlBasic(el);
   // Get endianness flag from architecture, rather than specific type encoding
   setflags();
+  submeta = (metatype == TYPE_INT) ? SUB_INT_UNICODE : SUB_UINT_UNICODE;
 }
 
 TypeUnicode::TypeUnicode(const string &nm,int4 sz,type_metatype m)
   : TypeBase(sz,m,nm)
 {
   setflags();			// Set special unicode UTF flags
+  submeta = (m == TYPE_INT) ? SUB_INT_UNICODE : SUB_UINT_UNICODE;
 }
 
 void TypeUnicode::saveXml(ostream &s) const
@@ -527,12 +536,10 @@ void TypePointer::printRaw(ostream &s) const
 int4 TypePointer::compare(const Datatype &op,int4 level) const
 
 {
-  TypePointer *tp;
-
-  if (size != op.getSize()) return (op.getSize()-size);
-  if (metatype != op.getMetatype()) return (metatype < op.getMetatype()) ? -1 : 1;
+  int4 res = Datatype::compare(op,level);
+  if (res != 0) return res;
   // Both must be pointers
-  tp = (TypePointer *) &op;
+  TypePointer *tp = (TypePointer *) &op;
   if (wordsize != tp->wordsize) return (wordsize < tp->wordsize) ? -1 : 1;
   level -= 1;
   if (level < 0) {
@@ -545,12 +552,10 @@ int4 TypePointer::compare(const Datatype &op,int4 level) const
 int4 TypePointer::compareDependency(const Datatype &op) const
 
 {
-  TypePointer *tp;
-
-  if (size != op.getSize()) return (op.getSize()-size);
-  if (metatype != op.getMetatype()) return (metatype < op.getMetatype()) ? -1 : 1;
+  int4 res = Datatype::compareDependency(op);
+  if (res != 0) return res;
   // Both must be pointers
-  tp = (TypePointer *) &op;
+  TypePointer *tp = (TypePointer *) &op;
   if (wordsize != tp->wordsize) return (wordsize < tp->wordsize) ? -1 : 1;
   if (ptrto == tp->ptrto) return 0;
   return (ptrto < tp->ptrto) ? -1 : 1; // Compare the absolute pointers
@@ -636,27 +641,23 @@ void TypeArray::printRaw(ostream &s) const
 int4 TypeArray::compare(const Datatype &op,int4 level) const
 
 {
-  TypeArray *ta;
-
-  if (size != op.getSize()) return (op.getSize()-size);
-  if (metatype != op.getMetatype()) return (metatype < op.getMetatype()) ? -1 : 1;
+  int4 res = Datatype::compare(op,level);
+  if (res != 0) return res;
   level -= 1;
   if (level < 0) {
     if (id == op.getId()) return 0;
     return (id < op.getId()) ? -1 : 1;
   }
-  ta = (TypeArray *) &op;	// Both must be arrays
+  TypeArray *ta = (TypeArray *) &op;	// Both must be arrays
   return arrayof->compare(*ta->arrayof,level); // Compare array elements
 }
 
 int4 TypeArray::compareDependency(const Datatype &op) const
 
 {
-  TypeArray *ta;
-
-  if (size != op.getSize()) return (op.getSize()-size);
-  if (metatype != op.getMetatype()) return (metatype < op.getMetatype()) ? -1 : 1;
-  ta = (TypeArray *) &op;	// Both must be arrays
+  int4 res = Datatype::compareDependency(op);
+  if (res != 0) return res;
+  TypeArray *ta = (TypeArray *) &op;	// Both must be arrays
   if (arrayof == ta->arrayof) return 0;
   return (arrayof < ta->arrayof) ? -1 : 1;
 }
@@ -886,6 +887,7 @@ void TypeEnum::restoreXml(const Element *el,TypeFactory &typegrp)
 
 {
   restoreXmlBasic(el);
+  submeta = (metatype == TYPE_INT) ? SUB_INT_ENUM : SUB_UINT_ENUM;
   const List &list(el->getChildren());
   List::const_iterator iter;
   map<uintb,string> nmap;
@@ -1067,9 +1069,8 @@ Datatype *TypeStruct::nearestArrayedComponentForward(uintb off,uintb *newoff,int
 
 int4 TypeStruct::compare(const Datatype &op,int4 level) const
 {
-  if (size != op.getSize()) return (op.getSize()-size);
-  if (metatype != op.getMetatype()) return (metatype < op.getMetatype()) ? -1 : 1;
-
+  int4 res = Datatype::compare(op,level);
+  if (res != 0) return res;
   const TypeStruct *ts = (const TypeStruct *)&op;
   vector<TypeField>::const_iterator iter1,iter2;
 
@@ -1109,9 +1110,8 @@ int4 TypeStruct::compare(const Datatype &op,int4 level) const
 int4 TypeStruct::compareDependency(const Datatype &op) const
 
 {
-  if (size != op.getSize()) return (op.getSize()-size);
-  if (metatype != op.getMetatype()) return (metatype < op.getMetatype()) ? -1 : 1;
-
+  int4 res = Datatype::compareDependency(op);
+  if (res != 0) return res;
   const TypeStruct *ts = (const TypeStruct *)&op;
   vector<TypeField>::const_iterator iter1,iter2;
 
@@ -1269,9 +1269,6 @@ void TypeCode::setProperties(bool isConstructor,bool isDestructor)
 int4 TypeCode::compareBasic(const TypeCode *op) const
 
 {
-  if (size != op->getSize()) return (op->getSize() < size) ? -1 : 1;
-  if (metatype != op->getMetatype()) return (metatype < op->getMetatype()) ? -1 : 1;
-
   if (proto == (FuncProto *)0) {
     if (op->proto == (FuncProto *)0) return 0;
     return 1;
@@ -1293,10 +1290,10 @@ int4 TypeCode::compareBasic(const TypeCode *op) const
   int4 opnump = op->proto->numParams();
   if (nump != opnump)
     return (opnump < nump) ? -1 : 1;
-  uint4 flags = proto->getComparableFlags();
+  uint4 myflags = proto->getComparableFlags();
   uint4 opflags = op->proto->getComparableFlags();
-  if (flags != opflags)
-    return (flags < opflags) ? -1 : 1;
+  if (myflags != opflags)
+    return (myflags < opflags) ? -1 : 1;
 
   return 2;			// Carry on with comparison of parameters
 }
@@ -1312,8 +1309,10 @@ Datatype *TypeCode::getSubType(uintb off,uintb *newoff) const
 int4 TypeCode::compare(const Datatype &op,int4 level) const
 
 {
+  int4 res = Datatype::compare(op,level);
+  if (res != 0) return res;
   const TypeCode *tc = (const TypeCode *)&op;
-  int4 res = compareBasic(tc);
+  res = compareBasic(tc);
   if (res != 2) return res;
 
   level -= 1;
@@ -1342,8 +1341,10 @@ int4 TypeCode::compare(const Datatype &op,int4 level) const
 int4 TypeCode::compareDependency(const Datatype &op) const
 
 {
+  int4 res = Datatype::compareDependency(op);
+  if (res != 0) return res;
   const TypeCode *tc = (const TypeCode *)&op;
-  int4 res = compareBasic(tc);
+  res = compareBasic(tc);
   if (res != 2) return res;
 
   int4 nump = proto->numParams();
@@ -1467,8 +1468,8 @@ Datatype *TypeSpacebase::nearestArrayedComponentForward(uintb off,uintb *newoff,
 	return symbolType;
       }
     }
-    int4 size = AddrSpace::byteToAddressInt(smallest->getSize(), spaceid->getWordSize());
-    nextAddr = smallest->getAddr() + size;
+    int4 sz = AddrSpace::byteToAddressInt(smallest->getSize(), spaceid->getWordSize());
+    nextAddr = smallest->getAddr() + sz;
   }
   if (nextAddr < addr)
     return (Datatype *)0;		// Don't let the address wrap
@@ -1518,8 +1519,8 @@ int4 TypeSpacebase::compare(const Datatype &op,int4 level) const
 int4 TypeSpacebase::compareDependency(const Datatype &op) const
 
 {
-  if (size != op.getSize()) return (op.getSize()-size);
-  if (metatype != op.getMetatype()) return (metatype < op.getMetatype()) ? -1 : 1;
+  int4 res = Datatype::compareDependency(op);
+  if (res != 0) return res;
   TypeSpacebase *tsb = (TypeSpacebase *) &op;
   if (spaceid != tsb->spaceid) return (spaceid < tsb->spaceid) ? -1:1;
   if (localframe.isInvalid()) return 0; // Global space base

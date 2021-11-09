@@ -200,6 +200,11 @@ public class DebuggerListingProvider extends CodeViewerProvider {
 		protected AddressSetView getSelection() {
 			return DebuggerListingProvider.this.getSelection();
 		}
+
+		@Override
+		protected void repaintPanel() {
+			getListingPanel().getFieldPanel().repaint();
+		}
 	}
 
 	private final DebuggerListingPlugin plugin;
@@ -338,6 +343,11 @@ public class DebuggerListingProvider extends CodeViewerProvider {
 	@Override
 	public boolean isReadOnly() {
 		return current.isAliveAndPresent();
+	}
+
+	@Override
+	public boolean isDynamicListing() {
+		return true;
 	}
 
 	@Override

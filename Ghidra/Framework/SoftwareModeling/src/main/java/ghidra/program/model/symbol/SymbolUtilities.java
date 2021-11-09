@@ -364,7 +364,7 @@ public class SymbolUtilities {
 			return null;
 		}
 		int len = str.length();
-		StringBuffer buf = new StringBuffer(len);
+		StringBuilder buf = new StringBuilder(len);
 		for (int i = 0; i < len; ++i) {
 			char c = str.charAt(i);
 			if (isInvalidChar(c)) {
@@ -1032,7 +1032,7 @@ public class SymbolUtilities {
 
 			if (namespace.isGlobal()) {
 				// do not add global symbol if same name already exists at address
-				for (Symbol s : program.getSymbolTable().getSymbols(address)) {
+				for (Symbol s : program.getSymbolTable().getSymbolsAsIterator(address)) {
 					if (name.equals(s.getName())) {
 						return null;
 					}

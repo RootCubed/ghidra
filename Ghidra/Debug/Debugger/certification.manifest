@@ -46,6 +46,8 @@ src/main/help/help/topics/DebuggerInterpreterPlugin/DebuggerInterpreterPlugin.ht
 src/main/help/help/topics/DebuggerListingPlugin/DebuggerListingPlugin.html||GHIDRA||||END|
 src/main/help/help/topics/DebuggerListingPlugin/images/DebuggerGoToDialog.png||GHIDRA||||END|
 src/main/help/help/topics/DebuggerListingPlugin/images/DebuggerListingPlugin.png||GHIDRA||||END|
+src/main/help/help/topics/DebuggerMemoryBytesPlugin/DebuggerMemoryBytesPlugin.html||GHIDRA||||END|
+src/main/help/help/topics/DebuggerMemoryBytesPlugin/images/DebuggerMemoryBytesPlugin.png||GHIDRA||||END|
 src/main/help/help/topics/DebuggerMemviewPlugin/DebuggerMemviewPlugin.html||GHIDRA||||END|
 src/main/help/help/topics/DebuggerMemviewPlugin/images/DebuggerMemviewPlugin.png||GHIDRA||||END|
 src/main/help/help/topics/DebuggerMemviewPlugin/images/DebuggerMemviewPlugin_old.png||GHIDRA||||END|
@@ -149,6 +151,7 @@ src/main/resources/images/breakpoints-enable-all.png||GHIDRA||||END|
 src/main/resources/images/breakpoints-make-effective.png||GHIDRA||||END|
 src/main/resources/images/breakpoints.png||GHIDRA||||END|
 src/main/resources/images/closedFolder.png||Modified Nuvola Icons - LGPL 2.1||||END|
+src/main/resources/images/conf.png||GHIDRA||||END|
 src/main/resources/images/connect.png||GHIDRA||||END|
 src/main/resources/images/console.png||GHIDRA||||END|
 src/main/resources/images/continue.png||GHIDRA||||END|
@@ -177,6 +180,7 @@ src/main/resources/images/stepout.png||GHIDRA||||END|
 src/main/resources/images/stepover.png||GHIDRA||||END|
 src/main/resources/images/stop.png||GHIDRA||||END|
 src/main/resources/images/sync_enabled.png||GHIDRA||||END|
+src/main/resources/images/system-switch-user.png||Oxygen Icons - LGPL 3.0|||Oxygen icon theme (dual license; LGPL or CC-SA-3.0)|END|
 src/main/resources/images/table.png||FAMFAMFAM Icons - CC 2.5|||famfamfam silk icon set|END|
 src/main/resources/images/text-xml.png||Oxygen Icons - LGPL 3.0|||Oxygen icon theme (dual license; LGPL or CC-SA-3.0)|END|
 src/main/resources/images/thread.png||GHIDRA||||END|

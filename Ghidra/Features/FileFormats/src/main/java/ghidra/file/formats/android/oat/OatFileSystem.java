@@ -16,27 +16,19 @@
 package ghidra.file.formats.android.oat;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
 
 import generic.continues.RethrowContinuesFactory;
-import ghidra.app.util.bin.BinaryReader;
-import ghidra.app.util.bin.ByteProvider;
-import ghidra.app.util.bin.ByteProviderWrapper;
-import ghidra.app.util.bin.format.elf.ElfConstants;
-import ghidra.app.util.bin.format.elf.ElfHeader;
-import ghidra.app.util.bin.format.elf.ElfSectionHeader;
-import ghidra.app.util.bin.format.elf.ElfSectionHeaderConstants;
-import ghidra.app.util.bin.format.elf.ElfSymbol;
-import ghidra.app.util.bin.format.elf.ElfSymbolTable;
+import ghidra.app.util.bin.*;
+import ghidra.app.util.bin.format.elf.*;
+import ghidra.app.util.importer.MessageLog;
 import ghidra.file.formats.android.dex.format.DexHeader;
-import ghidra.formats.gfilesystem.GFile;
-import ghidra.formats.gfilesystem.GFileImpl;
-import ghidra.formats.gfilesystem.GFileSystemBase;
+import ghidra.file.formats.android.oat.oatdexfile.OatDexFile;
+import ghidra.formats.gfilesystem.*;
 import ghidra.formats.gfilesystem.annotations.FileSystemInfo;
 import ghidra.formats.gfilesystem.factory.GFileSystemBaseFactory;
+import ghidra.formats.gfilesystem.fileinfo.FileAttribute;
+import ghidra.formats.gfilesystem.fileinfo.FileAttributes;
 import ghidra.util.exception.CancelledException;
 import ghidra.util.exception.CryptoException;
 import ghidra.util.task.TaskMonitor;
@@ -45,8 +37,8 @@ import ghidra.util.task.TaskMonitor;
 public class OatFileSystem extends GFileSystemBase {
 
 	private long baseOffset;
-	private List<GFile> listing = new ArrayList<GFile>();
-	private List<OatDexFile> dexFileList = new ArrayList<OatDexFile>();
+	private List<GFile> listing = new ArrayList<>();
+	private List<OatDexFile> dexFileList = new ArrayList<>();
 
 	public OatFileSystem(String fileSystemName, ByteProvider provider) {
 		super(fileSystemName, provider);
@@ -110,7 +102,7 @@ public class OatFileSystem extends GFileSystemBase {
 
 			ElfSectionHeader roDataSection = elf.getSection(ElfSectionHeaderConstants.dot_rodata);
 			if (roDataSection == null) {
-				//TODO should we check?
+				throw new IOException("rodata section does not exist.");
 			}
 			baseOffset = roDataSection.getOffset();
 
@@ -119,8 +111,7 @@ public class OatFileSystem extends GFileSystemBase {
 				new ByteProviderWrapper(provider, baseOffset, roDataSection.getSize());
 			BinaryReader reader = new BinaryReader(wrapper, elf.isLittleEndian());
 			OatHeader oatHeader = OatHeaderFactory.newOatHeader(reader);
-			//oatHeader.parse( reader, null );
-			OatHeaderFactory.parseOatHeader(oatHeader, reader, monitor);
+			OatHeaderFactory.parseOatHeader(oatHeader, null, reader, monitor, new MessageLog());
 			monitor.incrementProgress(1);
 
 			dexFileList = oatHeader.getOatDexFileList();
@@ -163,7 +154,7 @@ public class OatFileSystem extends GFileSystemBase {
 	public void close() throws IOException {
 		super.close();
 		listing.clear();
-		dexFileList = new ArrayList<OatDexFile>();//prevent UnmodifiableException
+		dexFileList = new ArrayList<>();//prevent UnmodifiableException
 	}
 
 	@Override
@@ -175,26 +166,27 @@ public class OatFileSystem extends GFileSystemBase {
 	}
 
 	@Override
-	public String getInfo(GFile file, TaskMonitor monitor) {
+	public FileAttributes getFileAttributes(GFile file, TaskMonitor monitor) {
 		int index = listing.indexOf(file);
+		if (index < 0) {
+			return FileAttributes.EMPTY;
+		}
+
 		OatDexFile oatDexFileHeader = dexFileList.get(index);
-		return oatDexFileHeader.getDexFileLocation();
+		return FileAttributes
+				.of(FileAttribute.create("Oat location", oatDexFileHeader.getDexFileLocation()));
 	}
 
 	@Override
-	public InputStream getData(GFile file, TaskMonitor monitor)
-			throws IOException, CancelledException, CryptoException {
+	public ByteProvider getByteProvider(GFile file, TaskMonitor monitor)
+			throws IOException, CancelledException {
 		int index = listing.indexOf(file);
+		if ( index < 0 ) {
+			throw new IOException("Invalid / unknown file: " + file);
+		}
 		OatDexFile oatDexFileHeader = dexFileList.get(index);
-		return provider.getInputStream(baseOffset + oatDexFileHeader.getDexFileOffset());
-	}
-
-	@Override
-	public InputStream getInputStream(GFile file, TaskMonitor monitor)
-			throws CancelledException, IOException {
-		int index = listing.indexOf(file);
-		OatDexFile oatDexFileHeader = dexFileList.get(index);
-		return provider.getInputStream(baseOffset + oatDexFileHeader.getDexFileOffset());
+		return new ByteProviderWrapper(provider, baseOffset + oatDexFileHeader.getDexFileOffset(),
+			oatDexFileHeader.getDexHeader().getFileSize(), file.getFSRL());
 	}
 
 }
