@@ -150,7 +150,7 @@ public class ApplicationUtilities {
 			throw new FileNotFoundException("System property \"java.io.tmpdir\" is not set!");
 		}
 		return new File(tmpdir,
-			SystemUtilities.getUserName() + "-" + applicationProperties.getApplicationName());
+			SystemUtilities.getUserName(true) + "-" + applicationProperties.getApplicationName());
 	}
 
 	/**
@@ -167,7 +167,7 @@ public class ApplicationUtilities {
 		String cachedir = System.getProperty("application.cachedir", "").trim();
 		if (!cachedir.isEmpty()) {
 			return new File(cachedir,
-				SystemUtilities.getUserName() + "-" + applicationProperties.getApplicationName());
+				SystemUtilities.getUserName(true) + "-" + applicationProperties.getApplicationName());
 		}
 
 		// Handle Windows specially

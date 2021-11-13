@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -88,6 +89,7 @@ import ghidra.util.xml.XmlUtilities;
 public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 	public static final String AUTOMATICALLY_SAVE_TOOLS = "Automatically Save Tools";
 	private static final String USE_ALERT_ANIMATION_OPTION_NAME = "Use Notification Animation";
+	private static final String OVERRIDE_USERNAME = "Override Username";
 
 	// TODO: Experimental Option !!
 	private static final String ENABLE_COMPRESSED_DATABUFFER_OUTPUT =
@@ -239,6 +241,8 @@ public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 				"should be animated.  This makes notifications more distinguishable.");
 		options.registerOption(ENABLE_COMPRESSED_DATABUFFER_OUTPUT, Boolean.FALSE, help,
 			"When enabled data buffers sent to Ghidra Server are compressed (see server configuration for other direction)");
+		options.registerOption(OVERRIDE_USERNAME, "", help,
+			"Use a custom username instead of the system username. (Leave blank to keep system username)");
 
 		boolean autoSave = options.getBoolean(AUTOMATICALLY_SAVE_TOOLS, true);
 		GhidraTool.autoSave = autoSave;
@@ -249,6 +253,9 @@ public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 		boolean compressDataBuffers =
 			options.getBoolean(ENABLE_COMPRESSED_DATABUFFER_OUTPUT, false);
 		DataBuffer.enableCompressedSerializationOutput(compressDataBuffers);
+
+		String overrideUsername = options.getString(OVERRIDE_USERNAME, "");
+		SystemUtilities.setUserName(overrideUsername);
 
 		options.addOptionsChangeListener(this);
 	}
@@ -264,6 +271,22 @@ public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 		}
 		else if (ENABLE_COMPRESSED_DATABUFFER_OUTPUT.equals(optionName)) {
 			DataBuffer.enableCompressedSerializationOutput((Boolean) newValue);
+		}
+		else if (OVERRIDE_USERNAME.equals(optionName)) {
+			String newName = (String) newValue;
+			// remove the spaces to be safe
+			if (newName.indexOf(" ") >= 0) {
+				String name = "";
+				StringTokenizer tokens = new StringTokenizer(newName, " ", false);
+				while (tokens.hasMoreTokens()) {
+					name += tokens.nextToken();
+				}
+				
+				newName = name;
+				options.setString(OVERRIDE_USERNAME, newName);
+			}
+
+			SystemUtilities.setUserName(newName);
 		}
 	}
 

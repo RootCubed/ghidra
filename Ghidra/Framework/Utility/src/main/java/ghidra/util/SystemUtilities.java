@@ -100,11 +100,29 @@ public class SystemUtilities {
 	}
 
 	/**
+	 * Set the user that is running the ghidra application
+	 * Used to override the system username, if one wishes to do so
+	 */
+	public static void setUserName(String name) {
+		if (name.equals("")) return;
+		userName = name;
+	}
+
+	/**
 	 * Get the user that is running the ghidra application
 	 * @return the user name
 	 */
 	public static String getUserName() {
-		if (userName == null) {
+		return getUserName(false);
+	}
+
+	/**
+	 * Get the user that is running the ghidra application
+	 * @param mustBeSystemUsername Whether it is vital that the username be the same as the system user name or not
+	 * @return the user name
+	 */
+	public static String getUserName(boolean mustBeSystemUsername) {
+		if (userName == null || mustBeSystemUsername) {
 			String uname = System.getProperty("user.name");
 
 			// remove the spaces since some operating systems allow
