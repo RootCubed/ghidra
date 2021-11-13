@@ -2132,27 +2132,35 @@
 @endif
 
 #lfd fr0,8(r2)	0xc8 02 00 08	
-:lfd	fD,dPlusRaOrZeroAddress 	is $(NOTVLE) & OP=50 & fD & dPlusRaOrZeroAddress
+:lfd	fD,dPlusRaOrZeroAddress 	is $(NOTVLE) & OP=50 & fD & dPlusRaOrZeroAddress & ps0D & ps1D
 {
 	fD = *:8(dPlusRaOrZeroAddress);
+	ps0D = float2float(fD);
+	ps1D = float2float(fD);
 }
 
 #lfdu fr0,8(r2)	0xcc 02 00 08	
-:lfdu	fD,dPlusRaAddress 	is $(NOTVLE) & OP=51 & fD & dPlusRaAddress & A
+:lfdu	fD,dPlusRaAddress 	is $(NOTVLE) & OP=51 & fD & dPlusRaAddress & A & ps0D & ps1D
 {
 	A = dPlusRaAddress;
 	fD = *:8(A);
+	ps0D = float2float(fD);
+	ps1D = float2float(fD);
 }
 #lfdux fr0,r2,r0	0x7c 02 04 ee	
-:lfdux	fD,A,B 	is $(NOTVLE) & OP=31 & fD & A & B & XOP_1_10=631 & BIT_0=0
+:lfdux	fD,A,B 	is $(NOTVLE) & OP=31 & fD & A & B & XOP_1_10=631 & BIT_0=0 & ps0D & ps1D
 {
 	A = A+B;
 	fD = *:8(A);
+	ps0D = float2float(fD);
+	ps1D = float2float(fD);
 }
 #lfdx fr0,r2,r0	0x7c 02 04 ae	
-:lfdx	fD,RA_OR_ZERO,B 	is $(NOTVLE) & OP=31 & fD & RA_OR_ZERO & B & XOP_1_10=599 & BIT_0=0
+:lfdx	fD,RA_OR_ZERO,B 	is $(NOTVLE) & OP=31 & fD & RA_OR_ZERO & B & XOP_1_10=599 & BIT_0=0 & ps0D & ps1D
 {
 	fD = *:8(RA_OR_ZERO+B);
+	ps0D = float2float(fD);
+	ps1D = float2float(fD);
 }
 
 #lfs fr0,8(r2)	0xc0 02 00 08	
