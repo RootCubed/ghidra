@@ -143,7 +143,7 @@ public class FileLocker {
 		Properties properties = new Properties();
 
 		// user info
-		properties.put("Username", System.getProperty("user.name"));
+		properties.put("Username", SystemUtilities.getUserName());
 		String hostname = "<Unknown>";
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();
