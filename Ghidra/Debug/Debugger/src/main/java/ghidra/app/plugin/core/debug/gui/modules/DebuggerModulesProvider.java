@@ -38,6 +38,7 @@ import docking.widgets.table.CustomToStringCellRenderer;
 import docking.widgets.table.DefaultEnumeratedColumnTableModel.EnumeratedTableColumn;
 import docking.widgets.table.TableFilter;
 import ghidra.app.plugin.core.debug.DebuggerPluginPackage;
+import ghidra.app.plugin.core.debug.gui.DebuggerBlockChooserDialog;
 import ghidra.app.plugin.core.debug.gui.DebuggerResources;
 import ghidra.app.plugin.core.debug.gui.DebuggerResources.*;
 import ghidra.app.plugin.core.debug.service.modules.MapModulesBackgroundCommand;
@@ -45,7 +46,8 @@ import ghidra.app.plugin.core.debug.service.modules.MapSectionsBackgroundCommand
 import ghidra.app.plugin.core.debug.utils.BackgroundUtils;
 import ghidra.app.plugin.core.debug.utils.DebouncedRowWrappedEnumeratedColumnTableModel;
 import ghidra.app.services.*;
-import ghidra.app.services.DebuggerStaticMappingService.*;
+import ghidra.app.services.ModuleMapProposal.ModuleMapEntry;
+import ghidra.app.services.SectionMapProposal.SectionMapEntry;
 import ghidra.async.AsyncUtils;
 import ghidra.async.TypeSpec;
 import ghidra.framework.main.AppInfo;
@@ -220,38 +222,54 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 		}
 	}
 
+	protected static Set<TraceModule> getSelectedModulesFromModuleContext(
+			DebuggerModuleActionContext context) {
+		return context.getSelectedModules()
+				.stream()
+				.map(r -> r.getModule())
+				.collect(Collectors.toSet());
+	}
+
+	protected static Set<TraceModule> getSelectedModulesFromSectionContext(
+			DebuggerSectionActionContext context) {
+		return context.getSelectedSections()
+				.stream()
+				.map(r -> r.getModule())
+				.collect(Collectors.toSet());
+	}
+
+	protected static Set<TraceSection> getSelectedSectionsFromModuleContext(
+			DebuggerModuleActionContext context) {
+		return context.getSelectedModules()
+				.stream()
+				.flatMap(r -> r.getModule().getSections().stream())
+				.collect(Collectors.toSet());
+	}
+
+	protected static Set<TraceSection> getSelectedSectionsFromSectionContext(
+			DebuggerSectionActionContext context) {
+		return context.getSelectedSections()
+				.stream()
+				.map(r -> r.getSection())
+				.collect(Collectors.toSet());
+	}
+
 	protected static Set<TraceModule> getSelectedModules(ActionContext context) {
 		if (context instanceof DebuggerModuleActionContext) {
-			DebuggerModuleActionContext ctx = (DebuggerModuleActionContext) context;
-			return ctx.getSelectedModules()
-					.stream()
-					.map(r -> r.getModule())
-					.collect(Collectors.toSet());
+			return getSelectedModulesFromModuleContext((DebuggerModuleActionContext) context);
 		}
 		if (context instanceof DebuggerSectionActionContext) {
-			DebuggerSectionActionContext ctx = (DebuggerSectionActionContext) context;
-			return ctx.getSelectedSections()
-					.stream()
-					.map(r -> r.getModule())
-					.collect(Collectors.toSet());
+			return getSelectedModulesFromSectionContext((DebuggerSectionActionContext) context);
 		}
 		return null;
 	}
 
 	protected static Set<TraceSection> getSelectedSections(ActionContext context) {
 		if (context instanceof DebuggerModuleActionContext) {
-			DebuggerModuleActionContext ctx = (DebuggerModuleActionContext) context;
-			return ctx.getSelectedModules()
-					.stream()
-					.flatMap(r -> r.getModule().getSections().stream())
-					.collect(Collectors.toSet());
+			return getSelectedSectionsFromModuleContext((DebuggerModuleActionContext) context);
 		}
 		if (context instanceof DebuggerSectionActionContext) {
-			DebuggerSectionActionContext ctx = (DebuggerSectionActionContext) context;
-			return ctx.getSelectedSections()
-					.stream()
-					.map(r -> r.getSection())
-					.collect(Collectors.toSet());
+			return getSelectedSectionsFromSectionContext((DebuggerSectionActionContext) context);
 		}
 		return null;
 	}
@@ -345,14 +363,24 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 			if (listingService == null) {
 				return;
 			}
-			Set<TraceSection> sections = getSelectedSections(myActionContext);
-			if (sections == null) {
-				return;
-			}
+
 			AddressSet sel = new AddressSet();
-			for (TraceSection s : sections) {
-				sel.add(s.getRange());
+			if (myActionContext instanceof DebuggerModuleActionContext) {
+				DebuggerModuleActionContext mCtx =
+					(DebuggerModuleActionContext) myActionContext;
+				for (TraceModule module : getSelectedModulesFromModuleContext(mCtx)) {
+					sel.add(module.getRange());
+				}
 			}
+			else if (myActionContext instanceof DebuggerSectionActionContext) {
+				DebuggerSectionActionContext sCtx =
+					(DebuggerSectionActionContext) myActionContext;
+				for (TraceSection section : getSelectedSectionsFromSectionContext(sCtx)) {
+					sel.add(section.getRange());
+				}
+			}
+
+			sel = sel.intersect(traceManager.getCurrentView().getMemory());
 			ProgramSelection ps = new ProgramSelection(sel);
 			listingService.setCurrentSelection(ps);
 		}
@@ -634,7 +662,9 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 	}
 
 	private void loadModules() {
+		moduleTable.getSelectionModel().clearSelection();
 		moduleTableModel.clear();
+		sectionTable.getSelectionModel().clearSelection();
 		sectionTableModel.clear();
 
 		if (currentTrace == null) {
@@ -758,8 +788,8 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 				.onAction(this::activatedMapModules)
 				.buildAndInstallLocal(this);
 		actionMapModuleTo = MapModuleToAction.builder(plugin)
-				.enabledWhen(ctx -> currentProgram != null)
 				.withContext(DebuggerModuleActionContext.class)
+				.enabledWhen(ctx -> currentProgram != null && ctx.getSelectedModules().size() == 1)
 				.popupWhen(ctx -> currentProgram != null && ctx.getSelectedModules().size() == 1)
 				.onAction(this::activatedMapModuleTo)
 				.buildAndInstallLocal(this);
@@ -769,13 +799,13 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 				.onAction(this::activatedMapSections)
 				.buildAndInstallLocal(this);
 		actionMapSectionTo = MapSectionToAction.builder(plugin)
-				.enabledWhen(ctx -> currentProgram != null)
 				.withContext(DebuggerSectionActionContext.class)
+				.enabledWhen(ctx -> currentProgram != null && ctx.getSelectedSections().size() == 1)
 				.popupWhen(ctx -> currentProgram != null && ctx.getSelectedSections().size() == 1)
 				.onAction(this::activatedMapSectionTo)
 				.buildAndInstallLocal(this);
 		actionMapSectionsTo = MapSectionsToAction.builder(plugin)
-				.enabledWhen(ctx -> currentProgram != null)
+				.enabledWhen(ctx -> currentProgram != null && isContextSectionsOfOneModule(ctx))
 				.popupWhen(ctx -> currentProgram != null && isContextSectionsOfOneModule(ctx))
 				.onAction(this::activatedMapSectionsTo)
 				.buildAndInstallLocal(this);
@@ -1006,7 +1036,7 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 		}
 		Map<TraceModule, ModuleMapProposal> map = staticMappingService.proposeModuleMaps(modules,
 			List.of(programManager.getAllOpenPrograms()));
-		Collection<ModuleMapEntry> proposal = ModuleMapProposal.flatten(map.values());
+		Collection<ModuleMapEntry> proposal = MapProposal.flatten(map.values());
 		promptModuleProposal(proposal);
 	}
 
@@ -1045,9 +1075,9 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 		}
 		Set<TraceModule> modules =
 			sections.stream().map(TraceSection::getModule).collect(Collectors.toSet());
-		Map<TraceModule, SectionMapProposal> map = staticMappingService.proposeSectionMaps(modules,
+		Map<?, SectionMapProposal> map = staticMappingService.proposeSectionMaps(modules,
 			List.of(programManager.getAllOpenPrograms()));
-		Collection<SectionMapEntry> proposal = SectionMapProposal.flatten(map.values());
+		Collection<SectionMapEntry> proposal = MapProposal.flatten(map.values());
 		Collection<SectionMapEntry> filtered = proposal.stream()
 				.filter(e -> sections.contains(e.getSection()))
 				.collect(Collectors.toSet());
@@ -1085,7 +1115,9 @@ public class DebuggerModulesProvider extends ComponentProviderAdapter {
 		if (block == null) {
 			return;
 		}
-		promptSectionProposal(List.of(new SectionMapEntry(section, location.getProgram(), block)));
+		SectionMapProposal map =
+			staticMappingService.proposeSectionMap(section, location.getProgram(), block);
+		promptSectionProposal(map.computeMap().values());
 	}
 
 	protected Set<MemoryBlock> collectBlocksInOpenPrograms() {

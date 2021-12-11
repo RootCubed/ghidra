@@ -34,6 +34,7 @@ import ghidra.app.plugin.core.debug.DebuggerPluginPackage;
 import ghidra.app.plugin.core.debug.gui.breakpoint.DebuggerBreakpointsPlugin;
 import ghidra.app.plugin.core.debug.gui.console.DebuggerConsolePlugin;
 import ghidra.app.plugin.core.debug.gui.listing.DebuggerListingPlugin;
+import ghidra.app.plugin.core.debug.gui.memory.DebuggerMemoryBytesPlugin;
 import ghidra.app.plugin.core.debug.gui.memory.DebuggerRegionsPlugin;
 import ghidra.app.plugin.core.debug.gui.modules.DebuggerModulesPlugin;
 import ghidra.app.plugin.core.debug.gui.modules.DebuggerStaticMappingPlugin;
@@ -118,6 +119,7 @@ public interface DebuggerResources {
 
 	// TODO: Some overlay to indicate dynamic, or new icon altogether
 	ImageIcon ICON_LISTING = ResourceManager.loadImage("images/Browser.gif");
+	ImageIcon ICON_MEMORY_BYTES = ResourceManager.loadImage("images/binaryData.gif");
 	ImageIcon ICON_CONSOLE = ResourceManager.loadImage("images/console.png");
 	ImageIcon ICON_REGISTERS = ResourceManager.loadImage("images/registers.png");
 	ImageIcon ICON_STACK = ResourceManager.loadImage("images/stack.png");
@@ -142,16 +144,19 @@ public interface DebuggerResources {
 	ImageIcon ICON_AUTOREAD = ResourceManager.loadImage("images/autoread.png");
 
 	// TODO: Draw a real icon.
-	ImageIcon ICON_CAPTURE_MEMORY = ICON_REGIONS;
-	//ResourceManager.loadImage("images/capture-memory.png");
+	ImageIcon ICON_READ_MEMORY = ICON_REGIONS;
+	//ResourceManager.loadImage("images/read-memory.png");
+
+	ImageIcon ICON_RENAME_SNAPSHOT = ICON_TIME;
 
 	// TODO: Draw an icon
 	ImageIcon ICON_MAP_IDENTICALLY = ResourceManager.loadImage("images/doubleArrow.png");
 	ImageIcon ICON_MAP_MODULES = ResourceManager.loadImage("images/modules.png");
 	ImageIcon ICON_MAP_SECTIONS = ICON_MAP_MODULES; // TODO
+	ImageIcon ICON_MAP_REGIONS = ICON_MAP_MODULES; // TODO
 	ImageIcon ICON_BLOCK = ICON_MAP_SECTIONS; // TODO
 	// TODO: Draw an icon
-	ImageIcon ICON_SELECT_ADDRESSES = ResourceManager.loadImage("images/NextSelectionBlock16.gif");
+	ImageIcon ICON_SELECT_ADDRESSES = ResourceManager.loadImage("images/text_align_justify.png");
 	// TODO: Draw an icon?
 	ImageIcon ICON_DATA_TYPES = ResourceManager.loadImage("images/dataTypes.png");
 	// TODO: Draw an icon?
@@ -172,6 +177,10 @@ public interface DebuggerResources {
 	ImageIcon ICON_EMULATE = ICON_PROCESS; // TODO
 	ImageIcon ICON_CONFIG = ResourceManager.loadImage("images/conf.png");
 	ImageIcon ICON_TOGGLE = ResourceManager.loadImage("images/system-switch-user.png");
+
+	ImageIcon ICON_DIFF = ResourceManager.loadImage("images/table_relationship.png");
+	ImageIcon ICON_DIFF_PREV = ResourceManager.loadImage("images/up.png");
+	ImageIcon ICON_DIFF_NEXT = ResourceManager.loadImage("images/down.png");
 
 	HelpLocation HELP_PACKAGE = new HelpLocation("Debugger", "package");
 
@@ -196,6 +205,11 @@ public interface DebuggerResources {
 	ImageIcon ICON_PROVIDER_MAPPINGS = ICON_MAPPINGS;
 	HelpLocation HELP_PROVIDER_MAPPINGS = new HelpLocation(
 		PluginUtils.getPluginNameFromClass(DebuggerStaticMappingPlugin.class), HELP_ANCHOR_PLUGIN);
+
+	String TITLE_PROVIDER_MEMORY_BYTES = "Memory";
+	ImageIcon ICON_PROVIDER_MEMORY_BYTES = ICON_MEMORY_BYTES;
+	HelpLocation HELP_PROVIDER_MEMORY_BYTES = new HelpLocation(
+		PluginUtils.getPluginNameFromClass(DebuggerMemoryBytesPlugin.class), HELP_ANCHOR_PLUGIN);
 
 	String TITLE_PROVIDER_MODULES = "Modules";
 	ImageIcon ICON_PROVIDER_MODULES = ICON_MODULES;
@@ -360,6 +374,7 @@ public interface DebuggerResources {
 	String GROUP_TRACE_CLOSE = "Dbg7.b. Trace Close";
 	String GROUP_MAINTENANCE = "Dbg8. Maintenance";
 	String GROUP_MAPPING = "Dbg9. Map Modules/Sections";
+	String GROUP_DIFF_NAV = "DiffNavigate";
 
 	static void tableRowActivationAction(GTable table, Runnable runnable) {
 		table.addMouseListener(new MouseAdapter() {
@@ -770,14 +785,15 @@ public interface DebuggerResources {
 		}
 	}
 
-	abstract class AbstractCaptureSelectedMemoryAction extends DockingAction {
-		public static final String NAME = "Capture Selected Memory";
-		public static final Icon ICON = ICON_CAPTURE_MEMORY;
-		public static final String HELP_ANCHOR = "capture_memory";
+	abstract class AbstractReadSelectedMemoryAction extends DockingAction {
+		public static final String NAME = "Read Selected Memory";
+		public static final Icon ICON = ICON_READ_MEMORY;
+		public static final String HELP_ANCHOR = "read_memory";
 
-		public AbstractCaptureSelectedMemoryAction(Plugin owner) {
+		public AbstractReadSelectedMemoryAction(Plugin owner) {
 			super(NAME, owner.getName());
-			setDescription("Capture memory for the selected addresses into the trace database");
+			setDescription(
+				"(Re-)read and record memory for the selected addresses into the trace database");
 			setHelpLocation(new HelpLocation(owner.getName(), HELP_ANCHOR));
 		}
 	}
@@ -878,7 +894,7 @@ public interface DebuggerResources {
 
 	interface AutoReadMemoryAction {
 		String NAME = "Auto-Read Target Memory";
-		String DESCRIPTION = "Automatically capture visible memory from the live target";
+		String DESCRIPTION = "Automatically read and record visible memory from the live target";
 		String HELP_ANCHOR = "auto_memory";
 
 		String NAME_VIS_RO_ONCE = "Read Visible Memory, RO Once";
@@ -1074,7 +1090,43 @@ public interface DebuggerResources {
 			return new ActionBuilder(NAME, ownerName)
 					.description(DESCRIPTION)
 					.menuGroup(GROUP)
-					.menuPath(NAME)
+					.menuPath(DebuggerPluginPackage.NAME, NAME)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface CopyIntoProgramAction {
+		String NAME_PAT = "Copy Into %s Program";
+		String DESC_PAT = "Copy the current selection into %s program";
+		String GROUP = GROUP_MAINTENANCE;
+	}
+
+	interface CopyIntoCurrentProgramAction extends CopyIntoProgramAction {
+		String NAME = String.format(NAME_PAT, "Current");
+		String DESCRIPTION = String.format(DESC_PAT, "the current");
+		String HELP_ANCHOR = "copy_into_current";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME, ownerName)
+					.description(DESCRIPTION)
+					.menuGroup(GROUP)
+					.menuPath(DebuggerPluginPackage.NAME, NAME)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface CopyIntoNewProgramAction extends CopyIntoProgramAction {
+		String NAME = String.format(NAME_PAT, "New");
+		String DESCRIPTION = String.format(DESC_PAT, "a new");
+		String HELP_ANCHOR = "copy_into_new";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME, ownerName)
+					.description(DESCRIPTION)
+					.menuGroup(GROUP)
+					.menuPath(DebuggerPluginPackage.NAME, NAME)
 					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
 		}
 	}
@@ -1344,7 +1396,7 @@ public interface DebuggerResources {
 
 	interface MapSectionToAction {
 		String NAME_PREFIX = "Map Section to ";
-		String DESCRIPTION = "Map the selected module to the current program";
+		String DESCRIPTION = "Map the selected section to the current program";
 		Icon ICON = ICON_MAP_SECTIONS; // TODO: Probably no icon
 		String GROUP = GROUP_MAPPING;
 		String HELP_ANCHOR = "map_section_to";
@@ -1364,6 +1416,57 @@ public interface DebuggerResources {
 		Icon ICON = ICON_MAP_SECTIONS;
 		String GROUP = GROUP_MAPPING;
 		String HELP_ANCHOR = "map_sections_to";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME_PREFIX, ownerName).description(DESCRIPTION)
+					.popupMenuPath(NAME_PREFIX + "...")
+					.popupMenuGroup(GROUP)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface MapRegionsAction {
+		String NAME = "Map Regions";
+		String DESCRIPTION = "Map selected regions to program memory blocks";
+		Icon ICON = ICON_MAP_REGIONS; // TODO: Probably no icon
+		String GROUP = GROUP_MAPPING;
+		String HELP_ANCHOR = "map_regions";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME, ownerName).description(DESCRIPTION)
+					//.toolBarIcon(ICON)
+					//.toolBarGroup(GROUP)
+					//.popupMenuIcon(ICON)
+					.popupMenuPath(NAME)
+					.popupMenuGroup(GROUP)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface MapRegionToAction {
+		String NAME_PREFIX = "Map Region to ";
+		String DESCRIPTION = "Map the selected region to the current program";
+		Icon ICON = ICON_MAP_SECTIONS; // TODO: Probably no icon
+		String GROUP = GROUP_MAPPING;
+		String HELP_ANCHOR = "map_region_to";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME_PREFIX, ownerName).description(DESCRIPTION)
+					.popupMenuPath(NAME_PREFIX + "...")
+					.popupMenuGroup(GROUP)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface MapRegionsToAction {
+		String NAME_PREFIX = "Map Regions to ";
+		String DESCRIPTION = "Map the selected (module) regions to the current program";
+		Icon ICON = ICON_MAP_SECTIONS;
+		String GROUP = GROUP_MAPPING;
+		String HELP_ANCHOR = "map_regions_to";
 
 		static ActionBuilder builder(Plugin owner) {
 			String ownerName = owner.getName();
@@ -1461,24 +1564,24 @@ public interface DebuggerResources {
 		}
 	}
 
-	abstract class AbstractStepTickForwardAction extends DockingAction {
-		public static final String NAME = "Step Trace Tick Forward";
+	abstract class AbstractEmulateTickForwardAction extends DockingAction {
+		public static final String NAME = "Emulate Trace Tick Forward";
 		public static final Icon ICON = ICON_STEP_INTO;
-		public static final String HELP_ANCHOR = "step_trace_tick_forward";
+		public static final String HELP_ANCHOR = "emu_trace_tick_forward";
 
-		public AbstractStepTickForwardAction(Plugin owner) {
+		public AbstractEmulateTickForwardAction(Plugin owner) {
 			super(NAME, owner.getName());
-			setDescription("Navigate the recording forward one tick");
+			setDescription("Emulate the recording forward one tick");
 			setHelpLocation(new HelpLocation(owner.getName(), HELP_ANCHOR));
 		}
 	}
 
-	interface StepPcodeForwardAction {
-		String NAME = "Step Trace p-code Forward";
+	interface EmulatePcodeForwardAction {
+		String NAME = "Emulate Trace p-code Forward";
 		String DESCRIPTION = "Navigate the recording forward one p-code tick";
 		Icon ICON = ICON_STEP_INTO;
 		String GROUP = GROUP_CONTROL;
-		String HELP_ANCHOR = "step_trace_pcode_forward";
+		String HELP_ANCHOR = "emu_trace_pcode_forward";
 
 		static ActionBuilder builder(Plugin owner) {
 			String ownerName = owner.getName();
@@ -1490,14 +1593,14 @@ public interface DebuggerResources {
 		}
 	}
 
-	abstract class AbstractStepTickBackwardAction extends DockingAction {
-		public static final String NAME = "Step Trace Tick Backward";
+	abstract class AbstractEmulateTickBackwardAction extends DockingAction {
+		public static final String NAME = "Emulate Trace Tick Backward";
 		public static final Icon ICON = ICON_STEP_BACK;
-		public static final String HELP_ANCHOR = "step_trace_tick_backward";
+		public static final String HELP_ANCHOR = "emu_trace_tick_backward";
 
-		public AbstractStepTickBackwardAction(Plugin owner) {
+		public AbstractEmulateTickBackwardAction(Plugin owner) {
 			super(NAME, owner.getName());
-			setDescription("Navigate the recording backward one tick");
+			setDescription("Emulate the recording backward one tick");
 			setHelpLocation(new HelpLocation(owner.getName(), HELP_ANCHOR));
 		}
 	}
@@ -1514,12 +1617,12 @@ public interface DebuggerResources {
 		}
 	}
 
-	interface StepPcodeBackwardAction {
-		String NAME = "Step Trace p-code Backward";
+	interface EmulatePcodeBackwardAction {
+		String NAME = "Emulate Trace p-code Backward";
 		String DESCRIPTION = "Navigate the recording backward one p-code tick";
 		Icon ICON = ICON_STEP_BACK;
 		String GROUP = GROUP_CONTROL;
-		String HELP_ANCHOR = "step_trace_pcode_backward";
+		String HELP_ANCHOR = "emu_trace_pcode_backward";
 
 		static ActionBuilder builder(Plugin owner) {
 			String ownerName = owner.getName();
@@ -1543,18 +1646,53 @@ public interface DebuggerResources {
 		}
 	}
 
+	// TODO: Perhaps to reduce overloading of "snapshot" we should use "event" instead?
+	interface RenameSnapshotAction {
+		String NAME = "Rename Current Snapshot";
+		String DESCRIPTION =
+			"Modify the description of the snapshot (event) in the current view";
+		String GROUP = GROUP_TRACE;
+		Icon ICON = ICON_RENAME_SNAPSHOT;
+		String HELP_ANCHOR = "rename_snapshot";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME, ownerName)
+					.description(DESCRIPTION)
+					.menuPath(DebuggerPluginPackage.NAME, NAME)
+					.menuGroup(GROUP, "zzz")
+					.keyBinding("CTRL SHIFT N")
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
 	interface SynchronizeFocusAction {
 		String NAME = "Synchronize Focus";
 		String DESCRIPTION = "Synchronize trace activation with debugger focus/select";
-		String GROUP = "zz";
 		Icon ICON = ICON_SYNC;
 		String HELP_ANCHOR = "sync_focus";
 
 		static ToggleActionBuilder builder(Plugin owner) {
 			String ownerName = owner.getName();
 			return new ToggleActionBuilder(NAME, ownerName).description(DESCRIPTION)
-					.toolBarGroup(GROUP)
-					.toolBarIcon(ICON)
+					.menuPath(NAME)
+					.menuIcon(ICON)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface GoToTimeAction {
+		String NAME = "Go To Time";
+		String DESCRIPTION = "Go to a specific time, optionally using emulation";
+		Icon ICON = ICON_TIME;
+		String HELP_ANCHOR = "goto_time";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME, ownerName).description(DESCRIPTION)
+					.menuPath(NAME)
+					.menuIcon(ICON)
+					.keyBinding("CTRL SHIFT T")
 					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
 		}
 	}
@@ -1745,6 +1883,73 @@ public interface DebuggerResources {
 					.description(DESCRIPTION)
 					.menuGroup(GROUP_GENERAL)
 					.menuPath(NAME)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface ForceFullViewAction {
+		String NAME = "Force Full View";
+		String DESCRIPTION = "Ignore regions and fiew full address spaces";
+		String GROUP = GROUP_GENERAL;
+		String HELP_ANCHOR = "force_full_view";
+
+		static ToggleActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ToggleActionBuilder(NAME, ownerName)
+					.description(DESCRIPTION)
+					.menuGroup(GROUP_GENERAL)
+					.menuPath(NAME)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface CompareTimesAction {
+		String NAME = "Compare";
+		String DESCRIPTION = "Compare this point in time to another";
+		String GROUP = "zzz"; // Same as for "Diff" action
+		Icon ICON = ICON_DIFF;
+		String HELP_ANCHOR = "compare";
+
+		static ToggleActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ToggleActionBuilder(NAME, ownerName)
+					.description(DESCRIPTION)
+					.toolBarGroup(GROUP)
+					.toolBarIcon(ICON)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface PrevDifferenceAction {
+		String NAME = "Previous Difference";
+		String DESCRIPTION = "Go to the previous highlighted difference";
+		String GROUP = GROUP_DIFF_NAV;
+		Icon ICON = ICON_DIFF_PREV;
+		String HELP_ANCHOR = "prev_diff";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME, ownerName)
+					.description(DESCRIPTION)
+					.toolBarGroup(GROUP)
+					.toolBarIcon(ICON)
+					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
+		}
+	}
+
+	interface NextDifferenceAction {
+		String NAME = "Next Difference";
+		String DESCRIPTION = "Go to the next highlighted difference";
+		String GROUP = GROUP_DIFF_NAV;
+		Icon ICON = ICON_DIFF_NEXT;
+		String HELP_ANCHOR = "next_diff";
+
+		static ActionBuilder builder(Plugin owner) {
+			String ownerName = owner.getName();
+			return new ActionBuilder(NAME, ownerName)
+					.description(DESCRIPTION)
+					.toolBarGroup(GROUP)
+					.toolBarIcon(ICON)
 					.helpLocation(new HelpLocation(ownerName, HELP_ANCHOR));
 		}
 	}

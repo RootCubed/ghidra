@@ -171,7 +171,8 @@ public class DefaultPcodeThread<T> implements PcodeThread<T> {
 	@Override
 	public void overrideCounter(Address counter) {
 		setCounter(counter);
-		state.setVar(pc, arithmetic.fromConst(counter.getOffset(), pc.getMinimumByteSize()));
+		state.setVar(pc,
+			arithmetic.fromConst(counter.getAddressableWordOffset(), pc.getMinimumByteSize()));
 	}
 
 	@Override
@@ -192,7 +193,7 @@ public class DefaultPcodeThread<T> implements PcodeThread<T> {
 		assignContext(context);
 		state.setVar(contextreg, arithmetic.fromConst(
 			this.context.getUnsignedValueIgnoreMask(),
-			contextreg.getMinimumByteSize()));
+			contextreg.getMinimumByteSize(), true));
 	}
 
 	@Override
@@ -211,11 +212,11 @@ public class DefaultPcodeThread<T> implements PcodeThread<T> {
 	@Override
 	public void reInitialize() {
 		long offset = arithmetic.toConcrete(state.getVar(pc)).longValue();
-		setCounter(language.getDefaultSpace().getAddress(offset));
+		setCounter(language.getDefaultSpace().getAddress(offset, true));
 
 		if (contextreg != Register.NO_CONTEXT) {
 			try {
-				BigInteger ctx = arithmetic.toConcrete(state.getVar(contextreg));
+				BigInteger ctx = arithmetic.toConcrete(state.getVar(contextreg), true);
 				assignContext(new RegisterValue(contextreg, ctx));
 			}
 			catch (AccessPcodeExecutionException e) {
@@ -258,7 +259,7 @@ public class DefaultPcodeThread<T> implements PcodeThread<T> {
 	}
 
 	protected void beginInstructionOrInject() {
-		PcodeProgram inj = injects.get(counter);
+		PcodeProgram inj = getInject(counter);
 		if (inj != null) {
 			instruction = null;
 			frame = executor.begin(inj);

@@ -789,16 +789,18 @@ void PrintC::opPtrsub(const PcodeOp *op)
   TypePointerRel *ptrel;
   Datatype *ct;
   const Varnode *in0;
+  uintb in1const;
   bool valueon,flex,arrayvalue;
   uint4 m;
 
   in0 = op->getIn(0);
+  in1const = op->getIn(1)->getOffset();
   ptype = (TypePointer *)in0->getHigh()->getType();
   if (ptype->getMetatype() != TYPE_PTR) {
     clear();
     throw LowlevelError("PTRSUB off of non-pointer type");
   }
-  if (ptype->isFormalPointerRel()) {
+  if (ptype->isFormalPointerRel() && ((TypePointerRel *)ptype)->evaluateThruParent(in1const)) {
     ptrel = (TypePointerRel *)ptype;
     ct = ptrel->getParent();
   }
@@ -811,10 +813,19 @@ void PrintC::opPtrsub(const PcodeOp *op)
   flex = isValueFlexible(in0);
 
   if (ct->getMetatype() == TYPE_STRUCT) {
-    uintb suboff = op->getIn(1)->getOffset();	// How far into container
+    uintb suboff = in1const;	// How far into container
     if (ptrel != (TypePointerRel *)0) {
       suboff += ptrel->getPointerOffset();
       suboff &= calc_mask(ptype->getSize());
+      if (suboff == 0) {
+	// Special case where we do not print a field
+	pushTypePointerRel(op);
+	if (flex)
+	  pushVnImplied(in0,op,m | print_load_value);
+	else
+	  pushVnImplied(in0,op,m);
+	return;
+      }
     }
     suboff = AddrSpace::addressToByte(suboff,ptype->getWordSize());
     string fieldname;
@@ -908,7 +919,7 @@ void PrintC::opPtrsub(const PcodeOp *op)
     }
     if (symbol == (Symbol *)0) {
       TypeSpacebase *sb = (TypeSpacebase *)ct;
-      Address addr = sb->getAddress(op->getIn(1)->getOffset(),in0->getSize(),op->getAddr());
+      Address addr = sb->getAddress(in1const,in0->getSize(),op->getAddr());
       pushUnnamedLocation(addr,(Varnode *)0,op);
     }
     else {
@@ -927,7 +938,7 @@ void PrintC::opPtrsub(const PcodeOp *op)
       push_integer(0,4,false,(Varnode *)0,op);
   }
   else if (ct->getMetatype() == TYPE_ARRAY) {
-    if (op->getIn(1)->getOffset() != 0) {
+    if (in1const != 0) {
       clear();
       throw LowlevelError("PTRSUB with non-zero offset into array type");
     }
@@ -1595,7 +1606,7 @@ void PrintC::pushConstant(uintb val,const Datatype *ct,
     clear();
     throw LowlevelError("Cannot have a constant of type void");
   case TYPE_PTR:
-  case TYPE_PTRSTRUCT:
+  case TYPE_PTRREL:
     if (option_NULL&&(val==0)) { // A null pointer
       pushAtom(Atom(nullToken,vartoken,EmitXml::var_color,op,vn));
       return;
