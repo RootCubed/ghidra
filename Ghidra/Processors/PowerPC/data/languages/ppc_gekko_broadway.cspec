@@ -8,43 +8,43 @@
   <default_proto>
     <prototype name="__stdcall" extrapop="0" stackshift="0">
       <input pointermax="8">
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps1_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps2_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps3_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps4_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps5_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps6_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps7_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps8_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps9_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps10_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps11_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps12_0"/>
         </pentry>
-        <pentry minsize="1" maxsize="4" metatype="float">
+        <pentry minsize="4" maxsize="4" metatype="float" extension="float">
           <register name="ps13_0"/>
         </pentry>
         <pentry minsize="8" maxsize="8" metatype="float" extension="float">
@@ -129,7 +129,6 @@
         </pentry>
       </output>
       <unaffected>
-        <register name="r1"/>
         <register name="r2"/>
         <register name="r13"/>
         <register name="r14"/>
@@ -150,6 +149,7 @@
         <register name="r29"/>
         <register name="r30"/>
         <register name="r31"/>
+        <register name="r1"/>
         <register name="f14"/>
         <register name="f15"/>
         <register name="f16"/>
@@ -167,6 +167,7 @@
         <register name="f28"/>
         <register name="f29"/>
         <register name="f30"/>
+        <register name="f31"/>
         <register name="ps14_0"/>
         <register name="ps15_0"/>
         <register name="ps16_0"/>
@@ -184,6 +185,7 @@
         <register name="ps28_0"/>
         <register name="ps29_0"/>
         <register name="ps30_0"/>
+        <register name="ps31_0"/>
         <register name="ps14_1"/>
         <register name="ps15_1"/>
         <register name="ps16_1"/>
@@ -201,6 +203,7 @@
         <register name="ps28_1"/>
         <register name="ps29_1"/>
         <register name="ps30_1"/>
+        <register name="ps31_1"/>
         <register name="cr4"/>
       </unaffected>
     </prototype>
