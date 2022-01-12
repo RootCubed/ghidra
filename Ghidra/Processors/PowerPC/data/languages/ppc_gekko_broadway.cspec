@@ -129,6 +129,7 @@
         </pentry>
       </output>
       <unaffected>
+        <register name="r1"/>
         <register name="r2"/>
         <register name="r13"/>
         <register name="r14"/>
@@ -149,7 +150,57 @@
         <register name="r29"/>
         <register name="r30"/>
         <register name="r31"/>
-        <register name="r1"/>
+        <register name="f14"/>
+        <register name="f15"/>
+        <register name="f16"/>
+        <register name="f17"/>
+        <register name="f18"/>
+        <register name="f19"/>
+        <register name="f20"/>
+        <register name="f21"/>
+        <register name="f22"/>
+        <register name="f23"/>
+        <register name="f24"/>
+        <register name="f25"/>
+        <register name="f26"/>
+        <register name="f27"/>
+        <register name="f28"/>
+        <register name="f29"/>
+        <register name="f30"/>
+        <register name="ps14_0"/>
+        <register name="ps15_0"/>
+        <register name="ps16_0"/>
+        <register name="ps17_0"/>
+        <register name="ps18_0"/>
+        <register name="ps19_0"/>
+        <register name="ps20_0"/>
+        <register name="ps21_0"/>
+        <register name="ps22_0"/>
+        <register name="ps23_0"/>
+        <register name="ps24_0"/>
+        <register name="ps25_0"/>
+        <register name="ps26_0"/>
+        <register name="ps27_0"/>
+        <register name="ps28_0"/>
+        <register name="ps29_0"/>
+        <register name="ps30_0"/>
+        <register name="ps14_1"/>
+        <register name="ps15_1"/>
+        <register name="ps16_1"/>
+        <register name="ps17_1"/>
+        <register name="ps18_1"/>
+        <register name="ps19_1"/>
+        <register name="ps20_1"/>
+        <register name="ps21_1"/>
+        <register name="ps22_1"/>
+        <register name="ps23_1"/>
+        <register name="ps24_1"/>
+        <register name="ps25_1"/>
+        <register name="ps26_1"/>
+        <register name="ps27_1"/>
+        <register name="ps28_1"/>
+        <register name="ps29_1"/>
+        <register name="ps30_1"/>
         <register name="cr4"/>
       </unaffected>
     </prototype>
