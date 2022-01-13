@@ -1857,7 +1857,7 @@
 	#floatZero:8 = int2float(zero);
 	tmp:4 = float2float(fB);
 	fD = float2float(tmp);
-	ps0D = tmp;
+	ps0D = ps0B;
 	# ps1D is undefined
 	setFPRF(ps0D);
 #	fp_fr = floatAddRoundedUp(floatZero, fB);
@@ -1876,7 +1876,7 @@
 	#floatZero:8 = int2float(zero);
 	tmp:4 = float2float(fB);
 	fD = float2float(tmp);
-	ps0D = tmp;
+	ps0D = ps0B;
 	# ps1D is undefined
 	setFPRF(ps0D);
 #	fp_fr = floatAddRoundedUp(floatZero, fB);
