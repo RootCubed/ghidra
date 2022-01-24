@@ -9464,6 +9464,7 @@ int4 RuleSimplifyPPCInt2Float::applyOp(PcodeOp *op,Funcdata &data)
   if (!pieceOp->getIn(0)->isConstant()) return 0;
 
   Varnode *inVar = pieceOp->getIn(1);
+  if (!inVar->isWritten()) return 0;
   
   uintb signedMask = 0;
   if (pieceOp->getIn(1)->getDef()->code() == CPUI_INT_XOR) {
