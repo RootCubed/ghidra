@@ -2166,14 +2166,14 @@ ArmPCRelImmed12: reloff		is U23=0 & immed & rotate
 	Rd = Rd & clearMask;
 }
 
-:bfi^COND Rd,Rm,lsbImm,bitWidth	is $(AMODE) &  COND & c2127=0x3e & msbImm & Rd & Rm & lsbImm & bitWidth & c0406=1	{
+:bfi^COND Rd,Rm,lsbImm,bitWidth	is $(AMODE) &  COND & c2127=0x3e & Rd & Rm & lsbImm & bitWidth & c0406=1	{
 	build COND;
 	build lsbImm;
-	build msbImm;
 	build bitWidth;
-	clearMask:4 = (-1 << (msbImm + 1)) | (-1 >> (32 - lsbImm));
-	bits:4 = (Rm << lsbImm) & ~clearMask;
-	Rd = (Rd & clearMask) | bits;
+	vmask:4 = (1 << bitWidth) - 1;
+	clear:4 = ~(vmask << lsbImm);
+	bits:4 = (Rm & vmask) << lsbImm;
+	Rd = (Rd & clear) | bits;
 }
 
 @endif # VERSION_6T2
@@ -2253,6 +2253,15 @@ ArmPCRelImmed12: reloff		is U23=0 & immed & rotate
 # bl used as a PIC instruction to get at current PC in lr
 :bl Addr24 		is $(AMODE) &  cond=14 & c2527=5 & L24=1 & immed24=0xffffff & Addr24
 {
+  lr = inst_next;
+  goto Addr24;
+}
+
+# bl<COND> used as a PIC instruction to get at current PC in lr
+:bl^COND Addr24 		is $(AMODE) & COND & c2527=5 & L24=1 & immed24=0xffffff & Addr24
+{
+  build COND;
+  build Addr24;
   lr = inst_next;
   goto Addr24;
 }
