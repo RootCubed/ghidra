@@ -338,6 +338,12 @@ public class DataTypeTreeCopyMoveTask extends Task {
 		DataTypeManager nodeDtm = dataType.getDataTypeManager();
 		boolean sameManager = (dtm == nodeDtm);
 		DataType newDt = !sameManager ? dataType.clone(nodeDtm) : dataType.copy(nodeDtm);
+
+		if (!sameManager && toCategory.isRoot()) {
+			// preserve use of source category when copy to root
+			toCategory = dtm.createCategory(dataType.getCategoryPath());
+		}
+
 		if (sameManager && newDt.getCategoryPath().equals(toCategory.getCategoryPath())) {
 			renameAsCopy(toCategory, newDt);
 		}
@@ -428,7 +434,7 @@ public class DataTypeTreeCopyMoveTask extends Task {
 	private void moveDataType(Category toCategory, DataType dataType) {
 		if (dataType.getCategoryPath().equals(toCategory.getCategoryPath())) {
 			errors.add("Move failed.  DataType is already in this category.  Category " +
-				toCategory + "; Data type: " + dataType);
+				toCategory + "; Data type: " + dataType.getName());
 			return;
 		}
 		try {
@@ -436,7 +442,7 @@ public class DataTypeTreeCopyMoveTask extends Task {
 		}
 		catch (DataTypeDependencyException e) {
 			errors.add("Move failed.  DataType is already in this category.  Category " +
-				toCategory + "; Data type: " + dataType + ". " + e.getMessage());
+				toCategory + "; Data type: " + dataType.getName() + ". " + e.getMessage());
 		}
 	}
 

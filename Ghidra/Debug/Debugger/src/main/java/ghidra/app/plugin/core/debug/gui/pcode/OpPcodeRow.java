@@ -15,6 +15,8 @@
  */
 package ghidra.app.plugin.core.debug.gui.pcode;
 
+import java.util.Objects;
+
 import ghidra.program.model.lang.Language;
 import ghidra.program.model.pcode.PcodeOp;
 
@@ -22,12 +24,14 @@ public class OpPcodeRow implements PcodeRow {
 	protected final Language language;
 	protected final PcodeOp op;
 	protected final boolean isNext;
+	protected final String label;
 	protected final String code;
 
-	public OpPcodeRow(Language language, PcodeOp op, boolean isNext, String code) {
+	public OpPcodeRow(Language language, PcodeOp op, boolean isNext, String label, String code) {
 		this.language = language;
-		this.op = op;
+		this.op = Objects.requireNonNull(op);
 		this.isNext = isNext;
+		this.label = label;
 		this.code = code;
 	}
 
@@ -37,10 +41,16 @@ public class OpPcodeRow implements PcodeRow {
 	}
 
 	@Override
+	public String getLabel() {
+		return label;
+	}
+
+	@Override
 	public String getCode() {
 		return code;
 	}
 
+	@Override
 	public boolean isNext() {
 		return isNext;
 	}

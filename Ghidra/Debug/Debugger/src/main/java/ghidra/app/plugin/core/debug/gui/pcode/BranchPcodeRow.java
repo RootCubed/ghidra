@@ -32,6 +32,11 @@ public class BranchPcodeRow implements PcodeRow {
 	}
 
 	@Override
+	public String getLabel() {
+		return "";
+	}
+
+	@Override
 	public String getCode() {
 		return "(branched from " + fromSeq + ")";
 	}
