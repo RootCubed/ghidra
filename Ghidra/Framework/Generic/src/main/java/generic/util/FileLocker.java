@@ -23,6 +23,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import ghidra.util.HTMLUtilities;
+import ghidra.util.SystemUtilities;
 
 public class FileLocker {
 
