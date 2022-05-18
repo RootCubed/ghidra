@@ -60,7 +60,6 @@ import ghidra.framework.plugintool.annotation.AutoServiceConsumed;
 import ghidra.pcode.exec.trace.TraceSleighUtils;
 import ghidra.program.model.address.*;
 import ghidra.program.model.data.DataType;
-import ghidra.program.model.data.DataTypeConflictException;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.util.CodeUnitInsertionException;
@@ -86,9 +85,11 @@ public class DebuggerWatchesProvider extends ComponentProviderAdapter {
 	protected enum WatchTableColumns implements EnumeratedTableColumn<WatchTableColumns, WatchRow> {
 		EXPRESSION("Expression", String.class, WatchRow::getExpression, WatchRow::setExpression),
 		ADDRESS("Address", Address.class, WatchRow::getAddress),
-		VALUE("Value", String.class, WatchRow::getRawValueString, WatchRow::setRawValueString, WatchRow::isValueEditable),
+		VALUE("Value", String.class, WatchRow::getRawValueString, WatchRow::setRawValueString, //
+				WatchRow::isRawValueEditable),
 		TYPE("Type", DataType.class, WatchRow::getDataType, WatchRow::setDataType),
-		REPR("Repr", String.class, WatchRow::getValueString),
+		REPR("Repr", String.class, WatchRow::getValueString, WatchRow::setValueString, //
+				WatchRow::isValueEditable),
 		ERROR("Error", String.class, WatchRow::getErrorMessage);
 
 		private final String header;
@@ -526,7 +527,7 @@ public class DebuggerWatchesProvider extends ComponentProviderAdapter {
 					listing.clearCodeUnits(row.getAddress(), row.getRange().getMaxAddress(), false);
 					listing.createData(address, dataType, size);
 				}
-				catch (CodeUnitInsertionException | DataTypeConflictException e) {
+				catch (CodeUnitInsertionException e) {
 					errs.add(address + " " + dataType + "(" + size + "): " + e.getMessage());
 				}
 			}
@@ -578,11 +579,18 @@ public class DebuggerWatchesProvider extends ComponentProviderAdapter {
 	}
 
 	private ProgramLocation getDynamicLocation(ProgramLocation someLoc) {
+		if (someLoc == null) {
+			return null;
+		}
 		TraceProgramView view = current.getView();
 		if (view == null) {
 			return null;
 		}
-		if (someLoc.getProgram() instanceof TraceProgramView) {
+		Program program = someLoc.getProgram();
+		if (program == null) {
+			return null;
+		}
+		if (program instanceof TraceProgramView) {
 			return someLoc;
 		}
 		return mappingService.getDynamicLocationFromStatic(view, someLoc);

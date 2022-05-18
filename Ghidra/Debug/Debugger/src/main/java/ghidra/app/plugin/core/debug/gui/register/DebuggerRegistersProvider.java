@@ -63,7 +63,7 @@ import ghidra.framework.plugintool.ComponentProviderAdapter;
 import ghidra.framework.plugintool.annotation.AutoServiceConsumed;
 import ghidra.program.model.address.*;
 import ghidra.program.model.data.DataType;
-import ghidra.program.model.data.DataTypeConflictException;
+import ghidra.program.model.data.DataTypeEncodeException;
 import ghidra.program.model.lang.*;
 import ghidra.program.model.util.CodeUnitInsertionException;
 import ghidra.trace.model.*;
@@ -89,12 +89,16 @@ public class DebuggerRegistersProvider extends ComponentProviderAdapter
 
 	protected enum RegisterTableColumns
 		implements EnumeratedTableColumn<RegisterTableColumns, RegisterRow> {
-		FAV("Fav", Boolean.class, RegisterRow::isFavorite, RegisterRow::setFavorite, r -> true, SortDirection.DESCENDING),
+		FAV("Fav", Boolean.class, RegisterRow::isFavorite, RegisterRow::setFavorite, //
+				r -> true, SortDirection.DESCENDING),
 		NUMBER("#", Integer.class, RegisterRow::getNumber),
 		NAME("Name", String.class, RegisterRow::getName),
-		VALUE("Value", BigInteger.class, RegisterRow::getValue, RegisterRow::setValue, RegisterRow::isValueEditable, SortDirection.ASCENDING),
-		TYPE("Type", DataType.class, RegisterRow::getDataType, RegisterRow::setDataType, r -> true, SortDirection.ASCENDING),
-		REPR("Repr", String.class, RegisterRow::getRepresentation);
+		VALUE("Value", BigInteger.class, RegisterRow::getValue, RegisterRow::setValue, //
+				RegisterRow::isValueEditable, SortDirection.ASCENDING),
+		TYPE("Type", DataType.class, RegisterRow::getDataType, RegisterRow::setDataType, //
+				r -> true, SortDirection.ASCENDING),
+		REPR("Repr", String.class, RegisterRow::getRepresentation, RegisterRow::setRepresentation, //
+				RegisterRow::isRepresentationEditable, SortDirection.ASCENDING);
 
 		private final String header;
 		private final Function<RegisterRow, ?> getter;
@@ -837,7 +841,7 @@ public class DebuggerRegistersProvider extends ComponentProviderAdapter
 			}
 			tid.commit();
 		}
-		catch (CodeUnitInsertionException | DataTypeConflictException | CancelledException e) {
+		catch (CodeUnitInsertionException | CancelledException e) {
 			throw new AssertionError(e);
 		}
 	}
@@ -857,6 +861,35 @@ public class DebuggerRegistersProvider extends ComponentProviderAdapter
 			return null;
 		}
 		return data.getDataType();
+	}
+
+	void writeRegisterValueRepresentation(Register register, String representation) {
+		TraceData data = getRegisterData(register);
+		if (data == null) {
+			// isEditable should have been false
+			tool.setStatusInfo("Register has no data type", true);
+			return;
+		}
+		try {
+			RegisterValue rv = TraceRegisterUtils.encodeValueRepresentationHackPointer(
+				register, data, representation);
+			writeRegisterValue(rv);
+		}
+		catch (DataTypeEncodeException e) {
+			tool.setStatusInfo(e.getMessage(), true);
+			return;
+		}
+	}
+
+	boolean canWriteRegisterRepresentation(Register register) {
+		if (!canWriteRegister(register)) {
+			return false;
+		}
+		TraceData data = getRegisterData(register);
+		if (data == null) {
+			return false;
+		}
+		return data.getBaseDataType().isEncodable();
 	}
 
 	String getRegisterValueRepresentation(Register register) {
