@@ -9584,7 +9584,7 @@ int4 RuleCleanSignBitCompare::applyOp(PcodeOp *op, Funcdata &data)
   Varnode* right = op->getIn(1);
 
   if (left->isConstant()) return 0;
-  if (!right->constantMatch(31)) return 0;
+  if (!right->constantMatch((left->getSize() * 8) - 1)) return 0;
 
   // 2. Check that var is INT_2COMP(INT_ZEXT(var_2))
   PcodeOp* left_up = left->getDef();
