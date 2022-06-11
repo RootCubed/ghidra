@@ -1162,14 +1162,14 @@
 :fabs fD,fB		is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & ps0B & XOP_1_10=264 & Rc=0
 {
  	fD = abs(fB);
- 	ps0D = float2float(ps0B);
+ 	ps0D = float2float(fD);
 }
 
 #fabs. fr0,fr1		0xfc 00 02 11
 :fabs. fD,fB	is $(NOTVLE) & OP=63 & fD & ps0D & BITS_16_20=0 & fB & ps0B & XOP_1_10=264 & Rc=1
 {
 	fD = abs(fB);
- 	ps0D = float2float(ps0B);
+ 	ps0D = float2float(fD);
 	cr1flags();
 }
 
