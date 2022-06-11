@@ -29,18 +29,30 @@ import ghidra.util.exception.DuplicateNameException;
 import ghidra.util.task.TaskMonitor;
 
 /**
- * Represents a linkedit_data_command structure.
- * 
- * @see <a href="https://opensource.apple.com/source/xnu/xnu-4570.71.2/EXTERNAL_HEADERS/mach-o/loader.h.auto.html">mach-o/loader.h</a> 
+ * Represents a linkedit_data_command structure 
  */
 public class LinkEditDataCommand extends LoadCommand {
-	private int dataoff;
-	private int datasize;
+	protected int dataoff;
+	protected int datasize;
+	protected BinaryReader dataReader;
 
-	LinkEditDataCommand(BinaryReader reader) throws IOException {
-		initLoadCommand(reader);
-		dataoff = reader.readNextInt();
-		datasize = reader.readNextInt();
+	/**
+	 * Creates and parses a new {@link LinkEditDataCommand}.  Sets <code>dataReader</code> to the
+	 * data offset.
+	 * 
+	 * @param loadCommandReader A {@link BinaryReader reader} that points to the start of the load
+	 *   command
+	 * @param dataReader A {@link BinaryReader reader} that can read the data that the load command
+	 *   references.  Note that this might be in a different underlying provider.
+	 * @throws IOException if an IO-related error occurs while parsing
+	 */
+	LinkEditDataCommand(BinaryReader loadCommandReader, BinaryReader dataReader)
+			throws IOException {
+		super(loadCommandReader);
+		this.dataoff = loadCommandReader.readNextInt();
+		this.datasize = loadCommandReader.readNextInt();
+		this.dataReader = dataReader;
+		this.dataReader.setPointerIndex(dataoff);
 	}
 
 	public int getDataOffset() {
@@ -66,7 +78,7 @@ public class LinkEditDataCommand extends LoadCommand {
 				Address address = baseAddress.getNewAddress(getStartIndex());
 				api.createData(address, toDataType());
 				api.setPlateComment(address,
-					LoadCommandTypes.getLoadCommentTypeName(getCommandType()));
+					LoadCommandTypes.getLoadCommandName(getCommandType()));
 
 //TODO markup actual data
 

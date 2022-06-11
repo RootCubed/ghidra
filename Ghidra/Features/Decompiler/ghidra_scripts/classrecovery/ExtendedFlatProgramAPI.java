@@ -848,28 +848,6 @@ public class ExtendedFlatProgramAPI extends FlatProgramAPI {
 	}
 
 	/**
-	 * Method to retrieve the minimum address on the given list
-	 * @param list the list of addresses
-	 * @return the minimum address on the given list
-	 */
-	public Address getMinimumAddressOnList(List<Address> list) {
-
-		Collections.sort(list);
-		return list.get(0);
-	}
-
-	/**
-	 * Method to retrieve the maximum address on the given list
-	 * @param list the list of addresses
-	 * @return the maximum address on the given list
-	 */
-	public Address getMaximumAddressOnList(List<Address> list) {
-
-		Collections.sort(list, Collections.reverseOrder());
-		return list.get(0);
-	}
-
-	/**
 	 * Method to retrieve the referenced Functions from the given referenceToClassMap
 	 * @param referenceToClassMap map of addresses that contain a reference to either a vftable or 
 	 * called function for a particular function
@@ -1031,72 +1009,22 @@ public class ExtendedFlatProgramAPI extends FlatProgramAPI {
 	}
 
 	/**
-	 * Create data type manager path that will be used when data types are created to place them in the correct folder
-	 * @param parent parent CategoryPath
-	 * @param categoryName name of the new category in the parent path
+	 * Create data type manager path combining the given parent category path and namespace
+	 * @param parent the given parent CategoryPath
+	 * @param namespace the given namespace
 	 * @return CategoryPath for new categoryName 
 	 * @throws CancelledException if cancelled
 	 */
-	public CategoryPath createDataTypeCategoryPath(CategoryPath parent, String categoryName) throws CancelledException {
+	public CategoryPath createDataTypeCategoryPath(CategoryPath parent, Namespace namespace)
+			throws CancelledException {
 
-		CategoryPath dataTypePath;
+		CategoryPath dataTypePath = parent;
 
-		// if single namespace no parsing necessary, just create using given categoryName
-		if (!categoryName.contains("::")) {
-			dataTypePath = new CategoryPath(parent, categoryName);
-			return dataTypePath;
+		for (String name : namespace.getPathList(true)) {
+			monitor.checkCanceled();
+
+			dataTypePath = new CategoryPath(dataTypePath, name);
 		}
-
-		// if category name contains :: but not valid template info then just 
-		// replace ::'s with /'s to form multi level path
-		if (!containsTemplate(categoryName)) {
-			categoryName = categoryName.replace("::", "/");
-		}
-
-		// if category name contains both :: and matched template brackets then only replace the 
-		// :: that are not contained inside template brackets
-		else {
-			boolean insideBrackets = false;
-			int numOpenedBrackets = 0;
-			int index = 0;
-			String newCategoryName = new String();
-			while (index < categoryName.length()) {
-				monitor.checkCanceled();
-
-				if (categoryName.substring(index).startsWith("::") && !insideBrackets) {
-					newCategoryName = newCategoryName.concat("/");
-					index += 2;
-					continue;
-				}
-
-				String character = categoryName.substring(index, index + 1);
-
-				newCategoryName = newCategoryName.concat(character);
-				index++;
-
-				if (character.equals("<")) {
-					insideBrackets = true;
-					numOpenedBrackets++;
-				}
-				if (character.equals(">")) {
-					numOpenedBrackets--;
-				}
-				if (numOpenedBrackets == 0) {
-					insideBrackets = false;
-				}
-			}
-			categoryName = newCategoryName;
-		}
-
-		String path;
-		if (parent.getName().equals("")) {
-			path = "/" + categoryName;
-		}
-		else {
-			path = "/" + parent.getName() + "/" + categoryName;
-		}
-		dataTypePath = new CategoryPath(path);
-
 		return dataTypePath;
 
 	}

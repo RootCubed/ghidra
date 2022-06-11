@@ -363,7 +363,7 @@ Datatype *TypeOpLoad::getInputCast(const PcodeOp *op,int4 slot,const CastStrateg
   Datatype *reqtype = op->getOut()->getHighTypeDefFacing();	// Cast load pointer to match output
   const Varnode *invn = op->getIn(1);
   Datatype *curtype = invn->getHighTypeReadFacing(op);
-  AddrSpace *spc = Address::getSpaceFromConst(op->getIn(0)->getAddr());
+  AddrSpace *spc = op->getIn(0)->getSpaceFromConst();
   // Its possible that the input type is not a pointer to the output type
   // (or even a pointer) due to cycle trimming in the type propagation algorithms
   if (curtype->getMetatype() == TYPE_PTR)
@@ -410,7 +410,7 @@ Datatype *TypeOpLoad::propagateType(Datatype *alttype,PcodeOp *op,Varnode *invn,
   if (invn->isSpacebase()) return (Datatype *)0;
   Datatype *newtype;
   if (inslot == -1) {	 // Propagating output to input (value to ptr)
-    AddrSpace *spc = Address::getSpaceFromConst(op->getIn(0)->getAddr());
+    AddrSpace *spc = op->getIn(0)->getSpaceFromConst();
     newtype = tlst->getTypePointerNoDepth(outvn->getTempType()->getSize(),alttype,spc->getWordSize());
   }
   else if (alttype->getMetatype()==TYPE_PTR) {
@@ -428,7 +428,7 @@ void TypeOpLoad::printRaw(ostream &s,const PcodeOp *op)
 {
   Varnode::printRaw(s,op->getOut());
   s << " = *(";
-  AddrSpace *spc = Address::getSpaceFromConst(op->getIn(0)->getAddr());
+  AddrSpace *spc = op->getIn(0)->getSpaceFromConst();
   s << spc->getName() << ',';
   Varnode::printRaw(s,op->getIn(1));
   s << ')';
@@ -449,7 +449,7 @@ Datatype *TypeOpStore::getInputCast(const PcodeOp *op,int4 slot,const CastStrate
   Datatype *pointerType = pointerVn->getHighTypeReadFacing(op);
   Datatype *pointedToType = pointerType;
   Datatype *valueType = op->getIn(2)->getHighTypeReadFacing(op);
-  AddrSpace *spc = Address::getSpaceFromConst(op->getIn(0)->getAddr());
+  AddrSpace *spc = op->getIn(0)->getSpaceFromConst();
   int4 destSize;
   if (pointerType->getMetatype() == TYPE_PTR) {
     pointedToType = ((TypePointer *)pointerType)->getPtrTo();
@@ -485,7 +485,7 @@ Datatype *TypeOpStore::propagateType(Datatype *alttype,PcodeOp *op,Varnode *invn
   if (invn->isSpacebase()) return (Datatype *)0;
   Datatype *newtype;
   if (inslot==2) {		// Propagating value to ptr
-    AddrSpace *spc = Address::getSpaceFromConst(op->getIn(0)->getAddr());
+    AddrSpace *spc = op->getIn(0)->getSpaceFromConst();
     newtype = tlst->getTypePointerNoDepth(outvn->getTempType()->getSize(),alttype,spc->getWordSize());
   }
   else if (alttype->getMetatype()==TYPE_PTR) {
@@ -502,7 +502,7 @@ void TypeOpStore::printRaw(ostream &s,const PcodeOp *op)
 
 {
   s << "*(";
-  AddrSpace *spc = Address::getSpaceFromConst(op->getIn(0)->getAddr());
+  AddrSpace *spc = op->getIn(0)->getSpaceFromConst();
   s << spc->getName() << ',';
   Varnode::printRaw(s,op->getIn(1));
   s << ") = ";
@@ -2185,7 +2185,7 @@ void TypeOpSegment::printRaw(ostream &s,const PcodeOp *op)
   }
   s << getOperatorName(op);
   s << '(';
-  AddrSpace *spc = Address::getSpaceFromConst(op->getIn(0)->getAddr());
+  AddrSpace *spc = op->getIn(0)->getSpaceFromConst();
   s << spc->getName() << ',';
   Varnode::printRaw(s,op->getIn(1));
   s << ',';

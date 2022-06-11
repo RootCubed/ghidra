@@ -21,13 +21,14 @@ import java.util.List;
 
 import ghidra.app.util.bin.*;
 import ghidra.app.util.bin.format.macho.commands.*;
+import ghidra.app.util.opinion.DyldCacheUtils.SplitDyldCache;
 import ghidra.program.model.data.*;
 import ghidra.util.exception.DuplicateNameException;
 
 /**
  * Represents a mach_header structure.
  * 
- * @see <a href="https://opensource.apple.com/source/xnu/xnu-4570.71.2/EXTERNAL_HEADERS/mach-o/loader.h.auto.html">mach-o/loader.h</a> 
+ * @see <a href="https://opensource.apple.com/source/xnu/xnu-7195.81.3/EXTERNAL_HEADERS/mach-o/loader.h.auto.html">mach-o/loader.h</a> 
  */
 public class MachHeader implements StructConverter {
 	private int magic;
@@ -135,15 +136,36 @@ public class MachHeader implements StructConverter {
 		_commandIndex = _reader.getPointerIndex();
 	}
 
+	/**
+	 * Parses this {@link MachHeader}'s {@link LoadCommand load commands}
+	 * 
+	 * @return This {@link MachHeader}, for convenience
+	 * @throws IOException If there was an IO-related error
+	 * @throws MachException if the load command is invalid
+	 */
 	public MachHeader parse() throws IOException, MachException {
+		return parse(null);
+	}
+	
+	/**
+	 * Parses this {@link MachHeader}'s {@link LoadCommand load commands}
+	 * 
+	 * @param splitDyldCache The {@link SplitDyldCache} that this header resides in.  Could be null
+	 *   if a split DYLD cache is not being used.
+	 * @return This {@link MachHeader}, for convenience
+	 * @throws IOException If there was an IO-related error
+	 * @throws MachException if the load command is invalid
+	 */
+	public MachHeader parse(SplitDyldCache splitDyldCache) throws IOException, MachException {
 		if (_parsed) {
 			return this;
 		}
+		long currentIndex = _commandIndex;
 		for (int i = 0; i < nCmds; ++i) {
-			_reader.setPointerIndex(_commandIndex);
-			LoadCommand lc = LoadCommandTypes.getLoadCommand(_reader, this);
+			_reader.setPointerIndex(currentIndex);
+			LoadCommand lc = LoadCommandFactory.getLoadCommand(_reader, this, splitDyldCache);
 			_commands.add(lc);
-			_commandIndex += lc.getCommandSize();
+			currentIndex += lc.getCommandSize();
 		}
 		_parsed = true;
 		return this;
@@ -287,6 +309,15 @@ public class MachHeader implements StructConverter {
 
 	public boolean isLittleEndian() {//TODO -- if intel it is LE
 		return magic == MachConstants.MH_CIGAM || magic == MachConstants.MH_CIGAM_64;
+	}
+
+	/**
+	 * Gets the size of this {@link MachHeader} in bytes
+	 * 
+	 * @return The size of this {@link MachHeader} in bytes
+	 */
+	public long getSize() {
+		return _commandIndex - _machHeaderStartIndexInProvider;
 	}
 
 	public String getDescription() {//TODO
