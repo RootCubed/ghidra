@@ -566,6 +566,7 @@ public abstract class AbstractGhidraHeadedDebuggerGUITest
 
 	@After
 	public void tearDown() {
+		waitForTasks();
 		runSwing(() -> traceManager.setSaveTracesByDefault(false));
 
 		if (tb != null) {
@@ -588,6 +589,8 @@ public abstract class AbstractGhidraHeadedDebuggerGUITest
 			programManager.closeAllPrograms(true);
 			program.release(this);
 		}
+
+		waitForTasks();
 
 		env.dispose();
 	}
