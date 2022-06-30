@@ -13,30 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "ghidra_context.hh"
+package ghidra.program.model.mem;
 
-const TrackedSet &ContextGhidra::getTrackedSet(const Address &addr) const
+import ghidra.util.exception.UsrException;
 
-{
-  cache.clear();
-  XmlDecode decoder(glb);
-  glb->getTrackedRegisters(addr,decoder);
-
-  uint4 elemId = decoder.openElement(ELEM_TRACKED_POINTSET);
-  decodeTracked(decoder,cache);
-  decoder.closeElement(elemId);
-  return cache;
+/**
+ * Exception for invalid address either due to improper format
+ * or address not defined within target
+ */
+public class InvalidAddressException extends UsrException {
+    
+	/**
+	 * Constructs a new InvalidAddressException
+	 */
+    public InvalidAddressException() {
+		super();
+    }
+	
+	/**
+	 * Constructs a new InvalidAddressException with a detailed message.
+	 * 
+	 * @param msg detailed message
+	 */
+    public InvalidAddressException(String msg) {
+        super(msg);
+    }
 }
-
-void ContextGhidra::decode(Decoder &decoder)
-
-{
-  decoder.skipElement();	// Ignore details handled by ghidra
-}
-
-void ContextGhidra::decodeFromSpec(Decoder &decoder)
-
-{
-  decoder.skipElement();	// Ignore details handled by ghidra
-}
-
+ 

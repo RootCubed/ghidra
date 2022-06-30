@@ -445,11 +445,10 @@ Address ParamEntry::getAddrBySlot(int4 &slotnum,int4 sz) const
 /// \brief Decode a \<pentry> element into \b this object
 ///
 /// \param decoder is the stream decoder
-/// \param manage is a manager to resolve address space references
 /// \param normalstack is \b true if the parameters should be allocated from the front of the range
 /// \param grouped is \b true if \b this will be grouped with other entries
 /// \param curList is the list of ParamEntry defined up to this point
-void ParamEntry::decode(Decoder &decoder,const AddrSpaceManager *manage,bool normalstack,bool grouped,list<ParamEntry> &curList)
+void ParamEntry::decode(Decoder &decoder,bool normalstack,bool grouped,list<ParamEntry> &curList)
 
 {
   flags = 0;
@@ -499,7 +498,7 @@ void ParamEntry::decode(Decoder &decoder,const AddrSpaceManager *manage,bool nor
   if (alignment == size)
     alignment = 0;
   Address addr;
-  addr = Address::decode(decoder,manage);
+  addr = Address::decode(decoder);
   decoder.closeElement(elemId);
   spaceid = addr.getSpace();
   addressbase = addr.getOffset();
@@ -1109,18 +1108,17 @@ void ParamListStandard::populateResolver(void)
 /// \brief Parse a \<pentry> element and add it to \b this list
 ///
 /// \param decoder is the stream decoder
-/// \param manage is manager for parsing address spaces
 /// \param effectlist holds any passed back effect records
 /// \param groupid is the group to which the new ParamEntry is assigned
 /// \param normalstack is \b true if the parameters should be allocated from the front of the range
 /// \param autokill is \b true if parameters are automatically added to the killedbycall list
 /// \param splitFloat is \b true if floating-point parameters are in their own resource section
 /// \param grouped is \b true if the new ParamEntry is grouped with other entries
-void ParamListStandard::parsePentry(Decoder &decoder,const AddrSpaceManager *manage,vector<EffectRecord> &effectlist,
+void ParamListStandard::parsePentry(Decoder &decoder,vector<EffectRecord> &effectlist,
 				    int4 groupid,bool normalstack,bool autokill,bool splitFloat,bool grouped)
 {
   entry.emplace_back(groupid);
-  entry.back().decode(decoder,manage,normalstack,grouped,entry);
+  entry.back().decode(decoder,normalstack,grouped,entry);
   if (splitFloat) {
     if (!grouped && entry.back().getType() == TYPE_FLOAT) {
       if (resourceTwoStart >= 0)
@@ -1144,13 +1142,12 @@ void ParamListStandard::parsePentry(Decoder &decoder,const AddrSpaceManager *man
 ///
 /// All ParamEntry objects will share the same \b group id.
 /// \param decoder is the stream decoder
-/// \param manage is manager for parsing address spaces
 /// \param effectlist holds any passed back effect records
 /// \param groupid is the group to which all ParamEntry elements are assigned
 /// \param normalstack is \b true if the parameters should be allocated from the front of the range
 /// \param autokill is \b true if parameters are automatically added to the killedbycall list
 /// \param splitFloat is \b true if floating-point parameters are in their own resource section
-void ParamListStandard::parseGroup(Decoder &decoder,const AddrSpaceManager *manage,vector<EffectRecord> &effectlist,
+void ParamListStandard::parseGroup(Decoder &decoder,vector<EffectRecord> &effectlist,
 				   int4 groupid,bool normalstack,bool autokill,bool splitFloat)
 {
   int4 basegroup = numgroup;
@@ -1158,7 +1155,7 @@ void ParamListStandard::parseGroup(Decoder &decoder,const AddrSpaceManager *mana
   ParamEntry *previous2 = (ParamEntry *)0;
   uint4 elemId = decoder.openElement(ELEM_GROUP);
   while(decoder.peekElement() != 0) {
-    parsePentry(decoder, manage, effectlist, basegroup, normalstack, autokill, splitFloat, true);
+    parsePentry(decoder, effectlist, basegroup, normalstack, autokill, splitFloat, true);
     ParamEntry &pentry( entry.back() );
     if (pentry.getSpace()->getType() == IPTR_JOIN)
       throw LowlevelError("<pentry> in the join space not allowed in <group> tag");
@@ -1332,8 +1329,7 @@ void ParamListStandard::getRangeList(AddrSpace *spc,RangeList &res) const
   }
 }
 
-void ParamListStandard::decode(Decoder &decoder,const AddrSpaceManager *manage,
-			       vector<EffectRecord> &effectlist,bool normalstack)
+void ParamListStandard::decode(Decoder &decoder,vector<EffectRecord> &effectlist,bool normalstack)
 
 {
   numgroup = 0;
@@ -1364,10 +1360,10 @@ void ParamListStandard::decode(Decoder &decoder,const AddrSpaceManager *manage,
     uint4 subId = decoder.peekElement();
     if (subId == 0) break;
     if (subId == ELEM_PENTRY) {
-      parsePentry(decoder, manage, effectlist, numgroup, normalstack, autokilledbycall, splitFloat, false);
+      parsePentry(decoder, effectlist, numgroup, normalstack, autokilledbycall, splitFloat, false);
     }
     else if (subId == ELEM_GROUP) {
-      parseGroup(decoder, manage, effectlist, numgroup, normalstack, autokilledbycall, splitFloat);
+      parseGroup(decoder, effectlist, numgroup, normalstack, autokilledbycall, splitFloat);
     }
   }
   decoder.closeElement(elemId);
@@ -1554,10 +1550,10 @@ void ParamListStandardOut::assignMap(const vector<Datatype *> &proto,TypeFactory
   }
 }
 
-void ParamListStandardOut::decode(Decoder &decoder,const AddrSpaceManager *manage,vector<EffectRecord> &effectlist,bool normalstack)
+void ParamListStandardOut::decode(Decoder &decoder,vector<EffectRecord> &effectlist,bool normalstack)
 
 {
-  ParamListRegisterOut::decode(decoder,manage,effectlist,normalstack);
+  ParamListRegisterOut::decode(decoder,effectlist,normalstack);
   // Check for double precision entries
   list<ParamEntry>::iterator iter;
   ParamEntry *previous1 = (ParamEntry *)0;
@@ -1903,7 +1899,7 @@ void FspecSpace::encodeAttributes(Encoder &encoder,uintb offset) const
     encoder.writeString(ATTRIB_SPACE, "fspec");
   else {
     AddrSpace *id = fc->getEntryAddress().getSpace();
-    encoder.writeString(ATTRIB_SPACE, id->getName());
+    encoder.writeSpace(ATTRIB_SPACE, id);
     encoder.writeUnsignedInteger(ATTRIB_OFFSET, fc->getEntryAddress().getOffset());
   }
 }
@@ -1917,7 +1913,7 @@ void FspecSpace::encodeAttributes(Encoder &encoder,uintb offset,int4 size) const
     encoder.writeString(ATTRIB_SPACE, "fspec");
   else {
     AddrSpace *id = fc->getEntryAddress().getSpace();
-    encoder.writeString(ATTRIB_SPACE, id->getName());
+    encoder.writeSpace(ATTRIB_SPACE, id);
     encoder.writeUnsignedInteger(ATTRIB_OFFSET, fc->getEntryAddress().getOffset());
     encoder.writeSignedInteger(ATTRIB_SIZE, size);
   }
@@ -1995,12 +1991,11 @@ void EffectRecord::encode(Encoder &encoder) const
 /// Parse an \<addr> element to get the memory range. The effect type is inherited from the parent.
 /// \param grouptype is the effect inherited from the parent
 /// \param decoder is the stream decoder
-/// \param manage is a manager to resolve address space references
-void EffectRecord::decode(uint4 grouptype,Decoder &decoder,const AddrSpaceManager *manage)
+void EffectRecord::decode(uint4 grouptype,Decoder &decoder)
 
 {
   type = grouptype;
-  range.decode(decoder,manage);
+  range.decode(decoder);
 }
 
 void ProtoModel::defaultLocalRange(void)
@@ -2335,7 +2330,7 @@ void ProtoModel::decode(Decoder &decoder)
     uint4 subId = decoder.peekElement();
     if (subId == 0) break;
     if (subId == ELEM_INPUT) {
-      input->decode(decoder,glb,effectlist,stackgrowsnegative);
+      input->decode(decoder,effectlist,stackgrowsnegative);
       if (stackspc != (AddrSpace *)0) {
 	input->getRangeList(stackspc,paramrange);
 	if (!paramrange.empty())
@@ -2343,13 +2338,13 @@ void ProtoModel::decode(Decoder &decoder)
       }
     }
     else if (subId == ELEM_OUTPUT) {
-      output->decode(decoder,glb,effectlist,stackgrowsnegative);
+      output->decode(decoder,effectlist,stackgrowsnegative);
     }
     else if (subId == ELEM_UNAFFECTED) {
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	effectlist.emplace_back();
-	effectlist.back().decode(EffectRecord::unaffected,decoder,glb);
+	effectlist.back().decode(EffectRecord::unaffected,decoder);
       }
       decoder.closeElement(subId);
     }
@@ -2357,7 +2352,7 @@ void ProtoModel::decode(Decoder &decoder)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	effectlist.emplace_back();
-	effectlist.back().decode(EffectRecord::killedbycall,decoder,glb);
+	effectlist.back().decode(EffectRecord::killedbycall,decoder);
       }
       decoder.closeElement(subId);
     }
@@ -2365,7 +2360,7 @@ void ProtoModel::decode(Decoder &decoder)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	effectlist.emplace_back();
-	effectlist.back().decode(EffectRecord::return_address,decoder,glb);
+	effectlist.back().decode(EffectRecord::return_address,decoder);
       }
       decoder.closeElement(subId);
       sawretaddr = true;
@@ -2375,7 +2370,7 @@ void ProtoModel::decode(Decoder &decoder)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
         Range range;
-        range.decode(decoder,glb);
+        range.decode(decoder);
         localrange.insertRange(range.getSpace(),range.getFirst(),range.getLast());
       }
       decoder.closeElement(subId);
@@ -2385,7 +2380,7 @@ void ProtoModel::decode(Decoder &decoder)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
         Range range;
-        range.decode(decoder,glb);
+        range.decode(decoder);
         paramrange.insertRange(range.getSpace(),range.getFirst(),range.getLast());
       }
       decoder.closeElement(subId);
@@ -2394,13 +2389,13 @@ void ProtoModel::decode(Decoder &decoder)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	likelytrash.emplace_back();
-	likelytrash.back().decode(decoder,glb);
+	likelytrash.back().decode(decoder);
       }
       decoder.closeElement(subId);
     }
     else if (subId == ELEM_PCODE) {
       int4 injectId = glb->pcodeinjectlib->decodeInject("Protomodel : "+name, name,
-								InjectPayload::CALLMECHANISM_TYPE,decoder);
+							InjectPayload::CALLMECHANISM_TYPE,decoder);
       InjectPayload *payload = glb->pcodeinjectlib->getPayload(injectId);
       if (payload->getName().find("uponentry") != string::npos)
 	injectUponEntry = injectId;
@@ -3221,7 +3216,7 @@ void ProtoStoreInternal::decode(Decoder &decoder,ProtoModel *model)
       namelist.push_back(name);
     pieces.emplace_back();
     ParameterPieces &curparam( pieces.back() );
-    curparam.addr = Address::decode(decoder,glb);
+    curparam.addr = Address::decode(decoder);
     curparam.type = glb->types->decodeType(decoder);
     curparam.flags = flags;
     if (curparam.addr.isInvalid())
@@ -4424,14 +4419,14 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
 	  outputlock = decoder.readBool();
       }
       int4 tmpsize;
-      outpieces.addr = Address::decode(decoder,glb,tmpsize);
+      outpieces.addr = Address::decode(decoder,tmpsize);
       outpieces.type = glb->types->decodeType(decoder);
       outpieces.flags = 0;
       decoder.closeElement(subId);
     }
     else if (subId == ELEM_ADDR) { // Old-style specification of return (supported partially for backward compat)
       int4 tmpsize;
-      outpieces.addr = Address::decode(decoder,glb,tmpsize);
+      outpieces.addr = Address::decode(decoder,tmpsize);
       outpieces.type = glb->types->decodeType(decoder);
       outpieces.flags = 0;
     }
@@ -4454,7 +4449,7 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	effectlist.emplace_back();
-	effectlist.back().decode(EffectRecord::unaffected,decoder,glb);
+	effectlist.back().decode(EffectRecord::unaffected,decoder);
       }
       decoder.closeElement(subId);
     }
@@ -4462,7 +4457,7 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	effectlist.emplace_back();
-	effectlist.back().decode(EffectRecord::killedbycall,decoder,glb);
+	effectlist.back().decode(EffectRecord::killedbycall,decoder);
       }
       decoder.closeElement(subId);
     }
@@ -4470,7 +4465,7 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	effectlist.emplace_back();
-	effectlist.back().decode(EffectRecord::return_address,decoder,glb);
+	effectlist.back().decode(EffectRecord::return_address,decoder);
       }
       decoder.closeElement(subId);
     }
@@ -4478,7 +4473,7 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
       decoder.openElement();
       while(decoder.peekElement() != 0) {
 	likelytrash.emplace_back();
-	likelytrash.back().decode(decoder,glb);
+	likelytrash.back().decode(decoder);
       }
       decoder.closeElement(subId);
     }

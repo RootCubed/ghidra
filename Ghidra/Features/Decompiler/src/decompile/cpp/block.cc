@@ -1324,10 +1324,10 @@ void BlockGraph::encodeBody(Encoder &encoder) const
     list[i]->encode(encoder);
 }
 
-void BlockGraph::decodeBody(Decoder &decoder,BlockMap &resolver)
+void BlockGraph::decodeBody(Decoder &decoder)
 
 {
-  BlockMap newresolver(resolver);
+  BlockMap newresolver;
   vector<FlowBlock *> tmplist;
 
   for(;;) {
@@ -1349,28 +1349,13 @@ void BlockGraph::decodeBody(Decoder &decoder,BlockMap &resolver)
   }
 }
 
-int4 BlockGraph::getInnerBlockDepth(void)
-
-{
-  int4 depth;
-  int4 maxDepth = 0;
-  for(int4 i=0;i<list.size();++i){
-    depth = list[i]->getBlockDepth();
-    if(depth>maxDepth){
-	maxDepth=depth;
-    }
-  }
-  return maxDepth;
-}
-
 /// Parse a \<block> element.  This is currently just a wrapper around the
 /// FlowBlock::decode() that sets of the BlockMap resolver
 /// \param decoder is the stream decoder
-/// \param m is the address space manager
-void BlockGraph::decode(Decoder &decoder,const AddrSpaceManager *m)
+void BlockGraph::decode(Decoder &decoder)
 
 {
-  BlockMap resolver(m);
+  BlockMap resolver;
   FlowBlock::decode(decoder,resolver);
   // Restore goto references here
 }
@@ -2431,7 +2416,7 @@ void FlowBlock::decode(Decoder &decoder,BlockMap &resolver)
 {
   uint4 elemId = decoder.openElement(ELEM_BLOCK);
   decodeHeader(decoder);
-  decodeBody(decoder,resolver);
+  decodeBody(decoder);
   decodeEdges(decoder,resolver);
   decoder.closeElement(elemId);
 }
@@ -2582,10 +2567,10 @@ void BlockBasic::encodeBody(Encoder &encoder) const
   cover.encode(encoder);
 }
 
-void BlockBasic::decodeBody(Decoder &decoder,BlockMap &resolver)
+void BlockBasic::decodeBody(Decoder &decoder)
 
 {
-  cover.decode(decoder, resolver.getAddressManager());
+  cover.decode(decoder);
 }
 
 void BlockBasic::printHeader(ostream &s) const
@@ -2874,13 +2859,6 @@ void BlockCondition::encodeHeader(Encoder &encoder) const
   BlockGraph::encodeHeader(encoder);
   string nm(get_opname(opc));
   encoder.writeString(ATTRIB_OPCODE, nm);
-}
-
-int4 BlockCondition::getBlockDepth(void)
-
-{
-  // conditions join block together but don't increase block depth
-  return getInnerBlockDepth();
 }
 
 void BlockIf::markUnstructured(void)
@@ -3472,24 +3450,6 @@ FlowBlock *BlockSwitch::nextFlowAfter(const FlowBlock *bl) const
   // Otherwise we are at last block of switch, flow is to exit of switch
   if (getParent() == (const FlowBlock *)0) return (FlowBlock *)0;
   return getParent()->nextFlowAfter(this);
-}
-
-int4 BlockSwitch::getBlockDepth(void){
-  int4 i;
-  int4 maxDepth=0;
-  for(i=0;i<caseblocks.size();++i){
-      int4 depth=caseblocks[i].block->getBlockDepth();
-      if(depth>maxDepth){
-	  maxDepth=depth;
-      }
-  }
-  return maxDepth+2; // +1 for switch block and +1 for case/default block
-}
-
-BlockMap::BlockMap(const BlockMap &op2)
-
-{
-  manage = op2.manage;
 }
 
 /// \param bt is the block_type

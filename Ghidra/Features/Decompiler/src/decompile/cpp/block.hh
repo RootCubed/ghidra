@@ -190,9 +190,7 @@ public:
   /// \brief Restore details about \b this FlowBlock from an element stream
   ///
   /// \param decoder is the stream decoder
-  /// \param resolver is used to recover FlowBlock objects based on elment references
-  virtual void decodeBody(Decoder &decoder,BlockMap &resolver) {}
-  virtual int4 getBlockDepth(void) {return 0;}		///< Return the depth in code block of \b this
+  virtual void decodeBody(Decoder &decoder) {}
   void encodeEdges(Encoder &encoder) const;		///< Encode edge information to a stream
   void decodeEdges(Decoder &decoder,BlockMap &resolver);
   void encode(Encoder &encoder) const;			///< Encode \b this to a stream
@@ -311,10 +309,8 @@ public:
   virtual void finalTransform(Funcdata &data);
   virtual void finalizePrinting(Funcdata &data) const;
   virtual void encodeBody(Encoder &encoder) const;
-  virtual void decodeBody(Decoder &decoder,BlockMap &resolver);
-  virtual int4 getInnerBlockDepth();					///< Return max depth of child blocks
-  virtual int4 getBlockDepth() {return getInnerBlockDepth()+1;}
-  void decode(Decoder &decoder,const AddrSpaceManager *m);	///< Restore \b this BlockGraph from an XML stream
+  virtual void decodeBody(Decoder &decoder);
+  void decode(Decoder &decoder);				///< Decode \b this BlockGraph from a stream
   void addEdge(FlowBlock *begin,FlowBlock *end);		///< Add a directed edge between component FlowBlocks
   void addLoopEdge(FlowBlock *begin,int4 outindex);		///< Mark a given edge as a \e loop edge
   void removeEdge(FlowBlock *begin,FlowBlock *end);		///< Remove an edge between component FlowBlocks
@@ -397,7 +393,7 @@ public:
   virtual block_type getType(void) const { return t_basic; }
   virtual FlowBlock *subBlock(int4 i) const { return (FlowBlock *)0; }
   virtual void encodeBody(Encoder &encoder) const;
-  virtual void decodeBody(Decoder &decoder,BlockMap &resolver);
+  virtual void decodeBody(Decoder &decoder);
   virtual void printHeader(ostream &s) const;
   virtual void printRaw(ostream &s) const;
   virtual void emit(PrintLanguage *lng) const { lng->emitBlockBasic(this); }
@@ -547,7 +543,6 @@ public:
   virtual bool isComplex(void) const { return getBlock(0)->isComplex(); }
   virtual FlowBlock *nextFlowAfter(const FlowBlock *bl) const;
   virtual void encodeHeader(Encoder &encoder) const;
-  virtual int4 getBlockDepth(void);
 };
 
 /// \brief A basic "if" block
@@ -720,14 +715,10 @@ public:
 /// list of FlowBlock objects sorted by index and then looks up the FlowBlock matching a given
 /// index as edges specify them.
 class BlockMap {
-  const AddrSpaceManager *manage;	///< Address space manager used to decode FlowBlock address ranges
   vector<FlowBlock *> sortlist;		///< The list of deserialized FlowBlock objects
   FlowBlock *resolveBlock(FlowBlock::block_type bt);	///< Construct a FlowBlock of the given type
   static FlowBlock *findBlock(const vector<FlowBlock *> &list,int4 ind);	///< Locate a FlowBlock with a given index
 public:
-  BlockMap(const AddrSpaceManager *m) { manage = m; }	///< Construct given an address space manager
-  BlockMap(const BlockMap &op2);			///< Copy constructor
-  const AddrSpaceManager *getAddressManager(void) const { return manage; }	///< Get the address space manager
   void sortList(void);					///< Sort the list of FlowBlock objects
 
   /// \brief Find the FlowBlock matching the given index
