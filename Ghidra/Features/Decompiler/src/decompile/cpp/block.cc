@@ -1349,6 +1349,20 @@ void BlockGraph::decodeBody(Decoder &decoder)
   }
 }
 
+int4 BlockGraph::getInnerBlockDepth(void)
+
+{
+  int4 depth;
+  int4 maxDepth = 0;
+  for(int4 i=0;i<list.size();++i){
+    depth = list[i]->getBlockDepth();
+    if(depth>maxDepth){
+	maxDepth=depth;
+    }
+  }
+  return maxDepth;
+}
+
 /// Parse a \<block> element.  This is currently just a wrapper around the
 /// FlowBlock::decode() that sets of the BlockMap resolver
 /// \param decoder is the stream decoder
@@ -2861,6 +2875,13 @@ void BlockCondition::encodeHeader(Encoder &encoder) const
   encoder.writeString(ATTRIB_OPCODE, nm);
 }
 
+int4 BlockCondition::getBlockDepth(void)
+
+{
+  // conditions join block together but don't increase block depth
+  return getInnerBlockDepth();
+}
+
 void BlockIf::markUnstructured(void)
 
 {
@@ -3450,6 +3471,18 @@ FlowBlock *BlockSwitch::nextFlowAfter(const FlowBlock *bl) const
   // Otherwise we are at last block of switch, flow is to exit of switch
   if (getParent() == (const FlowBlock *)0) return (FlowBlock *)0;
   return getParent()->nextFlowAfter(this);
+}
+
+int4 BlockSwitch::getBlockDepth(void){
+  int4 i;
+  int4 maxDepth=0;
+  for(i=0;i<caseblocks.size();++i){
+      int4 depth=caseblocks[i].block->getBlockDepth();
+      if(depth>maxDepth){
+	  maxDepth=depth;
+      }
+  }
+  return maxDepth+2; // +1 for switch block and +1 for case/default block
 }
 
 /// \param bt is the block_type

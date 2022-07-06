@@ -28,6 +28,10 @@ OpToken PrintC::bitwise_not = { "~", "", 1, 62, false, OpToken::unary_prefix, 0,
 OpToken PrintC::boolean_not = { "!", "", 1, 62, false, OpToken::unary_prefix, 0, 0, (OpToken *)0 };
 OpToken PrintC::unary_minus = { "-", "", 1, 62, false, OpToken::unary_prefix, 0, 0, (OpToken *)0 };
 OpToken PrintC::unary_plus = { "+", "", 1, 62, false, OpToken::unary_prefix, 0, 0, (OpToken *)0 };
+OpToken PrintC::pre_increment = { "++", "", 1, 66, false, OpToken::unary_prefix, 0, 0, (OpToken *)0 };
+OpToken PrintC::pre_decrement = { "--", "", 1, 66, false, OpToken::unary_prefix, 0, 0, (OpToken *)0 };
+OpToken PrintC::post_increment = { "++", "", 1, 66, false, OpToken::unary_postfix, 0, 0, (OpToken *)0 };
+OpToken PrintC::post_decrement = { "--", "", 1, 66, false, OpToken::unary_postfix, 0, 0, (OpToken *)0 };
 OpToken PrintC::addressof = { "&", "", 1, 62, false, OpToken::unary_prefix, 0, 0, (OpToken *)0 };
 OpToken PrintC::dereference = { "*", "", 1, 62, false, OpToken::unary_prefix, 0, 0, (OpToken *)0 };
 OpToken PrintC::typecast = { "(", ")", 2, 62, false, OpToken::presurround, 0, 0, (OpToken *)0 };
@@ -2026,7 +2030,7 @@ void PrintC::emitStructDefinition(const TypeStruct *ct)
   emit->print("typedef struct",EmitMarkup::keyword_color);
   emit->spaces(1);
   int4 id = emit->startIndent();
-  emit->print(OPEN_CURLY);
+  emitFormattedStartBrace(id);
   emit->tagLine();
   iter = ct->beginField();
   while(iter!=ct->endField()) {
@@ -2065,7 +2069,7 @@ void PrintC::emitEnumDefinition(const TypeEnum *ct)
   emit->print("typedef enum",EmitMarkup::keyword_color);
   emit->spaces(1);
   int4 id = emit->startIndent();
-  emit->print(OPEN_CURLY);
+  emitFormattedStartBrace(id);
   emit->tagLine();
   iter = ct->beginEnum();
   while(iter!=ct->endEnum()) {
@@ -2878,7 +2882,7 @@ void PrintC::emitBlockIf(const BlockIf *bl)
     setMod(no_branch);
     emit->spaces(1);
     int4 id = emit->startIndent();
-    emit->print(OPEN_CURLY);
+    emitFormattedStartBrace(id);
     int4 id1 = emit->beginBlock(bl->getBlock(1));
     bl->getBlock(1)->emit(this);
     emit->endBlock(id1);
@@ -2886,9 +2890,7 @@ void PrintC::emitBlockIf(const BlockIf *bl)
     emit->tagLine();
     emit->print(CLOSE_CURLY);
     if (bl->getSize() == 3) {
-      emit->tagLine();
-      emit->print(KEYWORD_ELSE,EmitMarkup::keyword_color);
-      emit->spaces(1);
+      emitFormattedElse(id);
       FlowBlock *elseBlock = bl->getBlock(2);
       if (elseBlock->getType() == FlowBlock::t_if) {
       // Attempt to merge the "else" and "if" syntax
@@ -2899,7 +2901,7 @@ void PrintC::emitBlockIf(const BlockIf *bl)
       }
       else {
 	int4 id2 = emit->startIndent();
-	emit->print(OPEN_CURLY);
+	emitFormattedStartBrace(id2);
 	int4 id3 = emit->beginBlock(elseBlock);
 	elseBlock->emit(this);
 	emit->endBlock(id3);
@@ -3001,7 +3003,7 @@ void PrintC::emitBlockWhileDo(const BlockWhileDo *bl)
     emit->closeParen(CLOSE_PAREN,id1);
     emit->spaces(1);
     indent = emit->startIndent();
-    emit->print(OPEN_CURLY);
+    emitFormattedStartBrace(indent);
     pushMod();
     setMod(no_branch);
     condBlock->emit(this);
@@ -3032,7 +3034,7 @@ void PrintC::emitBlockWhileDo(const BlockWhileDo *bl)
     emit->closeParen(CLOSE_PAREN,id1);
     emit->spaces(1);
     indent = emit->startIndent();
-    emit->print(OPEN_CURLY);
+    emitFormattedStartBrace(indent);
   }
   setMod(no_branch); // Dont print goto at bottom of clause
   int4 id2 = emit->beginBlock(bl->getBlock(1));
@@ -3057,7 +3059,7 @@ void PrintC::emitBlockDoWhile(const BlockDoWhile *bl)
   emit->print(KEYWORD_DO,EmitMarkup::keyword_color);
   emit->spaces(1);
   int4 id = emit->startIndent();
-  emit->print(OPEN_CURLY);
+  emitFormattedStartBrace(id);
   pushMod();
   int4 id2 = emit->beginBlock(bl->getBlock(0));
   setMod(no_branch);
@@ -3311,7 +3313,7 @@ void PrintC::emitBlockSwitch(const BlockSwitch *bl)
   bl->getSwitchBlock()->emit(this);
   popMod();
   emit->spaces(1);
-  emit->print(OPEN_CURLY);
+  emitFormattedStartBrace(0);
 
   for(int4 i=0;i<bl->getNumCaseBlocks();++i) {
     emitSwitchCase(i,bl);
@@ -3352,7 +3354,7 @@ int4 PrintC::emitFormattedStartBrace(int4 indent)
   	}
   	
   	emit->tagLine();
-    emit->print("{");
+    emit->print(OPEN_CURLY);
     
     emit->startIndent();
     break;
@@ -3360,7 +3362,7 @@ int4 PrintC::emitFormattedStartBrace(int4 indent)
   case indentation_style_kr:
 
     // Emit opening brace, indentation is unaffected
-    emit->print("{");
+    emit->print(OPEN_CURLY);
     break;
 
   default:
@@ -3388,7 +3390,7 @@ int4 PrintC::emitFormattedElse(int4 indent)
   default:
     throw LowlevelError("Unknown indentation style");
   }
-  emit->print("else",EmitXml::keyword_color);
+  emit->print(KEYWORD_ELSE,EmitMarkup::keyword_color);
   emit->spaces(1);
   return indent;
 }

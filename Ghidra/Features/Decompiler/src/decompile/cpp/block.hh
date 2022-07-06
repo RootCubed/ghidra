@@ -191,6 +191,7 @@ public:
   ///
   /// \param decoder is the stream decoder
   virtual void decodeBody(Decoder &decoder) {}
+  virtual int4 getBlockDepth(void) {return 0;}		///< Return the depth in code block of \b this
   void encodeEdges(Encoder &encoder) const;		///< Encode edge information to a stream
   void decodeEdges(Decoder &decoder,BlockMap &resolver);
   void encode(Encoder &encoder) const;			///< Encode \b this to a stream
@@ -310,6 +311,8 @@ public:
   virtual void finalizePrinting(Funcdata &data) const;
   virtual void encodeBody(Encoder &encoder) const;
   virtual void decodeBody(Decoder &decoder);
+  virtual int4 getInnerBlockDepth();					///< Return max depth of child blocks
+  virtual int4 getBlockDepth() {return getInnerBlockDepth()+1;}
   void decode(Decoder &decoder);				///< Decode \b this BlockGraph from a stream
   void addEdge(FlowBlock *begin,FlowBlock *end);		///< Add a directed edge between component FlowBlocks
   void addLoopEdge(FlowBlock *begin,int4 outindex);		///< Mark a given edge as a \e loop edge
@@ -543,6 +546,7 @@ public:
   virtual bool isComplex(void) const { return getBlock(0)->isComplex(); }
   virtual FlowBlock *nextFlowAfter(const FlowBlock *bl) const;
   virtual void encodeHeader(Encoder &encoder) const;
+  virtual int4 getBlockDepth(void);
 };
 
 /// \brief A basic "if" block

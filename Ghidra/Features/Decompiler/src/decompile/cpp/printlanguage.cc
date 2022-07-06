@@ -346,7 +346,7 @@ void PrintLanguage::emitOp(const ReversePolish &entry)
     break;
   case OpToken::unary_postfix:
     if (entry.visited!=1) return;
-    emit->tagOp(entry.tok->print,EmitXml::no_color,entry.op);
+    emit->tagOp(entry.tok->print1,EmitMarkup::no_color,entry.op);
     emit->spaces(entry.tok->spacing,entry.tok->bump);
     break;
   case OpToken::postsurround:
