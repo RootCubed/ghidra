@@ -16,37 +16,37 @@
 #include "fspec.hh"
 #include "funcdata.hh"
 
-AttributeId ATTRIB_CUSTOM = AttributeId("custom",54);
-AttributeId ATTRIB_DOTDOTDOT = AttributeId("dotdotdot",55);
-AttributeId ATTRIB_EXTENSION = AttributeId("extension",56);
-AttributeId ATTRIB_HASTHIS = AttributeId("hasthis",57);
-AttributeId ATTRIB_INLINE = AttributeId("inline",58);
-AttributeId ATTRIB_KILLEDBYCALL = AttributeId("killedbycall",59);
-AttributeId ATTRIB_MAXSIZE = AttributeId("maxsize",60);
-AttributeId ATTRIB_MINSIZE = AttributeId("minsize",61);
-AttributeId ATTRIB_MODELLOCK = AttributeId("modellock",62);
-AttributeId ATTRIB_NORETURN = AttributeId("noreturn",63);
-AttributeId ATTRIB_POINTERMAX = AttributeId("pointermax",64);
-AttributeId ATTRIB_SEPARATEFLOAT = AttributeId("separatefloat",65);
-AttributeId ATTRIB_STACKSHIFT = AttributeId("stackshift",66);
-AttributeId ATTRIB_STRATEGY = AttributeId("strategy",67);
-AttributeId ATTRIB_THISBEFORERETPOINTER = AttributeId("thisbeforeretpointer",68);
-AttributeId ATTRIB_VOIDLOCK = AttributeId("voidlock",69);
+AttributeId ATTRIB_CUSTOM = AttributeId("custom",114);
+AttributeId ATTRIB_DOTDOTDOT = AttributeId("dotdotdot",115);
+AttributeId ATTRIB_EXTENSION = AttributeId("extension",116);
+AttributeId ATTRIB_HASTHIS = AttributeId("hasthis",117);
+AttributeId ATTRIB_INLINE = AttributeId("inline",118);
+AttributeId ATTRIB_KILLEDBYCALL = AttributeId("killedbycall",119);
+AttributeId ATTRIB_MAXSIZE = AttributeId("maxsize",120);
+AttributeId ATTRIB_MINSIZE = AttributeId("minsize",121);
+AttributeId ATTRIB_MODELLOCK = AttributeId("modellock",122);
+AttributeId ATTRIB_NORETURN = AttributeId("noreturn",123);
+AttributeId ATTRIB_POINTERMAX = AttributeId("pointermax",124);
+AttributeId ATTRIB_SEPARATEFLOAT = AttributeId("separatefloat",125);
+AttributeId ATTRIB_STACKSHIFT = AttributeId("stackshift",126);
+AttributeId ATTRIB_STRATEGY = AttributeId("strategy",127);
+AttributeId ATTRIB_THISBEFORERETPOINTER = AttributeId("thisbeforeretpointer",128);
+AttributeId ATTRIB_VOIDLOCK = AttributeId("voidlock",129);
 
-ElementId ELEM_GROUP = ElementId("group",75);
-ElementId ELEM_INTERNALLIST = ElementId("internallist",76);
-ElementId ELEM_KILLEDBYCALL = ElementId("killedbycall",77);
-ElementId ELEM_LIKELYTRASH = ElementId("likelytrash",78);
-ElementId ELEM_LOCALRANGE = ElementId("localrange",79);
-ElementId ELEM_MODEL = ElementId("model",80);
-ElementId ELEM_PARAM = ElementId("param",81);
-ElementId ELEM_PARAMRANGE = ElementId("paramrange",82);
-ElementId ELEM_PENTRY = ElementId("pentry",83);
-ElementId ELEM_PROTOTYPE = ElementId("prototype",84);
-ElementId ELEM_RESOLVEPROTOTYPE = ElementId("resolveprototype",85);
-ElementId ELEM_RETPARAM = ElementId("retparam",86);
-ElementId ELEM_RETURNSYM = ElementId("returnsym",87);
-ElementId ELEM_UNAFFECTED = ElementId("unaffected",88);
+ElementId ELEM_GROUP = ElementId("group",160);
+ElementId ELEM_INTERNALLIST = ElementId("internallist",161);
+ElementId ELEM_KILLEDBYCALL = ElementId("killedbycall",162);
+ElementId ELEM_LIKELYTRASH = ElementId("likelytrash",163);
+ElementId ELEM_LOCALRANGE = ElementId("localrange",164);
+ElementId ELEM_MODEL = ElementId("model",165);
+ElementId ELEM_PARAM = ElementId("param",166);
+ElementId ELEM_PARAMRANGE = ElementId("paramrange",167);
+ElementId ELEM_PENTRY = ElementId("pentry",168);
+ElementId ELEM_PROTOTYPE = ElementId("prototype",169);
+ElementId ELEM_RESOLVEPROTOTYPE = ElementId("resolveprototype",170);
+ElementId ELEM_RETPARAM = ElementId("retparam",171);
+ElementId ELEM_RETURNSYM = ElementId("returnsym",172);
+ElementId ELEM_UNAFFECTED = ElementId("unaffected",173);
 
 /// \brief Find a ParamEntry matching the given storage Varnode
 ///
@@ -1703,6 +1703,25 @@ bool ParamTrial::operator<(const ParamTrial &b) const
   return (size < b.size);
 }
 
+/// Sort by fixed position then by ParamTrial::operator<
+/// \param a trial
+/// \param b trial
+/// \return \b true if \b a should be ordered before \b b
+bool ParamTrial::fixedPositionCompare(const ParamTrial &a, const ParamTrial &b)
+
+{
+	if (a.fixedPosition == -1 && b.fixedPosition == -1){
+		return a < b;
+	}
+	if (a.fixedPosition == -1){
+		return false;
+	}
+	if (b.fixedPosition == -1){
+		return true;
+	}
+	return a.fixedPosition < b.fixedPosition;
+}
+
 /// \param recoversub selects whether a sub-function or the active function is being tested
 ParamActive::ParamActive(bool recoversub)
 
@@ -2087,6 +2106,7 @@ ProtoModel::ProtoModel(Architecture *g)
   stackgrowsnegative = true;	// Normal stack parameter ordering
   hasThis = false;
   isConstruct = false;
+  isPrinted = true;
   defaultLocalRange();
   defaultParamRange();
 }
@@ -2099,6 +2119,7 @@ ProtoModel::ProtoModel(const string &nm,const ProtoModel &op2)
 {
   glb = op2.glb;
   name = nm;
+  isPrinted = true;		// Don't inherit. Always print unless setPrintInDecl called explicitly
   extrapop = op2.extrapop;
   if (op2.input != (ParamList *)0)
     input = op2.input->clone();
@@ -2285,6 +2306,7 @@ void ProtoModel::decode(Decoder &decoder)
   extrapop = -300;
   hasThis = false;
   isConstruct = false;
+  isPrinted = true;
   effectlist.clear();
   injectUponEntry = -1;
   injectUponReturn = -1;
@@ -3529,7 +3551,6 @@ void FuncProto::setModel(ProtoModel *m)
     model = m;
     extrapop = ProtoModel::extrapop_unknown;
   }
-  flags &= ~((uint4)unknown_model);	// Model is not "unknown" (even if null pointer is passed in)
 }
 
 /// The full function prototype is (re)set from a model, names, and data-types
@@ -4200,6 +4221,28 @@ bool FuncProto::getBiggestContainedOutput(const Address &loc,int4 size,VarnodeDa
   return model->getBiggestContainedOutput(loc,size,res);
 }
 
+/// A likely pointer data-type for "this" pointer is passed in, which can be pointer to void. As the
+/// storage of "this" may depend on the full prototype, if the prototype is not already locked in, we
+/// assume the prototype returns void and takes the given data-type as the single input parameter.
+/// \param dt is the given input data-type
+/// \return the starting address of storage for the "this" pointer
+Address FuncProto::getThisPointerStorage(Datatype *dt)
+
+{
+  if (!model->hasThisPointer())
+    return Address();
+  vector<Datatype *> typelist;
+  typelist.push_back(getOutputType());
+  typelist.push_back(dt);
+  vector<ParameterPieces> res;
+  model->assignParameterStorage(typelist, res, true);
+  for(int4 i=1;i<res.size();++i) {
+    if ((res[i].flags & ParameterPieces::hiddenretparm) != 0) continue;
+    return res[i].addr;
+  }
+  return Address();
+}
+
 /// \brief Decide if \b this can be safely restricted to match another prototype
 ///
 /// Do \b this and another given function prototype share enough of
@@ -4335,7 +4378,6 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
     throw LowlevelError("Prototype storage must be set before restoring FuncProto");
   ProtoModel *mod = (ProtoModel *)0;
   bool seenextrapop = false;
-  bool seenunknownmod = false;
   int4 readextrapop;
   flags = 0;
   injectid = -1;
@@ -4345,24 +4387,20 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
     if (attribId == 0) break;
     if (attribId == ATTRIB_MODEL) {
       string modelname = decoder.readString();
-      if ((modelname == "default")||(modelname.size()==0))
-	mod = glb->defaultfp;	// Get default model
-      else if (modelname == "unknown") {
-	mod = glb->defaultfp;		// Use the default
-	seenunknownmod = true;
-      }
-      else
+      if (modelname.size()==0 || modelname == "default")
+	mod = glb->defaultfp;	// Use the default model
+      else {
 	mod = glb->getModel(modelname);
+	if (mod == (ProtoModel *)0)	// Model name is unrecognized
+	  mod = glb->createUnknownModel(modelname);	// Create model with placeholder behavior
+      }
     }
     else if (attribId == ATTRIB_EXTRAPOP) {
       seenextrapop = true;
-      string expopval = decoder.readString();
-      if (expopval == "unknown")
+      try {
+	readextrapop = decoder.readSignedInteger();
+      } catch(DecoderError &err) {
 	readextrapop = ProtoModel::extrapop_unknown;
-      else {
-	istringstream i1(expopval);
-	i1.unsetf(ios::dec | ios::hex | ios::oct);
-	i1 >> readextrapop;
       }
     }
     else if (attribId == ATTRIB_MODELLOCK) {
@@ -4402,8 +4440,6 @@ void FuncProto::decode(Decoder &decoder,Architecture *glb)
     setModel(mod);		// This sets extrapop to model default
   if (seenextrapop)		// If explicitly set
     extrapop = readextrapop;
-  if (seenunknownmod)
-    flags |= unknown_model;
 
   uint4 subId = decoder.peekElement();
   if (subId != 0) {
@@ -5305,6 +5341,12 @@ void FuncCallSpecs::buildInputFromTrials(Funcdata &data)
   vector<Varnode *> newparam;
 
   newparam.push_back(op->getIn(0)); // Preserve the fspec parameter
+
+  if (isDotdotdot() && isInputLocked()){
+      //if varargs, move the fixed args to the beginning of the list in order
+	  //preserve relative order of variable args
+	  activeinput.sortFixedPosition();
+  }
 
   for(int4 i=0;i<activeinput.getNumTrials();++i) {
     const ParamTrial &paramtrial( activeinput.getTrial(i) );

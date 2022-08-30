@@ -26,6 +26,7 @@ import docking.widgets.tree.GTreeLazyNode;
 import docking.widgets.tree.GTreeNode;
 import ghidra.app.plugin.core.debug.gui.DebuggerResources;
 import ghidra.dbg.target.*;
+import ghidra.framework.model.DomainObjectClosedListener;
 import ghidra.trace.database.DBTraceUtils;
 import ghidra.trace.model.Trace;
 import ghidra.trace.model.Trace.TraceObjectChangeType;
@@ -37,12 +38,18 @@ import utilities.util.IDKeyed;
 
 public class ObjectTreeModel implements DisplaysModified {
 
-	class ListenerForChanges extends TraceDomainObjectListener {
+	class ListenerForChanges extends TraceDomainObjectListener
+			implements DomainObjectClosedListener {
 		public ListenerForChanges() {
 			listenFor(TraceObjectChangeType.CREATED, this::objectCreated);
 			listenFor(TraceObjectChangeType.VALUE_CREATED, this::valueCreated);
 			listenFor(TraceObjectChangeType.VALUE_DELETED, this::valueDeleted);
 			listenFor(TraceObjectChangeType.VALUE_LIFESPAN_CHANGED, this::valueLifespanChanged);
+		}
+
+		@Override
+		public void domainObjectClosed() {
+			setTrace(null);
 		}
 
 		protected boolean isEventValue(TraceObjectValue value) {
@@ -153,10 +160,12 @@ public class ObjectTreeModel implements DisplaysModified {
 
 		protected AbstractNode getOrCreateNode(TraceObjectValue value) {
 			if (value.getParent() == null) {
+				root.unloadChildren();
 				return root;
 			}
 			AbstractNode node =
 				byValue.computeIfAbsent(new IDKeyed<>(value), k -> createNode(value));
+			node.unloadChildren();
 			//AbstractNode node = createNode(value);
 			if (value.isCanonical()) {
 				byObject.put(new IDKeyed<>(value.getChild()), node);
@@ -173,6 +182,11 @@ public class ObjectTreeModel implements DisplaysModified {
 				return root;
 			}
 			return byObject.get(new IDKeyed<>(object));
+		}
+
+		public void invalidate() {
+			byObject.clear();
+			byValue.clear();
 		}
 	}
 
@@ -291,6 +305,13 @@ public class ObjectTreeModel implements DisplaysModified {
 
 		@Override
 		protected void childCreated(TraceObjectValue value) {
+			if (!isValueVisible(value)) {
+				return;
+			}
+			if (nodeCache.getByValue(value) != null) {
+				super.childCreated(value);
+				return;
+			}
 			try (KeepTreeState keep = KeepTreeState.ifNotNull(getTree())) {
 				unloadChildren();
 			}
@@ -600,12 +621,14 @@ public class ObjectTreeModel implements DisplaysModified {
 	protected void removeOldListeners() {
 		if (trace != null) {
 			trace.removeListener(listenerForChanges);
+			trace.removeCloseListener(listenerForChanges);
 		}
 	}
 
 	protected void addNewListeners() {
 		if (trace != null) {
 			trace.addListener(listenerForChanges);
+			trace.addCloseListener(listenerForChanges);
 		}
 	}
 
@@ -616,6 +639,7 @@ public class ObjectTreeModel implements DisplaysModified {
 	}
 
 	protected void reload() {
+		nodeCache.invalidate();
 		root.unloadChildren();
 	}
 

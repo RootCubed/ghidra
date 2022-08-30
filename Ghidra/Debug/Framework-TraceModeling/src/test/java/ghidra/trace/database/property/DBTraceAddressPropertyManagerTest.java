@@ -25,6 +25,7 @@ import org.junit.*;
 
 import com.google.common.collect.Range;
 
+import ghidra.program.model.address.Address;
 import ghidra.program.model.util.TypeMismatchException;
 import ghidra.test.AbstractGhidraHeadlessIntegrationTest;
 import ghidra.trace.database.ToyDBTraceBuilder;
@@ -215,7 +216,7 @@ public class DBTraceAddressPropertyManagerTest extends AbstractGhidraHeadlessInt
 	@Test
 	public void testGetPropertyMap() throws Exception {
 		assertNull(propertyManager.getPropertyMap("MyProp"));
-		TracePropertyMap<String> map;
+		TracePropertyMapOperations<String> map;
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			map = propertyManager.createPropertyMap("MyProp", String.class);
 		}
@@ -235,7 +236,7 @@ public class DBTraceAddressPropertyManagerTest extends AbstractGhidraHeadlessInt
 	@Test
 	public void testGetOrCreatePropertyMap() throws Exception {
 		assertNull(propertyManager.getPropertyMap("MyProp"));
-		TracePropertyMap<String> map;
+		TracePropertyMapOperations<String> map;
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			map = propertyManager.getOrCreatePropertyMap("MyProp", String.class);
 		}
@@ -252,52 +253,9 @@ public class DBTraceAddressPropertyManagerTest extends AbstractGhidraHeadlessInt
 	}
 
 	@Test
-	public void testGetPropertyGetter() throws Exception {
-		assertNull(propertyManager.getPropertyGetter("MyProp", String.class));
-		TracePropertyMap<String> map;
-		try (UndoableTransaction tid = tb.startTransaction()) {
-			map = propertyManager.createPropertyMap("MyProp", String.class);
-		}
-		assertNotNull(map);
-		TracePropertyGetter<String> getter =
-			propertyManager.getPropertyGetter("MyProp", String.class);
-		assertSame(map, getter);
-		assertSame(map, propertyManager.getPropertyGetter("MyProp", Object.class));
-
-		try {
-			propertyManager.getPropertyGetter("MyProp", Integer.class);
-			fail();
-		}
-		catch (TypeMismatchException e) {
-			// pass
-		}
-	}
-
-	@Test
-	public void testGetOrCreatePropertySetter() throws Exception {
-		TracePropertyMap<MySaveable> map;
-		try (UndoableTransaction tid = tb.startTransaction()) {
-			map = propertyManager.createPropertyMap("MyProp", MySaveable.class);
-		}
-		assertNotNull(map);
-		TracePropertySetter<ExtMySaveable> setter =
-			propertyManager.getOrCreatePropertySetter("MyProp", ExtMySaveable.class);
-		assertSame(map, setter);
-		assertSame(map, propertyManager.getOrCreatePropertySetter("MyProp", MySaveable.class));
-
-		try {
-			propertyManager.getOrCreatePropertySetter("MyProp", Saveable.class);
-			fail();
-		}
-		catch (TypeMismatchException e) {
-			// pass
-		}
-	}
-
-	@Test
 	public void testGetAllProperties() throws Exception {
 		assertEquals(0, propertyManager.getAllProperties().size());
-		TracePropertyMap<String> map;
+		TracePropertyMapOperations<String> map;
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			map = propertyManager.createPropertyMap("MyProp", String.class);
 		}
@@ -308,7 +266,7 @@ public class DBTraceAddressPropertyManagerTest extends AbstractGhidraHeadlessInt
 
 	@Test
 	public void testMapGetValueClass() throws Exception {
-		TracePropertyMap<String> map;
+		TracePropertyMapOperations<String> map;
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			map = propertyManager.createPropertyMap("MyProp", String.class);
 		}
@@ -317,7 +275,7 @@ public class DBTraceAddressPropertyManagerTest extends AbstractGhidraHeadlessInt
 
 	protected <T> void doTestMap(Class<T> valueClass, T value) throws Exception {
 		try (UndoableTransaction tid = tb.startTransaction()) {
-			TracePropertyMap<T> map =
+			TracePropertyMapOperations<T> map =
 				propertyManager.createPropertyMap("MyProp", valueClass);
 			assertSame(valueClass, map.getValueClass());
 
@@ -341,7 +299,8 @@ public class DBTraceAddressPropertyManagerTest extends AbstractGhidraHeadlessInt
 
 		try (ToyDBTraceBuilder tb = new ToyDBTraceBuilder(file)) {
 			TraceAddressPropertyManager propertyManager = tb.trace.getAddressPropertyManager();
-			TracePropertyMap<T> map = propertyManager.getPropertyMap("MyProp", valueClass);
+			TracePropertyMapOperations<T> map =
+				propertyManager.getPropertyMap("MyProp", valueClass);
 			assertNotNull(map);
 
 			Entry<TraceAddressSnapRange, T> entry = map.getEntry(4, tb.addr(0x00400001));
@@ -374,5 +333,25 @@ public class DBTraceAddressPropertyManagerTest extends AbstractGhidraHeadlessInt
 	@Test
 	public void testSaveableMap() throws Exception {
 		doTestMap(MySaveable.class, new MySaveable(6, "MyString"));
+	}
+
+	@Test
+	public void testStringMapAtNoAdress() throws Exception {
+		TracePropertyMap<String> map;
+		try (UndoableTransaction tid = tb.startTransaction()) {
+			map = propertyManager.createPropertyMap("MyProp", String.class);
+
+			map.set(Range.atLeast(0L), Address.NO_ADDRESS, "Value");
+		}
+
+		assertEquals("Value", map.get(4, Address.NO_ADDRESS));
+
+		File file = tb.save();
+
+		try (ToyDBTraceBuilder tb = new ToyDBTraceBuilder(file)) {
+			TracePropertyMap<String> map2 =
+				tb.trace.getAddressPropertyManager().getPropertyMap("MyProp", String.class);
+			assertEquals("Value", map2.get(4, Address.NO_ADDRESS));
+		}
 	}
 }

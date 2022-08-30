@@ -1443,6 +1443,9 @@ void ActionFuncLink::funcLinkInput(FuncCallSpecs *fc,Funcdata &data)
       ProtoParameter *param = fc->getParam(i);
       active->registerTrial(param->getAddress(),param->getSize());
       active->getTrial(i).markActive(); // Parameter is not optional
+      if (varargs){
+    	  active->getTrial(i).setFixedPosition(i);
+      }
       AddrSpace *spc = param->getAddress().getSpace();
       uintb off = param->getAddress().getOffset();
       int4 sz = param->getSize();
@@ -2171,7 +2174,7 @@ int4 ActionDefaultParams::apply(Funcdata &data)
 
       if (otherfunc != (Funcdata *)0) {
 	fc->copy(otherfunc->getFuncProto());
-	if ((!fc->isModelLocked())&&(!fc->hasMatchingModel(evalfp)))
+	if ((!fc->isModelLocked())&& !fc->hasMatchingModel(evalfp))
 	  fc->setModel(evalfp);
       }
       else
@@ -4059,8 +4062,10 @@ int4 ActionPrototypeTypes::apply(Funcdata &data)
   ProtoModel *evalfp = data.getArch()->evalfp_current;
   if (evalfp == (ProtoModel *)0)
     evalfp = data.getArch()->defaultfp;
-  if ((!data.getFuncProto().isModelLocked())&&(!data.getFuncProto().hasMatchingModel(evalfp)))
+  if ((!data.getFuncProto().isModelLocked()) && !data.getFuncProto().hasMatchingModel(evalfp))
     data.getFuncProto().setModel(evalfp);
+  if (data.getFuncProto().hasThisPointer())
+    data.prepareThisPointer();
 
   iterend = data.endOp(CPUI_RETURN);
 
@@ -4337,10 +4342,15 @@ int4 ActionPrototypeWarnings::apply(Funcdata &data)
   if (ourproto.hasOutputErrors()) {
     data.warningHeader("Cannot assign location of return value for this function: Return value may be inaccurate");
   }
-  if (ourproto.isUnknownModel() && (!ourproto.hasCustomStorage()) &&
-  	(ourproto.isInputLocked() || ourproto.isOutputLocked())) {
-    data.warningHeader("Unknown calling convention yet parameter storage is locked");
-  }
+  if (ourproto.isModelUnknown()) {
+    ostringstream s;
+    s << "Unknown calling convention";
+    if (ourproto.printModelInDecl())
+      s << ": " << ourproto.getModelName();
+    if (!ourproto.hasCustomStorage() && (ourproto.isInputLocked() || ourproto.isOutputLocked()))
+      s << " -- yet parameter storage is locked";
+    data.warningHeader(s.str());
+ }
   int4 numcalls = data.numCalls();
   for(int4 i=0;i<numcalls;++i) {
     FuncCallSpecs *fc = data.getCallSpecs(i);
@@ -5062,6 +5072,7 @@ void ActionDatabase::universalAction(Architecture *conf)
 	actprop->addRule( new RulePiece2Zext("analysis") );
 	actprop->addRule( new RulePiece2Sext("analysis") );
 	actprop->addRule( new RulePopcountBoolXor("analysis") );
+	actprop->addRule( new RuleOrMultiBool("analysis") );
 	actprop->addRule( new RuleXorSwap("analysis") );
 	actprop->addRule( new RuleCountLeadingZerosShiftBool("analysis") );
 	actprop->addRule( new RuleSimplifyPPCInt2Float("analysis") );

@@ -28,7 +28,7 @@ import java.util.List;
 
 import ghidra.app.plugin.assembler.Assembler;
 import ghidra.app.plugin.assembler.Assemblers;
-import ghidra.app.plugin.core.debug.service.emulation.DebuggerTracePcodeEmulator;
+import ghidra.app.plugin.core.debug.service.emulation.BytesDebuggerPcodeEmulator;
 import ghidra.app.plugin.core.debug.service.emulation.ProgramEmulationUtils;
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
 import ghidra.app.script.GhidraScript;
@@ -81,7 +81,7 @@ public class DebuggerEmuExampleScript extends GhidraScript {
 					.getProjectData()
 					.getRootFolder()
 					.createFile("emu_example", program, monitor);
-			try (UndoableTransaction tid = UndoableTransaction.start(program, "Init", true)) {
+			try (UndoableTransaction tid = UndoableTransaction.start(program, "Init")) {
 				AddressSpace space = program.getAddressFactory().getDefaultAddressSpace();
 				entry = space.getAddress(0x00400000);
 				Address dataEntry = space.getAddress(0x00600000);
@@ -136,7 +136,7 @@ public class DebuggerEmuExampleScript extends GhidraScript {
 		 * library. This emulator will still know how to integrate with the UI, reading through to
 		 * open programs and writing state back into the trace.
 		 */
-		DebuggerTracePcodeEmulator emulator = new DebuggerTracePcodeEmulator(tool, trace, 0, null) {
+		BytesDebuggerPcodeEmulator emulator = new BytesDebuggerPcodeEmulator(tool, trace, 0, null) {
 			@Override
 			protected PcodeUseropLibrary<byte[]> createUseropLibrary() {
 				return new DemoPcodeUseropLibrary(language, DebuggerEmuExampleScript.this);
@@ -163,13 +163,13 @@ public class DebuggerEmuExampleScript extends GhidraScript {
 		 */
 		TraceTimeManager time = trace.getTimeManager();
 		TraceSnapshot snapshot = time.getSnapshot(0, true);
-		try (UndoableTransaction tid = UndoableTransaction.start(trace, "Emulate", true)) {
+		try (UndoableTransaction tid = UndoableTransaction.start(trace, "Emulate")) {
 			for (int i = 0; i < 10; i++) {
 				println("Executing: " + thread.getCounter());
 				thread.stepInstruction();
 				snapshot =
 					time.createSnapshot("Stepped to " + thread.getCounter());
-				emulator.writeDown(trace, snapshot.getKey(), 0, false);
+				emulator.writeDown(trace, snapshot.getKey(), 0);
 			}
 			printerr("We should not have completed 10 steps!");
 		}

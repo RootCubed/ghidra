@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.3.1.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.5.1"
+#define YYBISON_VERSION "3.3.1"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -84,11 +84,12 @@
 #define yyerror         xmlerror
 #define yydebug         xmldebug
 #define yynerrs         xmlnerrs
+
 #define yylval          xmllval
 #define yychar          xmlchar
 
 /* First part of user prologue.  */
-#line 16 "xml.y"
+#line 16 "src/decompile/cpp/xml.y" /* yacc.c:337  */
 
 #include "xml.hh"
 // CharData mode   look for '<' '&' or "]]>"
@@ -191,17 +192,7 @@ static XmlScan *global_scan;					///< Global reference to the scanner
 static ContentHandler *handler;					///< Global reference to the content handler
 extern int yydebug;								///< Debug mode
 
-#line 180 "xml.cc"
-
-# ifndef YY_CAST
-#  ifdef __cplusplus
-#   define YY_CAST(Type, Val) static_cast<Type> (Val)
-#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
-#  else
-#   define YY_CAST(Type, Val) ((Type) (Val))
-#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
-#  endif
-# endif
+#line 181 "src/decompile/cpp/xml.cc" /* yacc.c:337  */
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -250,18 +241,19 @@ extern int xmldebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+
 union YYSTYPE
 {
-#line 119 "xml.y"
+#line 119 "src/decompile/cpp/xml.y" /* yacc.c:352  */
 
   int4 i;
   string *str;
   Attributes *attr;
   NameValue *pair;
 
-#line 248 "xml.cc"
-
+#line 240 "src/decompile/cpp/xml.cc" /* yacc.c:352  */
 };
+
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
@@ -280,75 +272,28 @@ int xmlparse (void);
 # undef short
 #endif
 
-/* On compilers that do not define __PTRDIFF_MAX__ etc., make sure
-   <limits.h> and (if available) <stdint.h> are included
-   so that the code can choose integer types of a good width.  */
-
-#ifndef __PTRDIFF_MAX__
-# include <limits.h> /* INFRINGES ON USER NAME SPACE */
-# if defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
-#  include <stdint.h> /* INFRINGES ON USER NAME SPACE */
-#  define YY_STDINT_H
-# endif
+#ifdef YYTYPE_UINT8
+typedef YYTYPE_UINT8 yytype_uint8;
+#else
+typedef unsigned char yytype_uint8;
 #endif
 
-/* Narrow types that promote to a signed type and that can represent a
-   signed or unsigned integer of at least N bits.  In tables they can
-   save space and decrease cache pressure.  Promoting to a signed type
-   helps avoid bugs in integer arithmetic.  */
-
-#ifdef __INT_LEAST8_MAX__
-typedef __INT_LEAST8_TYPE__ yytype_int8;
-#elif defined YY_STDINT_H
-typedef int_least8_t yytype_int8;
+#ifdef YYTYPE_INT8
+typedef YYTYPE_INT8 yytype_int8;
 #else
 typedef signed char yytype_int8;
 #endif
 
-#ifdef __INT_LEAST16_MAX__
-typedef __INT_LEAST16_TYPE__ yytype_int16;
-#elif defined YY_STDINT_H
-typedef int_least16_t yytype_int16;
+#ifdef YYTYPE_UINT16
+typedef YYTYPE_UINT16 yytype_uint16;
+#else
+typedef unsigned short yytype_uint16;
+#endif
+
+#ifdef YYTYPE_INT16
+typedef YYTYPE_INT16 yytype_int16;
 #else
 typedef short yytype_int16;
-#endif
-
-#if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
-typedef __UINT_LEAST8_TYPE__ yytype_uint8;
-#elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
-       && UINT_LEAST8_MAX <= INT_MAX)
-typedef uint_least8_t yytype_uint8;
-#elif !defined __UINT_LEAST8_MAX__ && UCHAR_MAX <= INT_MAX
-typedef unsigned char yytype_uint8;
-#else
-typedef short yytype_uint8;
-#endif
-
-#if defined __UINT_LEAST16_MAX__ && __UINT_LEAST16_MAX__ <= __INT_MAX__
-typedef __UINT_LEAST16_TYPE__ yytype_uint16;
-#elif (!defined __UINT_LEAST16_MAX__ && defined YY_STDINT_H \
-       && UINT_LEAST16_MAX <= INT_MAX)
-typedef uint_least16_t yytype_uint16;
-#elif !defined __UINT_LEAST16_MAX__ && USHRT_MAX <= INT_MAX
-typedef unsigned short yytype_uint16;
-#else
-typedef int yytype_uint16;
-#endif
-
-#ifndef YYPTRDIFF_T
-# if defined __PTRDIFF_TYPE__ && defined __PTRDIFF_MAX__
-#  define YYPTRDIFF_T __PTRDIFF_TYPE__
-#  define YYPTRDIFF_MAXIMUM __PTRDIFF_MAX__
-# elif defined PTRDIFF_MAX
-#  ifndef ptrdiff_t
-#   include <stddef.h> /* INFRINGES ON USER NAME SPACE */
-#  endif
-#  define YYPTRDIFF_T ptrdiff_t
-#  define YYPTRDIFF_MAXIMUM PTRDIFF_MAX
-# else
-#  define YYPTRDIFF_T long
-#  define YYPTRDIFF_MAXIMUM LONG_MAX
-# endif
 #endif
 
 #ifndef YYSIZE_T
@@ -356,7 +301,7 @@ typedef int yytype_uint16;
 #  define YYSIZE_T __SIZE_TYPE__
 # elif defined size_t
 #  define YYSIZE_T size_t
-# elif defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
+# elif ! defined YYSIZE_T
 #  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
 #  define YYSIZE_T size_t
 # else
@@ -364,19 +309,7 @@ typedef int yytype_uint16;
 # endif
 #endif
 
-#define YYSIZE_MAXIMUM                                  \
-  YY_CAST (YYPTRDIFF_T,                                 \
-           (YYPTRDIFF_MAXIMUM < YY_CAST (YYSIZE_T, -1)  \
-            ? YYPTRDIFF_MAXIMUM                         \
-            : YY_CAST (YYSIZE_T, -1)))
-
-#define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
-
-/* Stored state numbers (used for stacks). */
-typedef yytype_uint8 yy_state_t;
-
-/* State numbers in computations.  */
-typedef int yy_state_fast_t;
+#define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
@@ -390,20 +323,22 @@ typedef int yy_state_fast_t;
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_PURE
-# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
-#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
+#ifndef YY_ATTRIBUTE
+# if (defined __GNUC__                                               \
+      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
+     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
+#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
 # else
-#  define YY_ATTRIBUTE_PURE
+#  define YY_ATTRIBUTE(Spec) /* empty */
 # endif
 #endif
 
+#ifndef YY_ATTRIBUTE_PURE
+# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
+#endif
+
 #ifndef YY_ATTRIBUTE_UNUSED
-# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
-#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
-# else
-#  define YY_ATTRIBUTE_UNUSED
-# endif
+# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
@@ -415,11 +350,11 @@ typedef int yy_state_fast_t;
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
-    _Pragma ("GCC diagnostic push")                                     \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+    _Pragma ("GCC diagnostic push") \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
     _Pragma ("GCC diagnostic pop")
 #else
 # define YY_INITIAL_VALUE(Value) Value
@@ -432,20 +367,6 @@ typedef int yy_state_fast_t;
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
-#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
-# define YY_IGNORE_USELESS_CAST_BEGIN                          \
-    _Pragma ("GCC diagnostic push")                            \
-    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
-# define YY_IGNORE_USELESS_CAST_END            \
-    _Pragma ("GCC diagnostic pop")
-#endif
-#ifndef YY_IGNORE_USELESS_CAST_BEGIN
-# define YY_IGNORE_USELESS_CAST_BEGIN
-# define YY_IGNORE_USELESS_CAST_END
-#endif
-
-
-#define YY_ASSERT(E) ((void) (0 && (E)))
 
 #if ! defined yyoverflow || YYERROR_VERBOSE
 
@@ -522,17 +443,17 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yy_state_t yyss_alloc;
+  yytype_int16 yyss_alloc;
   YYSTYPE yyvs_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
-# define YYSTACK_GAP_MAXIMUM (YYSIZEOF (union yyalloc) - 1)
+# define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
 
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (YYSIZEOF (yy_state_t) + YYSIZEOF (YYSTYPE)) \
+     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
       + YYSTACK_GAP_MAXIMUM)
 
 # define YYCOPY_NEEDED 1
@@ -545,11 +466,11 @@ union yyalloc
 # define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
     do                                                                  \
       {                                                                 \
-        YYPTRDIFF_T yynewbytes;                                         \
+        YYSIZE_T yynewbytes;                                            \
         YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
         Stack = &yyptr->Stack_alloc;                                    \
-        yynewbytes = yystacksize * YYSIZEOF (*Stack) + YYSTACK_GAP_MAXIMUM; \
-        yyptr += yynewbytes / YYSIZEOF (*yyptr);                        \
+        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
+        yyptr += yynewbytes / sizeof (*yyptr);                          \
       }                                                                 \
     while (0)
 
@@ -561,12 +482,12 @@ union yyalloc
 # ifndef YYCOPY
 #  if defined __GNUC__ && 1 < __GNUC__
 #   define YYCOPY(Dst, Src, Count) \
-      __builtin_memcpy (Dst, Src, YY_CAST (YYSIZE_T, (Count)) * sizeof (*(Src)))
+      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
 #  else
 #   define YYCOPY(Dst, Src, Count)              \
       do                                        \
         {                                       \
-          YYPTRDIFF_T yyi;                      \
+          YYSIZE_T yyi;                         \
           for (yyi = 0; yyi < (Count); yyi++)   \
             (Dst)[yyi] = (Src)[yyi];            \
         }                                       \
@@ -592,15 +513,14 @@ union yyalloc
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   266
 
-
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
 #define YYTRANSLATE(YYX)                                                \
-  (0 <= (YYX) && (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+  ((unsigned) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex.  */
-static const yytype_int8 yytranslate[] =
+static const yytype_uint8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,    15,
       13,     2,     2,    14,     2,     2,     2,     2,     2,     2,
@@ -670,7 +590,7 @@ static const char *const yytname[] =
 # ifdef YYPRINT
 /* YYTOKNUM[NUM] -- (External) token number corresponding to the
    (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
+static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,    32,    10,    13,     9,    39,    34,    33,    45,
@@ -680,14 +600,14 @@ static const yytype_int16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF (-136)
+#define YYPACT_NINF -136
 
-#define yypact_value_is_default(Yyn) \
-  ((Yyn) == YYPACT_NINF)
+#define yypact_value_is_default(Yystate) \
+  (!!((Yystate) == (-136)))
 
-#define YYTABLE_NINF (-1)
+#define YYTABLE_NINF -1
 
-#define yytable_value_is_error(Yyn) \
+#define yytable_value_is_error(Yytable_value) \
   0
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -715,7 +635,7 @@ static const yytype_int16 yypact[] =
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
      Performed when YYTABLE does not specify something else to do.  Zero
      means the default is an error.  */
-static const yytype_int8 yydefact[] =
+static const yytype_uint8 yydefact[] =
 {
        0,    18,     0,     4,     5,     6,     7,     0,     8,    38,
        0,     0,    36,    37,    31,     0,    28,     0,    27,     0,
@@ -808,7 +728,7 @@ static const yytype_int16 yycheck[] =
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
-static const yytype_int8 yystos[] =
+static const yytype_uint8 yystos[] =
 {
        0,    10,    11,    12,    13,    14,    15,    51,    52,    53,
       57,    58,    59,    60,    65,    66,    69,    72,    73,    74,
@@ -829,7 +749,7 @@ static const yytype_int8 yystos[] =
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const yytype_int8 yyr1[] =
+static const yytype_uint8 yyr1[] =
 {
        0,    50,    51,    51,    52,    52,    52,    52,    53,    53,
       54,    54,    54,    55,    55,    55,    56,    56,    57,    58,
@@ -842,7 +762,7 @@ static const yytype_int8 yyr1[] =
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const yytype_int8 yyr2[] =
+static const yytype_uint8 yyr2[] =
 {
        0,     2,     2,     3,     1,     1,     1,     1,     1,     2,
        1,     2,     2,     1,     2,     2,     2,     2,     1,     4,
@@ -937,9 +857,7 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
   if (yytype < YYNTOKENS)
     YYPRINT (yyo, yytoknum[yytype], *yyvaluep);
 # endif
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   YYUSE (yytype);
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
@@ -963,7 +881,7 @@ yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
 `------------------------------------------------------------------*/
 
 static void
-yy_stack_print (yy_state_t *yybottom, yy_state_t *yytop)
+yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
 {
   YYFPRINTF (stderr, "Stack now");
   for (; yybottom <= yytop; yybottom++)
@@ -986,19 +904,19 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule)
 {
-  int yylno = yyrline[yyrule];
+  unsigned long yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
   int yyi;
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %d):\n",
+  YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
              yyrule - 1, yylno);
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr,
-                       yystos[+yyssp[yyi + 1 - yynrhs]],
+                       yystos[yyssp[yyi + 1 - yynrhs]],
                        &yyvsp[(yyi + 1) - (yynrhs)]
                                               );
       YYFPRINTF (stderr, "\n");
@@ -1043,13 +961,13 @@ int yydebug;
 
 # ifndef yystrlen
 #  if defined __GLIBC__ && defined _STRING_H
-#   define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
+#   define yystrlen strlen
 #  else
 /* Return the length of YYSTR.  */
-static YYPTRDIFF_T
+static YYSIZE_T
 yystrlen (const char *yystr)
 {
-  YYPTRDIFF_T yylen;
+  YYSIZE_T yylen;
   for (yylen = 0; yystr[yylen]; yylen++)
     continue;
   return yylen;
@@ -1085,12 +1003,12 @@ yystpcpy (char *yydest, const char *yysrc)
    backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
    null, do not copy; instead, return the length of what the result
    would have been.  */
-static YYPTRDIFF_T
+static YYSIZE_T
 yytnamerr (char *yyres, const char *yystr)
 {
   if (*yystr == '"')
     {
-      YYPTRDIFF_T yyn = 0;
+      YYSIZE_T yyn = 0;
       char const *yyp = yystr;
 
       for (;;)
@@ -1121,10 +1039,10 @@ yytnamerr (char *yyres, const char *yystr)
     do_not_strip_quotes: ;
     }
 
-  if (yyres)
-    return yystpcpy (yyres, yystr) - yyres;
-  else
+  if (! yyres)
     return yystrlen (yystr);
+
+  return (YYSIZE_T) (yystpcpy (yyres, yystr) - yyres);
 }
 # endif
 
@@ -1137,19 +1055,19 @@ yytnamerr (char *yyres, const char *yystr)
    *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
    required number of bytes is too large to store.  */
 static int
-yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
-                yy_state_t *yyssp, int yytoken)
+yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
+                yytype_int16 *yyssp, int yytoken)
 {
+  YYSIZE_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
+  YYSIZE_T yysize = yysize0;
   enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
   /* Internationalized format string. */
   const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat: reported tokens (one for the "unexpected",
-     one per "expected"). */
+  /* Arguments of yyformat. */
   char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-  /* Actual size of YYARG. */
+  /* Number of reported tokens (one for the "unexpected", one per
+     "expected"). */
   int yycount = 0;
-  /* Cumulated lengths of YYARG.  */
-  YYPTRDIFF_T yysize = 0;
 
   /* There are many possibilities here to consider:
      - If this state is a consistent state with a default action, then
@@ -1176,9 +1094,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
   */
   if (yytoken != YYEMPTY)
     {
-      int yyn = yypact[+*yyssp];
-      YYPTRDIFF_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
-      yysize = yysize0;
+      int yyn = yypact[*yyssp];
       yyarg[yycount++] = yytname[yytoken];
       if (!yypact_value_is_default (yyn))
         {
@@ -1203,8 +1119,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
                   }
                 yyarg[yycount++] = yytname[yyx];
                 {
-                  YYPTRDIFF_T yysize1
-                    = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
+                  YYSIZE_T yysize1 = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
                   if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
                     yysize = yysize1;
                   else
@@ -1231,9 +1146,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
     }
 
   {
-    /* Don't count the "%s"s in the final size, but reserve room for
-       the terminator.  */
-    YYPTRDIFF_T yysize1 = yysize + (yystrlen (yyformat) - 2 * yycount) + 1;
+    YYSIZE_T yysize1 = yysize + yystrlen (yyformat);
     if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
       yysize = yysize1;
     else
@@ -1263,8 +1176,8 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
         }
       else
         {
-          ++yyp;
-          ++yyformat;
+          yyp++;
+          yyformat++;
         }
   }
   return 0;
@@ -1307,7 +1220,7 @@ int yynerrs;
 int
 yyparse (void)
 {
-    yy_state_fast_t yystate;
+    int yystate;
     /* Number of tokens to shift before error messages enabled.  */
     int yyerrstatus;
 
@@ -1319,16 +1232,16 @@ yyparse (void)
        to reallocate them elsewhere.  */
 
     /* The state stack.  */
-    yy_state_t yyssa[YYINITDEPTH];
-    yy_state_t *yyss;
-    yy_state_t *yyssp;
+    yytype_int16 yyssa[YYINITDEPTH];
+    yytype_int16 *yyss;
+    yytype_int16 *yyssp;
 
     /* The semantic value stack.  */
     YYSTYPE yyvsa[YYINITDEPTH];
     YYSTYPE *yyvs;
     YYSTYPE *yyvsp;
 
-    YYPTRDIFF_T yystacksize;
+    YYSIZE_T yystacksize;
 
   int yyn;
   int yyresult;
@@ -1342,7 +1255,7 @@ yyparse (void)
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
   char *yymsg = yymsgbuf;
-  YYPTRDIFF_T yymsg_alloc = sizeof yymsgbuf;
+  YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
@@ -1374,14 +1287,10 @@ yynewstate:
 
 
 /*--------------------------------------------------------------------.
-| yysetstate -- set current state (the top of the stack) to yystate.  |
+| yynewstate -- set current state (the top of the stack) to yystate.  |
 `--------------------------------------------------------------------*/
 yysetstate:
-  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
-  YY_ASSERT (0 <= yystate && yystate < YYNSTATES);
-  YY_IGNORE_USELESS_CAST_BEGIN
-  *yyssp = YY_CAST (yy_state_t, yystate);
-  YY_IGNORE_USELESS_CAST_END
+  *yyssp = (yytype_int16) yystate;
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
@@ -1389,23 +1298,23 @@ yysetstate:
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
-      YYPTRDIFF_T yysize = yyssp - yyss + 1;
+      YYSIZE_T yysize = (YYSIZE_T) (yyssp - yyss + 1);
 
 # if defined yyoverflow
       {
         /* Give user a chance to reallocate the stack.  Use copies of
            these so that the &'s don't force the real ones into
            memory.  */
-        yy_state_t *yyss1 = yyss;
         YYSTYPE *yyvs1 = yyvs;
+        yytype_int16 *yyss1 = yyss;
 
         /* Each stack pointer address is followed by the size of the
            data in use in that stack, in bytes.  This used to be a
            conditional around just the two extra args, but that might
            be undefined if yyoverflow is a macro.  */
         yyoverflow (YY_("memory exhausted"),
-                    &yyss1, yysize * YYSIZEOF (*yyssp),
-                    &yyvs1, yysize * YYSIZEOF (*yyvsp),
+                    &yyss1, yysize * sizeof (*yyssp),
+                    &yyvs1, yysize * sizeof (*yyvsp),
                     &yystacksize);
         yyss = yyss1;
         yyvs = yyvs1;
@@ -1419,10 +1328,9 @@ yysetstate:
         yystacksize = YYMAXDEPTH;
 
       {
-        yy_state_t *yyss1 = yyss;
+        yytype_int16 *yyss1 = yyss;
         union yyalloc *yyptr =
-          YY_CAST (union yyalloc *,
-                   YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
+          (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
         if (! yyptr)
           goto yyexhaustedlab;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
@@ -1436,15 +1344,15 @@ yysetstate:
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
-      YY_IGNORE_USELESS_CAST_BEGIN
-      YYDPRINTF ((stderr, "Stack size increased to %ld\n",
-                  YY_CAST (long, yystacksize)));
-      YY_IGNORE_USELESS_CAST_END
+      YYDPRINTF ((stderr, "Stack size increased to %lu\n",
+                  (unsigned long) yystacksize));
 
       if (yyss + yystacksize - 1 <= yyssp)
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
+  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1505,13 +1413,15 @@ yybackup:
 
   /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
+
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
+
   yystate = yyn;
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
-  /* Discard the shifted token.  */
-  yychar = YYEMPTY;
   goto yynewstate;
 
 
@@ -1546,261 +1456,260 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 10:
-#line 144 "xml.y"
-                   { (yyval.str) = new string; global_scan->setmode(XmlScan::AttValueSingleMode); }
-#line 1538 "xml.cc"
+        case 10:
+#line 144 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = new string; global_scan->setmode(XmlScan::AttValueSingleMode); }
+#line 1448 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 11:
-#line 145 "xml.y"
-                                      { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += *(yyvsp[0].str); delete (yyvsp[0].str); global_scan->setmode(XmlScan::AttValueSingleMode); }
-#line 1544 "xml.cc"
+#line 145 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += *(yyvsp[0].str); delete (yyvsp[0].str); global_scan->setmode(XmlScan::AttValueSingleMode); }
+#line 1454 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 12:
-#line 146 "xml.y"
-                                       { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += (yyvsp[0].i); global_scan->setmode(XmlScan::AttValueSingleMode); }
-#line 1550 "xml.cc"
+#line 146 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += (yyvsp[0].i); global_scan->setmode(XmlScan::AttValueSingleMode); }
+#line 1460 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 13:
-#line 147 "xml.y"
-                  { (yyval.str) = new string; global_scan->setmode(XmlScan::AttValueDoubleMode); }
-#line 1556 "xml.cc"
+#line 147 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = new string; global_scan->setmode(XmlScan::AttValueDoubleMode); }
+#line 1466 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 14:
-#line 148 "xml.y"
-                                      { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += *(yyvsp[0].str); delete (yyvsp[0].str); global_scan->setmode(XmlScan::AttValueDoubleMode); }
-#line 1562 "xml.cc"
+#line 148 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += *(yyvsp[0].str); delete (yyvsp[0].str); global_scan->setmode(XmlScan::AttValueDoubleMode); }
+#line 1472 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 15:
-#line 149 "xml.y"
-                                       { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += (yyvsp[0].i); global_scan->setmode(XmlScan::AttValueDoubleMode); }
-#line 1568 "xml.cc"
+#line 149 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); *(yyval.str) += (yyvsp[0].i); global_scan->setmode(XmlScan::AttValueDoubleMode); }
+#line 1478 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 16:
-#line 150 "xml.y"
-                            { (yyval.str) = (yyvsp[-1].str); }
-#line 1574 "xml.cc"
+#line 150 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); }
+#line 1484 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 17:
-#line 151 "xml.y"
-                             { (yyval.str) = (yyvsp[-1].str); }
-#line 1580 "xml.cc"
+#line 151 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); }
+#line 1490 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 18:
-#line 152 "xml.y"
-                     { global_scan->setmode(XmlScan::NameMode); delete (yyvsp[0].str); }
-#line 1586 "xml.cc"
+#line 152 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::NameMode); delete (yyvsp[0].str); }
+#line 1496 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 19:
-#line 153 "xml.y"
-                                    { global_scan->setmode(XmlScan::CommentMode); delete (yyvsp[-3].str); }
-#line 1592 "xml.cc"
+#line 153 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::CommentMode); delete (yyvsp[-3].str); }
+#line 1502 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 20:
-#line 154 "xml.y"
-                                          { delete (yyvsp[-3].str); }
-#line 1598 "xml.cc"
+#line 154 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { delete (yyvsp[-3].str); }
+#line 1508 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 21:
-#line 155 "xml.y"
-                  { delete (yyvsp[-1].str); yyerror("Processing instructions are not supported"); YYERROR; }
-#line 1604 "xml.cc"
+#line 155 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { delete (yyvsp[-1].str); yyerror("Processing instructions are not supported"); YYERROR; }
+#line 1514 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 22:
-#line 156 "xml.y"
-                            { (yyval.str) = (yyvsp[-1].str); }
-#line 1610 "xml.cc"
+#line 156 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); }
+#line 1520 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 23:
-#line 157 "xml.y"
-                                                   { global_scan->setmode(XmlScan::CDataMode); delete (yyvsp[-8].str); }
-#line 1616 "xml.cc"
+#line 157 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::CDataMode); delete (yyvsp[-8].str); }
+#line 1526 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 32:
-#line 168 "xml.y"
-                                                       { delete (yyvsp[-8].str); yyerror("DTD's not supported"); YYERROR; }
-#line 1622 "xml.cc"
+#line 168 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { delete (yyvsp[-8].str); yyerror("DTD's not supported"); YYERROR; }
+#line 1532 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 39:
-#line 176 "xml.y"
-                                                       { handler->setVersion(*(yyvsp[0].str)); delete (yyvsp[0].str); }
-#line 1628 "xml.cc"
+#line 176 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->setVersion(*(yyvsp[0].str)); delete (yyvsp[0].str); }
+#line 1538 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 40:
-#line 177 "xml.y"
-                                                            { handler->setEncoding(*(yyvsp[0].str)); delete (yyvsp[0].str); }
-#line 1634 "xml.cc"
+#line 177 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->setEncoding(*(yyvsp[0].str)); delete (yyvsp[0].str); }
+#line 1544 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 46:
-#line 184 "xml.y"
-                      { handler->endElement((yyvsp[0].attr)->getelemURI(),(yyvsp[0].attr)->getelemName(),(yyvsp[0].attr)->getelemName()); delete (yyvsp[0].attr); }
-#line 1640 "xml.cc"
+#line 184 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->endElement((yyvsp[0].attr)->getelemURI(),(yyvsp[0].attr)->getelemName(),(yyvsp[0].attr)->getelemName()); delete (yyvsp[0].attr); }
+#line 1550 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 47:
-#line 185 "xml.y"
-                             { handler->endElement((yyvsp[-2].attr)->getelemURI(),(yyvsp[-2].attr)->getelemName(),(yyvsp[-2].attr)->getelemName()); delete (yyvsp[-2].attr); delete (yyvsp[0].str); }
-#line 1646 "xml.cc"
+#line 185 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->endElement((yyvsp[-2].attr)->getelemURI(),(yyvsp[-2].attr)->getelemName(),(yyvsp[-2].attr)->getelemName()); delete (yyvsp[-2].attr); delete (yyvsp[0].str); }
+#line 1556 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 48:
-#line 187 "xml.y"
-                    { handler->startElement((yyvsp[-1].attr)->getelemURI(),(yyvsp[-1].attr)->getelemName(),(yyvsp[-1].attr)->getelemName(),*(yyvsp[-1].attr)); (yyval.attr) = (yyvsp[-1].attr); }
-#line 1652 "xml.cc"
+#line 187 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->startElement((yyvsp[-1].attr)->getelemURI(),(yyvsp[-1].attr)->getelemName(),(yyvsp[-1].attr)->getelemName(),*(yyvsp[-1].attr)); (yyval.attr) = (yyvsp[-1].attr); }
+#line 1562 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 49:
-#line 188 "xml.y"
-                        { handler->startElement((yyvsp[-2].attr)->getelemURI(),(yyvsp[-2].attr)->getelemName(),(yyvsp[-2].attr)->getelemName(),*(yyvsp[-2].attr)); (yyval.attr) = (yyvsp[-2].attr); }
-#line 1658 "xml.cc"
+#line 188 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->startElement((yyvsp[-2].attr)->getelemURI(),(yyvsp[-2].attr)->getelemName(),(yyvsp[-2].attr)->getelemName(),*(yyvsp[-2].attr)); (yyval.attr) = (yyvsp[-2].attr); }
+#line 1568 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 50:
-#line 189 "xml.y"
-                                { handler->startElement((yyvsp[-2].attr)->getelemURI(),(yyvsp[-2].attr)->getelemName(),(yyvsp[-2].attr)->getelemName(),*(yyvsp[-2].attr)); (yyval.attr) = (yyvsp[-2].attr); }
-#line 1664 "xml.cc"
+#line 189 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->startElement((yyvsp[-2].attr)->getelemURI(),(yyvsp[-2].attr)->getelemName(),(yyvsp[-2].attr)->getelemName(),*(yyvsp[-2].attr)); (yyval.attr) = (yyvsp[-2].attr); }
+#line 1574 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 51:
-#line 190 "xml.y"
-                                    { handler->startElement((yyvsp[-3].attr)->getelemURI(),(yyvsp[-3].attr)->getelemName(),(yyvsp[-3].attr)->getelemName(),*(yyvsp[-3].attr)); (yyval.attr) = (yyvsp[-3].attr); }
-#line 1670 "xml.cc"
+#line 190 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { handler->startElement((yyvsp[-3].attr)->getelemURI(),(yyvsp[-3].attr)->getelemName(),(yyvsp[-3].attr)->getelemName(),*(yyvsp[-3].attr)); (yyval.attr) = (yyvsp[-3].attr); }
+#line 1580 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 52:
-#line 192 "xml.y"
-                          { (yyval.attr) = new Attributes((yyvsp[0].str)); global_scan->setmode(XmlScan::SNameMode); }
-#line 1676 "xml.cc"
+#line 192 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.attr) = new Attributes((yyvsp[0].str)); global_scan->setmode(XmlScan::SNameMode); }
+#line 1586 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 53:
-#line 193 "xml.y"
-                                  { (yyval.attr) = (yyvsp[-1].attr); (yyval.attr)->add_attribute( (yyvsp[0].pair)->name, (yyvsp[0].pair)->value); delete (yyvsp[0].pair); global_scan->setmode(XmlScan::SNameMode); }
-#line 1682 "xml.cc"
+#line 193 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.attr) = (yyvsp[-1].attr); (yyval.attr)->add_attribute( (yyvsp[0].pair)->name, (yyvsp[0].pair)->value); delete (yyvsp[0].pair); global_scan->setmode(XmlScan::SNameMode); }
+#line 1592 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 54:
-#line 194 "xml.y"
-                              { (yyval.pair) = new NameValue; (yyval.pair)->name = (yyvsp[-2].str); (yyval.pair)->value = (yyvsp[0].str); }
-#line 1688 "xml.cc"
+#line 194 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.pair) = new NameValue; (yyval.pair)->name = (yyvsp[-2].str); (yyval.pair)->value = (yyvsp[0].str); }
+#line 1598 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 55:
-#line 195 "xml.y"
-                         { global_scan->setmode(XmlScan::NameMode); delete (yyvsp[-1].str); }
-#line 1694 "xml.cc"
+#line 195 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::NameMode); delete (yyvsp[-1].str); }
+#line 1604 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 56:
-#line 196 "xml.y"
-                         { (yyval.str) = (yyvsp[-1].str); }
-#line 1700 "xml.cc"
+#line 196 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); }
+#line 1610 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 57:
-#line 197 "xml.y"
-                             { (yyval.str) = (yyvsp[-2].str); }
-#line 1706 "xml.cc"
+#line 197 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-2].str); }
+#line 1616 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 58:
-#line 199 "xml.y"
-         { global_scan->setmode(XmlScan::CharDataMode); }
-#line 1712 "xml.cc"
+#line 199 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::CharDataMode); }
+#line 1622 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 59:
-#line 200 "xml.y"
-                            { print_content( *(yyvsp[0].str) ); delete (yyvsp[0].str); global_scan->setmode(XmlScan::CharDataMode); }
-#line 1718 "xml.cc"
+#line 200 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { print_content( *(yyvsp[0].str) ); delete (yyvsp[0].str); global_scan->setmode(XmlScan::CharDataMode); }
+#line 1628 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 60:
-#line 201 "xml.y"
-                           { global_scan->setmode(XmlScan::CharDataMode); }
-#line 1724 "xml.cc"
+#line 201 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::CharDataMode); }
+#line 1634 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 61:
-#line 202 "xml.y"
-                             { string *tmp=new string(); *tmp += (yyvsp[0].i); print_content(*tmp); delete tmp; global_scan->setmode(XmlScan::CharDataMode); }
-#line 1730 "xml.cc"
+#line 202 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { string *tmp=new string(); *tmp += (yyvsp[0].i); print_content(*tmp); delete tmp; global_scan->setmode(XmlScan::CharDataMode); }
+#line 1640 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 62:
-#line 203 "xml.y"
-                          { print_content( *(yyvsp[0].str) ); delete (yyvsp[0].str); global_scan->setmode(XmlScan::CharDataMode); }
-#line 1736 "xml.cc"
+#line 203 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { print_content( *(yyvsp[0].str) ); delete (yyvsp[0].str); global_scan->setmode(XmlScan::CharDataMode); }
+#line 1646 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 63:
-#line 204 "xml.y"
-                      { global_scan->setmode(XmlScan::CharDataMode); }
-#line 1742 "xml.cc"
+#line 204 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::CharDataMode); }
+#line 1652 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 64:
-#line 205 "xml.y"
-                           { global_scan->setmode(XmlScan::CharDataMode); }
-#line 1748 "xml.cc"
+#line 205 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::CharDataMode); }
+#line 1658 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 65:
-#line 207 "xml.y"
-                     { (yyval.i) = convertEntityRef(*(yyvsp[0].str)); delete (yyvsp[0].str); }
-#line 1754 "xml.cc"
+#line 207 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.i) = convertEntityRef(*(yyvsp[0].str)); delete (yyvsp[0].str); }
+#line 1664 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 66:
-#line 208 "xml.y"
-                     { (yyval.i) = convertCharRef(*(yyvsp[0].str)); delete (yyvsp[0].str); }
-#line 1760 "xml.cc"
+#line 208 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.i) = convertCharRef(*(yyvsp[0].str)); delete (yyvsp[0].str); }
+#line 1670 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 67:
-#line 210 "xml.y"
-              { global_scan->setmode(XmlScan::NameMode); }
-#line 1766 "xml.cc"
+#line 210 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::NameMode); }
+#line 1676 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 68:
-#line 211 "xml.y"
-                           { global_scan->setmode(XmlScan::CharRefMode); }
-#line 1772 "xml.cc"
+#line 211 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { global_scan->setmode(XmlScan::CharRefMode); }
+#line 1682 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 69:
-#line 212 "xml.y"
-                                  { (yyval.str) = (yyvsp[-1].str); }
-#line 1778 "xml.cc"
+#line 212 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); }
+#line 1688 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
   case 70:
-#line 213 "xml.y"
-                             { (yyval.str) = (yyvsp[-1].str); }
-#line 1784 "xml.cc"
+#line 213 "src/decompile/cpp/xml.y" /* yacc.c:1652  */
+    { (yyval.str) = (yyvsp[-1].str); }
+#line 1694 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
     break;
 
 
-#line 1788 "xml.cc"
-
+#line 1698 "src/decompile/cpp/xml.cc" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1863,7 +1772,7 @@ yyerrlab:
           {
             if (yymsg != yymsgbuf)
               YYSTACK_FREE (yymsg);
-            yymsg = YY_CAST (char *, YYSTACK_ALLOC (YY_CAST (YYSIZE_T, yymsg_alloc)));
+            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
             if (!yymsg)
               {
                 yymsg = yymsgbuf;
@@ -2018,7 +1927,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[+*yyssp], yyvsp);
+                  yystos[*yyssp], yyvsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -2031,7 +1940,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 214 "xml.y"
+#line 214 "src/decompile/cpp/xml.y" /* yacc.c:1918  */
 
 
 XmlScan::XmlScan(istream &t) : s(t)
@@ -2386,7 +2295,7 @@ const string &Element::getAttributeValue(const string &nm) const
   for(uint4 i=0;i<attr.size();++i)
     if (attr[i] == nm)
       return value[i];
-  throw XmlError("Unknown attribute: "+nm);
+  throw DecoderError("Unknown attribute: "+nm);
 }
 
 DocumentStorage::~DocumentStorage(void)
@@ -2411,7 +2320,7 @@ Document *DocumentStorage::openDocument(const string &filename)
 {
   ifstream s(filename.c_str());
   if (!s)
-    throw XmlError("Unable to open xml document "+filename);
+    throw DecoderError("Unable to open xml document "+filename);
   Document *res = parseDocument(s);
   s.close();
   return res;
@@ -2441,7 +2350,7 @@ Document *xml_tree(istream &i)
   TreeHandler handle(doc);
   if (0!=xml_parse(i,&handle)) {
     delete doc;
-    throw XmlError(handle.getError());
+    throw DecoderError(handle.getError());
   }
   return doc;
 }

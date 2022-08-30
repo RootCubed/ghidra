@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/* A Bison parser, made by GNU Bison 3.5.1.  */
+/* A Bison parser, made by GNU Bison 3.3.1.  */
 
 /* Bison implementation for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2020 Free Software Foundation,
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2019 Free Software Foundation,
    Inc.
 
    This program is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@
 #define YYBISON 1
 
 /* Bison version.  */
-#define YYBISON_VERSION "3.5.1"
+#define YYBISON_VERSION "3.3.1"
 
 /* Skeleton name.  */
 #define YYSKELETON_NAME "yacc.c"
@@ -79,16 +79,17 @@
 
 
 /* Substitute the variable and function names.  */
-#define yyparse         cparseparse
-#define yylex           cparselex
-#define yyerror         cparseerror
-#define yydebug         cparsedebug
-#define yynerrs         cparsenerrs
-#define yylval          cparselval
-#define yychar          cparsechar
+#define yyparse         grammarparse
+#define yylex           grammarlex
+#define yyerror         grammarerror
+#define yydebug         grammardebug
+#define yynerrs         grammarnerrs
+
+#define yylval          grammarlval
+#define yychar          grammarchar
 
 /* First part of user prologue.  */
-#line 16 "grammar.y"
+#line 16 "src/decompile/cpp/grammar.y" /* yacc.c:337  */
 
 #include "grammar.hh"
 
@@ -97,17 +98,7 @@ extern int yyerror(const char *str);
 static CParse *parse;
 extern int yydebug;
 
-#line 86 "grammar.cc"
-
-# ifndef YY_CAST
-#  ifdef __cplusplus
-#   define YY_CAST(Type, Val) static_cast<Type> (Val)
-#   define YY_REINTERPRET_CAST(Type, Val) reinterpret_cast<Type> (Val)
-#  else
-#   define YY_CAST(Type, Val) ((Type) (Val))
-#   define YY_REINTERPRET_CAST(Type, Val) ((Type) (Val))
-#  endif
-# endif
+#line 87 "src/decompile/cpp/grammar.cc" /* yacc.c:337  */
 # ifndef YY_NULLPTR
 #  if defined __cplusplus
 #   if 201103L <= __cplusplus
@@ -134,7 +125,7 @@ extern int yydebug;
 # define YYDEBUG 0
 #endif
 #if YYDEBUG
-extern int cparsedebug;
+extern int grammardebug;
 #endif
 
 /* Token type.  */
@@ -160,9 +151,10 @@ extern int cparsedebug;
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
+
 union YYSTYPE
 {
-#line 25 "grammar.y"
+#line 25 "src/decompile/cpp/grammar.y" /* yacc.c:352  */
 
   uint4 flags;
   TypeDeclarator *dec;
@@ -175,18 +167,18 @@ union YYSTYPE
   string *str;
   uintb *i;
 
-#line 164 "grammar.cc"
-
+#line 156 "src/decompile/cpp/grammar.cc" /* yacc.c:352  */
 };
+
 typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
 
-extern YYSTYPE cparselval;
+extern YYSTYPE grammarlval;
 
-int cparseparse (void);
+int grammarparse (void);
 
 
 
@@ -196,75 +188,28 @@ int cparseparse (void);
 # undef short
 #endif
 
-/* On compilers that do not define __PTRDIFF_MAX__ etc., make sure
-   <limits.h> and (if available) <stdint.h> are included
-   so that the code can choose integer types of a good width.  */
-
-#ifndef __PTRDIFF_MAX__
-# include <limits.h> /* INFRINGES ON USER NAME SPACE */
-# if defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
-#  include <stdint.h> /* INFRINGES ON USER NAME SPACE */
-#  define YY_STDINT_H
-# endif
+#ifdef YYTYPE_UINT8
+typedef YYTYPE_UINT8 yytype_uint8;
+#else
+typedef unsigned char yytype_uint8;
 #endif
 
-/* Narrow types that promote to a signed type and that can represent a
-   signed or unsigned integer of at least N bits.  In tables they can
-   save space and decrease cache pressure.  Promoting to a signed type
-   helps avoid bugs in integer arithmetic.  */
-
-#ifdef __INT_LEAST8_MAX__
-typedef __INT_LEAST8_TYPE__ yytype_int8;
-#elif defined YY_STDINT_H
-typedef int_least8_t yytype_int8;
+#ifdef YYTYPE_INT8
+typedef YYTYPE_INT8 yytype_int8;
 #else
 typedef signed char yytype_int8;
 #endif
 
-#ifdef __INT_LEAST16_MAX__
-typedef __INT_LEAST16_TYPE__ yytype_int16;
-#elif defined YY_STDINT_H
-typedef int_least16_t yytype_int16;
+#ifdef YYTYPE_UINT16
+typedef YYTYPE_UINT16 yytype_uint16;
+#else
+typedef unsigned short yytype_uint16;
+#endif
+
+#ifdef YYTYPE_INT16
+typedef YYTYPE_INT16 yytype_int16;
 #else
 typedef short yytype_int16;
-#endif
-
-#if defined __UINT_LEAST8_MAX__ && __UINT_LEAST8_MAX__ <= __INT_MAX__
-typedef __UINT_LEAST8_TYPE__ yytype_uint8;
-#elif (!defined __UINT_LEAST8_MAX__ && defined YY_STDINT_H \
-       && UINT_LEAST8_MAX <= INT_MAX)
-typedef uint_least8_t yytype_uint8;
-#elif !defined __UINT_LEAST8_MAX__ && UCHAR_MAX <= INT_MAX
-typedef unsigned char yytype_uint8;
-#else
-typedef short yytype_uint8;
-#endif
-
-#if defined __UINT_LEAST16_MAX__ && __UINT_LEAST16_MAX__ <= __INT_MAX__
-typedef __UINT_LEAST16_TYPE__ yytype_uint16;
-#elif (!defined __UINT_LEAST16_MAX__ && defined YY_STDINT_H \
-       && UINT_LEAST16_MAX <= INT_MAX)
-typedef uint_least16_t yytype_uint16;
-#elif !defined __UINT_LEAST16_MAX__ && USHRT_MAX <= INT_MAX
-typedef unsigned short yytype_uint16;
-#else
-typedef int yytype_uint16;
-#endif
-
-#ifndef YYPTRDIFF_T
-# if defined __PTRDIFF_TYPE__ && defined __PTRDIFF_MAX__
-#  define YYPTRDIFF_T __PTRDIFF_TYPE__
-#  define YYPTRDIFF_MAXIMUM __PTRDIFF_MAX__
-# elif defined PTRDIFF_MAX
-#  ifndef ptrdiff_t
-#   include <stddef.h> /* INFRINGES ON USER NAME SPACE */
-#  endif
-#  define YYPTRDIFF_T ptrdiff_t
-#  define YYPTRDIFF_MAXIMUM PTRDIFF_MAX
-# else
-#  define YYPTRDIFF_T long
-#  define YYPTRDIFF_MAXIMUM LONG_MAX
-# endif
 #endif
 
 #ifndef YYSIZE_T
@@ -272,7 +217,7 @@ typedef int yytype_uint16;
 #  define YYSIZE_T __SIZE_TYPE__
 # elif defined size_t
 #  define YYSIZE_T size_t
-# elif defined __STDC_VERSION__ && 199901 <= __STDC_VERSION__
+# elif ! defined YYSIZE_T
 #  include <stddef.h> /* INFRINGES ON USER NAME SPACE */
 #  define YYSIZE_T size_t
 # else
@@ -280,19 +225,7 @@ typedef int yytype_uint16;
 # endif
 #endif
 
-#define YYSIZE_MAXIMUM                                  \
-  YY_CAST (YYPTRDIFF_T,                                 \
-           (YYPTRDIFF_MAXIMUM < YY_CAST (YYSIZE_T, -1)  \
-            ? YYPTRDIFF_MAXIMUM                         \
-            : YY_CAST (YYSIZE_T, -1)))
-
-#define YYSIZEOF(X) YY_CAST (YYPTRDIFF_T, sizeof (X))
-
-/* Stored state numbers (used for stacks). */
-typedef yytype_int8 yy_state_t;
-
-/* State numbers in computations.  */
-typedef int yy_state_fast_t;
+#define YYSIZE_MAXIMUM ((YYSIZE_T) -1)
 
 #ifndef YY_
 # if defined YYENABLE_NLS && YYENABLE_NLS
@@ -306,20 +239,22 @@ typedef int yy_state_fast_t;
 # endif
 #endif
 
-#ifndef YY_ATTRIBUTE_PURE
-# if defined __GNUC__ && 2 < __GNUC__ + (96 <= __GNUC_MINOR__)
-#  define YY_ATTRIBUTE_PURE __attribute__ ((__pure__))
+#ifndef YY_ATTRIBUTE
+# if (defined __GNUC__                                               \
+      && (2 < __GNUC__ || (__GNUC__ == 2 && 96 <= __GNUC_MINOR__)))  \
+     || defined __SUNPRO_C && 0x5110 <= __SUNPRO_C
+#  define YY_ATTRIBUTE(Spec) __attribute__(Spec)
 # else
-#  define YY_ATTRIBUTE_PURE
+#  define YY_ATTRIBUTE(Spec) /* empty */
 # endif
 #endif
 
+#ifndef YY_ATTRIBUTE_PURE
+# define YY_ATTRIBUTE_PURE   YY_ATTRIBUTE ((__pure__))
+#endif
+
 #ifndef YY_ATTRIBUTE_UNUSED
-# if defined __GNUC__ && 2 < __GNUC__ + (7 <= __GNUC_MINOR__)
-#  define YY_ATTRIBUTE_UNUSED __attribute__ ((__unused__))
-# else
-#  define YY_ATTRIBUTE_UNUSED
-# endif
+# define YY_ATTRIBUTE_UNUSED YY_ATTRIBUTE ((__unused__))
 #endif
 
 /* Suppress unused-variable warnings by "using" E.  */
@@ -331,11 +266,11 @@ typedef int yy_state_fast_t;
 
 #if defined __GNUC__ && ! defined __ICC && 407 <= __GNUC__ * 100 + __GNUC_MINOR__
 /* Suppress an incorrect diagnostic about yylval being uninitialized.  */
-# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN                            \
-    _Pragma ("GCC diagnostic push")                                     \
-    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")              \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN \
+    _Pragma ("GCC diagnostic push") \
+    _Pragma ("GCC diagnostic ignored \"-Wuninitialized\"")\
     _Pragma ("GCC diagnostic ignored \"-Wmaybe-uninitialized\"")
-# define YY_IGNORE_MAYBE_UNINITIALIZED_END      \
+# define YY_IGNORE_MAYBE_UNINITIALIZED_END \
     _Pragma ("GCC diagnostic pop")
 #else
 # define YY_INITIAL_VALUE(Value) Value
@@ -348,20 +283,6 @@ typedef int yy_state_fast_t;
 # define YY_INITIAL_VALUE(Value) /* Nothing. */
 #endif
 
-#if defined __cplusplus && defined __GNUC__ && ! defined __ICC && 6 <= __GNUC__
-# define YY_IGNORE_USELESS_CAST_BEGIN                          \
-    _Pragma ("GCC diagnostic push")                            \
-    _Pragma ("GCC diagnostic ignored \"-Wuseless-cast\"")
-# define YY_IGNORE_USELESS_CAST_END            \
-    _Pragma ("GCC diagnostic pop")
-#endif
-#ifndef YY_IGNORE_USELESS_CAST_BEGIN
-# define YY_IGNORE_USELESS_CAST_BEGIN
-# define YY_IGNORE_USELESS_CAST_END
-#endif
-
-
-#define YY_ASSERT(E) ((void) (0 && (E)))
 
 #if ! defined yyoverflow || YYERROR_VERBOSE
 
@@ -438,17 +359,17 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 /* A type that is properly aligned for any stack member.  */
 union yyalloc
 {
-  yy_state_t yyss_alloc;
+  yytype_int16 yyss_alloc;
   YYSTYPE yyvs_alloc;
 };
 
 /* The size of the maximum gap between one aligned stack and the next.  */
-# define YYSTACK_GAP_MAXIMUM (YYSIZEOF (union yyalloc) - 1)
+# define YYSTACK_GAP_MAXIMUM (sizeof (union yyalloc) - 1)
 
 /* The size of an array large to enough to hold all stacks, each with
    N elements.  */
 # define YYSTACK_BYTES(N) \
-     ((N) * (YYSIZEOF (yy_state_t) + YYSIZEOF (YYSTYPE)) \
+     ((N) * (sizeof (yytype_int16) + sizeof (YYSTYPE)) \
       + YYSTACK_GAP_MAXIMUM)
 
 # define YYCOPY_NEEDED 1
@@ -461,11 +382,11 @@ union yyalloc
 # define YYSTACK_RELOCATE(Stack_alloc, Stack)                           \
     do                                                                  \
       {                                                                 \
-        YYPTRDIFF_T yynewbytes;                                         \
+        YYSIZE_T yynewbytes;                                            \
         YYCOPY (&yyptr->Stack_alloc, Stack, yysize);                    \
         Stack = &yyptr->Stack_alloc;                                    \
-        yynewbytes = yystacksize * YYSIZEOF (*Stack) + YYSTACK_GAP_MAXIMUM; \
-        yyptr += yynewbytes / YYSIZEOF (*yyptr);                        \
+        yynewbytes = yystacksize * sizeof (*Stack) + YYSTACK_GAP_MAXIMUM; \
+        yyptr += yynewbytes / sizeof (*yyptr);                          \
       }                                                                 \
     while (0)
 
@@ -477,12 +398,12 @@ union yyalloc
 # ifndef YYCOPY
 #  if defined __GNUC__ && 1 < __GNUC__
 #   define YYCOPY(Dst, Src, Count) \
-      __builtin_memcpy (Dst, Src, YY_CAST (YYSIZE_T, (Count)) * sizeof (*(Src)))
+      __builtin_memcpy (Dst, Src, (Count) * sizeof (*(Src)))
 #  else
 #   define YYCOPY(Dst, Src, Count)              \
       do                                        \
         {                                       \
-          YYPTRDIFF_T yyi;                      \
+          YYSIZE_T yyi;                         \
           for (yyi = 0; yyi < (Count); yyi++)   \
             (Dst)[yyi] = (Src)[yyi];            \
         }                                       \
@@ -508,15 +429,14 @@ union yyalloc
 #define YYUNDEFTOK  2
 #define YYMAXUTOK   270
 
-
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex, with out-of-bounds checking.  */
 #define YYTRANSLATE(YYX)                                                \
-  (0 <= (YYX) && (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
+  ((unsigned) (YYX) <= YYMAXUTOK ? yytranslate[YYX] : YYUNDEFTOK)
 
 /* YYTRANSLATE[TOKEN-NUM] -- Symbol number corresponding to TOKEN-NUM
    as returned by yylex.  */
-static const yytype_int8 yytranslate[] =
+static const yytype_uint8 yytranslate[] =
 {
        0,     2,     2,     2,     2,     2,     2,     2,     2,     2,
        2,     2,     2,     2,     2,     2,     2,     2,     2,     2,
@@ -587,7 +507,7 @@ static const char *const yytname[] =
 # ifdef YYPRINT
 /* YYTOKNUM[NUM] -- (External) token number corresponding to the
    (internal) symbol number NUM (which must be that of a token).  */
-static const yytype_int16 yytoknum[] =
+static const yytype_uint16 yytoknum[] =
 {
        0,   256,   257,   258,   259,   260,   261,   262,   263,   264,
      265,   266,   267,   268,   269,   270,    59,    44,   123,   125,
@@ -595,14 +515,14 @@ static const yytype_int16 yytoknum[] =
 };
 # endif
 
-#define YYPACT_NINF (-71)
+#define YYPACT_NINF -71
 
-#define yypact_value_is_default(Yyn) \
-  ((Yyn) == YYPACT_NINF)
+#define yypact_value_is_default(Yystate) \
+  (!!((Yystate) == (-71)))
 
-#define YYTABLE_NINF (-1)
+#define YYTABLE_NINF -1
 
-#define yytable_value_is_error(Yyn) \
+#define yytable_value_is_error(Yytable_value) \
   0
 
   /* YYPACT[STATE-NUM] -- Index in YYTABLE of the portion describing
@@ -626,7 +546,7 @@ static const yytype_int16 yypact[] =
   /* YYDEFACT[STATE-NUM] -- Default reduction number in state STATE-NUM.
      Performed when YYTABLE does not specify something else to do.  Zero
      means the default is an error.  */
-static const yytype_int8 yydefact[] =
+static const yytype_uint8 yydefact[] =
 {
        0,     0,     0,     0,     0,     0,     0,     6,     8,     9,
       17,     2,     0,     7,    18,    19,    63,     3,     1,    22,
@@ -661,7 +581,7 @@ static const yytype_int8 yydefgoto[] =
   /* YYTABLE[YYPACT[STATE-NUM]] -- What to do in state STATE-NUM.  If
      positive, shift that token.  If negative, reduce the rule whose
      number is the opposite.  If YYTABLE_NINF, syntax error.  */
-static const yytype_int8 yytable[] =
+static const yytype_uint8 yytable[] =
 {
       13,    13,    17,    39,    40,    94,    13,    13,    13,    72,
      103,    50,    13,    72,    52,    56,    18,    55,    89,    57,
@@ -703,7 +623,7 @@ static const yytype_int8 yycheck[] =
 
   /* YYSTOS[STATE-NUM] -- The (internal number of the) accessing
      symbol of state STATE-NUM.  */
-static const yytype_int8 yystos[] =
+static const yytype_uint8 yystos[] =
 {
        0,     8,     9,    27,     5,     6,     7,    12,    13,    14,
       15,    28,    29,    32,    33,    39,    29,    48,     0,    11,
@@ -720,7 +640,7 @@ static const yytype_int8 yystos[] =
 };
 
   /* YYR1[YYN] -- Symbol number of symbol that rule YYN derives.  */
-static const yytype_int8 yyr1[] =
+static const yytype_uint8 yyr1[] =
 {
        0,    26,    27,    27,    28,    28,    29,    29,    29,    29,
       29,    29,    29,    29,    30,    30,    31,    32,    32,    32,
@@ -733,7 +653,7 @@ static const yytype_int8 yyr1[] =
 };
 
   /* YYR2[YYN] -- Number of symbols on the right hand side of rule YYN.  */
-static const yytype_int8 yyr2[] =
+static const yytype_uint8 yyr2[] =
 {
        0,     2,     2,     2,     2,     3,     1,     1,     1,     1,
        2,     2,     2,     2,     1,     3,     1,     1,     1,     1,
@@ -828,9 +748,7 @@ yy_symbol_value_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
   if (yytype < YYNTOKENS)
     YYPRINT (yyo, yytoknum[yytype], *yyvaluep);
 # endif
-  YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   YYUSE (yytype);
-  YY_IGNORE_MAYBE_UNINITIALIZED_END
 }
 
 
@@ -854,7 +772,7 @@ yy_symbol_print (FILE *yyo, int yytype, YYSTYPE const * const yyvaluep)
 `------------------------------------------------------------------*/
 
 static void
-yy_stack_print (yy_state_t *yybottom, yy_state_t *yytop)
+yy_stack_print (yytype_int16 *yybottom, yytype_int16 *yytop)
 {
   YYFPRINTF (stderr, "Stack now");
   for (; yybottom <= yytop; yybottom++)
@@ -877,19 +795,19 @@ do {                                                            \
 `------------------------------------------------*/
 
 static void
-yy_reduce_print (yy_state_t *yyssp, YYSTYPE *yyvsp, int yyrule)
+yy_reduce_print (yytype_int16 *yyssp, YYSTYPE *yyvsp, int yyrule)
 {
-  int yylno = yyrline[yyrule];
+  unsigned long yylno = yyrline[yyrule];
   int yynrhs = yyr2[yyrule];
   int yyi;
-  YYFPRINTF (stderr, "Reducing stack by rule %d (line %d):\n",
+  YYFPRINTF (stderr, "Reducing stack by rule %d (line %lu):\n",
              yyrule - 1, yylno);
   /* The symbols being reduced.  */
   for (yyi = 0; yyi < yynrhs; yyi++)
     {
       YYFPRINTF (stderr, "   $%d = ", yyi + 1);
       yy_symbol_print (stderr,
-                       yystos[+yyssp[yyi + 1 - yynrhs]],
+                       yystos[yyssp[yyi + 1 - yynrhs]],
                        &yyvsp[(yyi + 1) - (yynrhs)]
                                               );
       YYFPRINTF (stderr, "\n");
@@ -934,13 +852,13 @@ int yydebug;
 
 # ifndef yystrlen
 #  if defined __GLIBC__ && defined _STRING_H
-#   define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
+#   define yystrlen strlen
 #  else
 /* Return the length of YYSTR.  */
-static YYPTRDIFF_T
+static YYSIZE_T
 yystrlen (const char *yystr)
 {
-  YYPTRDIFF_T yylen;
+  YYSIZE_T yylen;
   for (yylen = 0; yystr[yylen]; yylen++)
     continue;
   return yylen;
@@ -976,12 +894,12 @@ yystpcpy (char *yydest, const char *yysrc)
    backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
    null, do not copy; instead, return the length of what the result
    would have been.  */
-static YYPTRDIFF_T
+static YYSIZE_T
 yytnamerr (char *yyres, const char *yystr)
 {
   if (*yystr == '"')
     {
-      YYPTRDIFF_T yyn = 0;
+      YYSIZE_T yyn = 0;
       char const *yyp = yystr;
 
       for (;;)
@@ -1012,10 +930,10 @@ yytnamerr (char *yyres, const char *yystr)
     do_not_strip_quotes: ;
     }
 
-  if (yyres)
-    return yystpcpy (yyres, yystr) - yyres;
-  else
+  if (! yyres)
     return yystrlen (yystr);
+
+  return (YYSIZE_T) (yystpcpy (yyres, yystr) - yyres);
 }
 # endif
 
@@ -1028,19 +946,19 @@ yytnamerr (char *yyres, const char *yystr)
    *YYMSG_ALLOC to the required number of bytes.  Return 2 if the
    required number of bytes is too large to store.  */
 static int
-yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
-                yy_state_t *yyssp, int yytoken)
+yysyntax_error (YYSIZE_T *yymsg_alloc, char **yymsg,
+                yytype_int16 *yyssp, int yytoken)
 {
+  YYSIZE_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
+  YYSIZE_T yysize = yysize0;
   enum { YYERROR_VERBOSE_ARGS_MAXIMUM = 5 };
   /* Internationalized format string. */
   const char *yyformat = YY_NULLPTR;
-  /* Arguments of yyformat: reported tokens (one for the "unexpected",
-     one per "expected"). */
+  /* Arguments of yyformat. */
   char const *yyarg[YYERROR_VERBOSE_ARGS_MAXIMUM];
-  /* Actual size of YYARG. */
+  /* Number of reported tokens (one for the "unexpected", one per
+     "expected"). */
   int yycount = 0;
-  /* Cumulated lengths of YYARG.  */
-  YYPTRDIFF_T yysize = 0;
 
   /* There are many possibilities here to consider:
      - If this state is a consistent state with a default action, then
@@ -1067,9 +985,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
   */
   if (yytoken != YYEMPTY)
     {
-      int yyn = yypact[+*yyssp];
-      YYPTRDIFF_T yysize0 = yytnamerr (YY_NULLPTR, yytname[yytoken]);
-      yysize = yysize0;
+      int yyn = yypact[*yyssp];
       yyarg[yycount++] = yytname[yytoken];
       if (!yypact_value_is_default (yyn))
         {
@@ -1094,8 +1010,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
                   }
                 yyarg[yycount++] = yytname[yyx];
                 {
-                  YYPTRDIFF_T yysize1
-                    = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
+                  YYSIZE_T yysize1 = yysize + yytnamerr (YY_NULLPTR, yytname[yyx]);
                   if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
                     yysize = yysize1;
                   else
@@ -1122,9 +1037,7 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
     }
 
   {
-    /* Don't count the "%s"s in the final size, but reserve room for
-       the terminator.  */
-    YYPTRDIFF_T yysize1 = yysize + (yystrlen (yyformat) - 2 * yycount) + 1;
+    YYSIZE_T yysize1 = yysize + yystrlen (yyformat);
     if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
       yysize = yysize1;
     else
@@ -1154,8 +1067,8 @@ yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
         }
       else
         {
-          ++yyp;
-          ++yyformat;
+          yyp++;
+          yyformat++;
         }
   }
   return 0;
@@ -1198,7 +1111,7 @@ int yynerrs;
 int
 yyparse (void)
 {
-    yy_state_fast_t yystate;
+    int yystate;
     /* Number of tokens to shift before error messages enabled.  */
     int yyerrstatus;
 
@@ -1210,16 +1123,16 @@ yyparse (void)
        to reallocate them elsewhere.  */
 
     /* The state stack.  */
-    yy_state_t yyssa[YYINITDEPTH];
-    yy_state_t *yyss;
-    yy_state_t *yyssp;
+    yytype_int16 yyssa[YYINITDEPTH];
+    yytype_int16 *yyss;
+    yytype_int16 *yyssp;
 
     /* The semantic value stack.  */
     YYSTYPE yyvsa[YYINITDEPTH];
     YYSTYPE *yyvs;
     YYSTYPE *yyvsp;
 
-    YYPTRDIFF_T yystacksize;
+    YYSIZE_T yystacksize;
 
   int yyn;
   int yyresult;
@@ -1233,7 +1146,7 @@ yyparse (void)
   /* Buffer for error messages, and its allocated size.  */
   char yymsgbuf[128];
   char *yymsg = yymsgbuf;
-  YYPTRDIFF_T yymsg_alloc = sizeof yymsgbuf;
+  YYSIZE_T yymsg_alloc = sizeof yymsgbuf;
 #endif
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
@@ -1265,14 +1178,10 @@ yynewstate:
 
 
 /*--------------------------------------------------------------------.
-| yysetstate -- set current state (the top of the stack) to yystate.  |
+| yynewstate -- set current state (the top of the stack) to yystate.  |
 `--------------------------------------------------------------------*/
 yysetstate:
-  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
-  YY_ASSERT (0 <= yystate && yystate < YYNSTATES);
-  YY_IGNORE_USELESS_CAST_BEGIN
-  *yyssp = YY_CAST (yy_state_t, yystate);
-  YY_IGNORE_USELESS_CAST_END
+  *yyssp = (yytype_int16) yystate;
 
   if (yyss + yystacksize - 1 <= yyssp)
 #if !defined yyoverflow && !defined YYSTACK_RELOCATE
@@ -1280,23 +1189,23 @@ yysetstate:
 #else
     {
       /* Get the current used size of the three stacks, in elements.  */
-      YYPTRDIFF_T yysize = yyssp - yyss + 1;
+      YYSIZE_T yysize = (YYSIZE_T) (yyssp - yyss + 1);
 
 # if defined yyoverflow
       {
         /* Give user a chance to reallocate the stack.  Use copies of
            these so that the &'s don't force the real ones into
            memory.  */
-        yy_state_t *yyss1 = yyss;
         YYSTYPE *yyvs1 = yyvs;
+        yytype_int16 *yyss1 = yyss;
 
         /* Each stack pointer address is followed by the size of the
            data in use in that stack, in bytes.  This used to be a
            conditional around just the two extra args, but that might
            be undefined if yyoverflow is a macro.  */
         yyoverflow (YY_("memory exhausted"),
-                    &yyss1, yysize * YYSIZEOF (*yyssp),
-                    &yyvs1, yysize * YYSIZEOF (*yyvsp),
+                    &yyss1, yysize * sizeof (*yyssp),
+                    &yyvs1, yysize * sizeof (*yyvsp),
                     &yystacksize);
         yyss = yyss1;
         yyvs = yyvs1;
@@ -1310,10 +1219,9 @@ yysetstate:
         yystacksize = YYMAXDEPTH;
 
       {
-        yy_state_t *yyss1 = yyss;
+        yytype_int16 *yyss1 = yyss;
         union yyalloc *yyptr =
-          YY_CAST (union yyalloc *,
-                   YYSTACK_ALLOC (YY_CAST (YYSIZE_T, YYSTACK_BYTES (yystacksize))));
+          (union yyalloc *) YYSTACK_ALLOC (YYSTACK_BYTES (yystacksize));
         if (! yyptr)
           goto yyexhaustedlab;
         YYSTACK_RELOCATE (yyss_alloc, yyss);
@@ -1327,15 +1235,15 @@ yysetstate:
       yyssp = yyss + yysize - 1;
       yyvsp = yyvs + yysize - 1;
 
-      YY_IGNORE_USELESS_CAST_BEGIN
-      YYDPRINTF ((stderr, "Stack size increased to %ld\n",
-                  YY_CAST (long, yystacksize)));
-      YY_IGNORE_USELESS_CAST_END
+      YYDPRINTF ((stderr, "Stack size increased to %lu\n",
+                  (unsigned long) yystacksize));
 
       if (yyss + yystacksize - 1 <= yyssp)
         YYABORT;
     }
 #endif /* !defined yyoverflow && !defined YYSTACK_RELOCATE */
+
+  YYDPRINTF ((stderr, "Entering state %d\n", yystate));
 
   if (yystate == YYFINAL)
     YYACCEPT;
@@ -1396,13 +1304,15 @@ yybackup:
 
   /* Shift the lookahead token.  */
   YY_SYMBOL_PRINT ("Shifting", yytoken, &yylval, &yylloc);
+
+  /* Discard the shifted token.  */
+  yychar = YYEMPTY;
+
   yystate = yyn;
   YY_IGNORE_MAYBE_UNINITIALIZED_BEGIN
   *++yyvsp = yylval;
   YY_IGNORE_MAYBE_UNINITIALIZED_END
 
-  /* Discard the shifted token.  */
-  yychar = YYEMPTY;
   goto yynewstate;
 
 
@@ -1437,429 +1347,428 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2:
-#line 60 "grammar.y"
-                                 { parse->setResultDeclarations((yyvsp[0].declist)); }
-#line 1429 "grammar.cc"
+        case 2:
+#line 60 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { parse->setResultDeclarations((yyvsp[0].declist)); }
+#line 1339 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 3:
-#line 61 "grammar.y"
-                                     { vector<TypeDeclarator *> *res = parse->newVecDeclarator(); res->push_back((yyvsp[0].dec)); parse->setResultDeclarations(res); }
-#line 1435 "grammar.cc"
+#line 61 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { vector<TypeDeclarator *> *res = parse->newVecDeclarator(); res->push_back((yyvsp[0].dec)); parse->setResultDeclarations(res); }
+#line 1345 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 4:
-#line 65 "grammar.y"
-                             { (yyval.declist) = parse->mergeSpecDecVec((yyvsp[-1].spec)); }
-#line 1441 "grammar.cc"
+#line 65 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = parse->mergeSpecDecVec((yyvsp[-1].spec)); }
+#line 1351 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 5:
-#line 66 "grammar.y"
-                                                    { (yyval.declist) = parse->mergeSpecDecVec((yyvsp[-2].spec),(yyvsp[-1].declist)); }
-#line 1447 "grammar.cc"
+#line 66 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = parse->mergeSpecDecVec((yyvsp[-2].spec),(yyvsp[-1].declist)); }
+#line 1357 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 6:
-#line 70 "grammar.y"
-                          { (yyval.spec) = parse->newSpecifier(); parse->addSpecifier((yyval.spec),(yyvsp[0].str)); }
-#line 1453 "grammar.cc"
+#line 70 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->newSpecifier(); parse->addSpecifier((yyval.spec),(yyvsp[0].str)); }
+#line 1363 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 7:
-#line 71 "grammar.y"
-                   { (yyval.spec) = parse->newSpecifier(); parse->addTypeSpecifier((yyval.spec),(yyvsp[0].type)); }
-#line 1459 "grammar.cc"
+#line 71 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->newSpecifier(); parse->addTypeSpecifier((yyval.spec),(yyvsp[0].type)); }
+#line 1369 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 8:
-#line 72 "grammar.y"
-                   { (yyval.spec) = parse->newSpecifier(); parse->addSpecifier((yyval.spec),(yyvsp[0].str)); }
-#line 1465 "grammar.cc"
+#line 72 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->newSpecifier(); parse->addSpecifier((yyval.spec),(yyvsp[0].str)); }
+#line 1375 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 9:
-#line 73 "grammar.y"
-                       { (yyval.spec) = parse->newSpecifier(); parse->addFuncSpecifier((yyval.spec),(yyvsp[0].str)); }
-#line 1471 "grammar.cc"
+#line 73 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->newSpecifier(); parse->addFuncSpecifier((yyval.spec),(yyvsp[0].str)); }
+#line 1381 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 10:
-#line 74 "grammar.y"
-                                                   { (yyval.spec) = parse->addSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
-#line 1477 "grammar.cc"
+#line 74 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->addSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
+#line 1387 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 11:
-#line 75 "grammar.y"
-                                          { (yyval.spec) = parse->addTypeSpecifier((yyvsp[0].spec),(yyvsp[-1].type)); }
-#line 1483 "grammar.cc"
+#line 75 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->addTypeSpecifier((yyvsp[0].spec),(yyvsp[-1].type)); }
+#line 1393 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 12:
-#line 76 "grammar.y"
-                                          { (yyval.spec) = parse->addSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
-#line 1489 "grammar.cc"
+#line 76 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->addSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
+#line 1399 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 13:
-#line 77 "grammar.y"
-                                              { (yyval.spec) = parse->addFuncSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
-#line 1495 "grammar.cc"
+#line 77 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->addFuncSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
+#line 1405 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 14:
-#line 81 "grammar.y"
-                  { (yyval.declist) = parse->newVecDeclarator(); (yyval.declist)->push_back((yyvsp[0].dec)); }
-#line 1501 "grammar.cc"
+#line 81 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = parse->newVecDeclarator(); (yyval.declist)->push_back((yyvsp[0].dec)); }
+#line 1411 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 15:
-#line 82 "grammar.y"
-                                             { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((yyvsp[0].dec)); }
-#line 1507 "grammar.cc"
+#line 82 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((yyvsp[0].dec)); }
+#line 1417 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 16:
-#line 86 "grammar.y"
-             { (yyval.dec) = (yyvsp[0].dec); }
-#line 1513 "grammar.cc"
+#line 86 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = (yyvsp[0].dec); }
+#line 1423 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 17:
-#line 91 "grammar.y"
-            { (yyval.type) = (yyvsp[0].type); }
-#line 1519 "grammar.cc"
+#line 91 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = (yyvsp[0].type); }
+#line 1429 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 18:
-#line 92 "grammar.y"
-                              { (yyval.type) = (yyvsp[0].type); }
-#line 1525 "grammar.cc"
+#line 92 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = (yyvsp[0].type); }
+#line 1435 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 19:
-#line 93 "grammar.y"
-                   { (yyval.type) = (yyvsp[0].type); }
-#line 1531 "grammar.cc"
+#line 93 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = (yyvsp[0].type); }
+#line 1441 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 20:
-#line 97 "grammar.y"
-                                         { (yyval.type) = parse->newStruct("",(yyvsp[-1].declist)); }
-#line 1537 "grammar.cc"
+#line 97 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newStruct("",(yyvsp[-1].declist)); }
+#line 1447 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 21:
-#line 98 "grammar.y"
-                                                      { (yyval.type) = parse->newStruct(*(yyvsp[-3].str),(yyvsp[-1].declist)); }
-#line 1543 "grammar.cc"
+#line 98 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newStruct(*(yyvsp[-3].str),(yyvsp[-1].declist)); }
+#line 1453 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 22:
-#line 99 "grammar.y"
-                      { (yyval.type) = parse->oldStruct(*(yyvsp[0].str)); }
-#line 1549 "grammar.cc"
+#line 99 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->oldStruct(*(yyvsp[0].str)); }
+#line 1459 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 23:
-#line 100 "grammar.y"
-                                          { (yyval.type) = parse->newUnion("",(yyvsp[-1].declist)); }
-#line 1555 "grammar.cc"
+#line 100 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newUnion("",(yyvsp[-1].declist)); }
+#line 1465 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 24:
-#line 101 "grammar.y"
-                                                     { (yyval.type) = parse->newUnion(*(yyvsp[-3].str),(yyvsp[-1].declist)); }
-#line 1561 "grammar.cc"
+#line 101 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newUnion(*(yyvsp[-3].str),(yyvsp[-1].declist)); }
+#line 1471 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 25:
-#line 102 "grammar.y"
-                     { (yyval.type) = parse->oldUnion(*(yyvsp[0].str)); }
-#line 1567 "grammar.cc"
+#line 102 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->oldUnion(*(yyvsp[0].str)); }
+#line 1477 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 26:
-#line 106 "grammar.y"
-                     { (yyval.declist) = (yyvsp[0].declist); }
-#line 1573 "grammar.cc"
+#line 106 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = (yyvsp[0].declist); }
+#line 1483 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 27:
-#line 107 "grammar.y"
-                                               { (yyval.declist) = (yyvsp[-1].declist); (yyval.declist)->insert((yyval.declist)->end(),(yyvsp[0].declist)->begin(),(yyvsp[0].declist)->end()); }
-#line 1579 "grammar.cc"
+#line 107 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = (yyvsp[-1].declist); (yyval.declist)->insert((yyval.declist)->end(),(yyvsp[0].declist)->begin(),(yyvsp[0].declist)->end()); }
+#line 1489 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 28:
-#line 111 "grammar.y"
-                                                      { (yyval.declist) = parse->mergeSpecDecVec((yyvsp[-2].spec),(yyvsp[-1].declist)); }
-#line 1585 "grammar.cc"
+#line 111 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = parse->mergeSpecDecVec((yyvsp[-2].spec),(yyvsp[-1].declist)); }
+#line 1495 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 29:
-#line 115 "grammar.y"
-                 { (yyval.spec) = parse->newSpecifier(); parse->addTypeSpecifier((yyval.spec),(yyvsp[0].type)); }
-#line 1591 "grammar.cc"
+#line 115 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->newSpecifier(); parse->addTypeSpecifier((yyval.spec),(yyvsp[0].type)); }
+#line 1501 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 30:
-#line 116 "grammar.y"
-                                            { (yyval.spec) = parse->addTypeSpecifier((yyvsp[0].spec),(yyvsp[-1].type)); }
-#line 1597 "grammar.cc"
+#line 116 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->addTypeSpecifier((yyvsp[0].spec),(yyvsp[-1].type)); }
+#line 1507 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 31:
-#line 117 "grammar.y"
-                   { (yyval.spec) = parse->newSpecifier(); parse->addSpecifier((yyval.spec),(yyvsp[0].str)); }
-#line 1603 "grammar.cc"
+#line 117 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->newSpecifier(); parse->addSpecifier((yyval.spec),(yyvsp[0].str)); }
+#line 1513 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 32:
-#line 118 "grammar.y"
-                                            { (yyval.spec) = parse->addSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
-#line 1609 "grammar.cc"
+#line 118 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.spec) = parse->addSpecifier((yyvsp[0].spec),(yyvsp[-1].str)); }
+#line 1519 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 33:
-#line 122 "grammar.y"
-                    { (yyval.declist) = parse->newVecDeclarator(); (yyval.declist)->push_back((yyvsp[0].dec)); }
-#line 1615 "grammar.cc"
+#line 122 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = parse->newVecDeclarator(); (yyval.declist)->push_back((yyvsp[0].dec)); }
+#line 1525 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 34:
-#line 123 "grammar.y"
-                                                 { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((yyvsp[0].dec)); }
-#line 1621 "grammar.cc"
+#line 123 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((yyvsp[0].dec)); }
+#line 1531 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 35:
-#line 127 "grammar.y"
-             { (yyval.dec) = (yyvsp[0].dec); }
-#line 1627 "grammar.cc"
+#line 127 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = (yyvsp[0].dec); }
+#line 1537 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 36:
-#line 132 "grammar.y"
-                                          { (yyval.type) = parse->newEnum(*(yyvsp[-3].str),(yyvsp[-1].vecenum)); }
-#line 1633 "grammar.cc"
+#line 132 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newEnum(*(yyvsp[-3].str),(yyvsp[-1].vecenum)); }
+#line 1543 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 37:
-#line 133 "grammar.y"
-                                 { (yyval.type) = parse->newEnum("",(yyvsp[-1].vecenum)); }
-#line 1639 "grammar.cc"
+#line 133 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newEnum("",(yyvsp[-1].vecenum)); }
+#line 1549 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 38:
-#line 134 "grammar.y"
-                                                { (yyval.type) = parse->newEnum(*(yyvsp[-4].str),(yyvsp[-2].vecenum)); }
-#line 1645 "grammar.cc"
+#line 134 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newEnum(*(yyvsp[-4].str),(yyvsp[-2].vecenum)); }
+#line 1555 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 39:
-#line 135 "grammar.y"
-                                     { (yyval.type) = parse->newEnum("",(yyvsp[-2].vecenum)); }
-#line 1651 "grammar.cc"
+#line 135 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->newEnum("",(yyvsp[-2].vecenum)); }
+#line 1561 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 40:
-#line 136 "grammar.y"
-                    { (yyval.type) = parse->oldEnum(*(yyvsp[0].str)); }
-#line 1657 "grammar.cc"
+#line 136 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.type) = parse->oldEnum(*(yyvsp[0].str)); }
+#line 1567 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 41:
-#line 140 "grammar.y"
-             { (yyval.vecenum) = parse->newVecEnumerator(); (yyval.vecenum)->push_back((yyvsp[0].enumer)); }
-#line 1663 "grammar.cc"
+#line 140 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.vecenum) = parse->newVecEnumerator(); (yyval.vecenum)->push_back((yyvsp[0].enumer)); }
+#line 1573 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 42:
-#line 141 "grammar.y"
-                                   { (yyval.vecenum) = (yyvsp[-2].vecenum); (yyval.vecenum)->push_back((yyvsp[0].enumer)); }
-#line 1669 "grammar.cc"
+#line 141 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.vecenum) = (yyvsp[-2].vecenum); (yyval.vecenum)->push_back((yyvsp[0].enumer)); }
+#line 1579 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 43:
-#line 145 "grammar.y"
-             { (yyval.enumer) = parse->newEnumerator(*(yyvsp[0].str)); }
-#line 1675 "grammar.cc"
+#line 145 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.enumer) = parse->newEnumerator(*(yyvsp[0].str)); }
+#line 1585 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 44:
-#line 146 "grammar.y"
-                          { (yyval.enumer) = parse->newEnumerator(*(yyvsp[-2].str),*(yyvsp[0].i)); }
-#line 1681 "grammar.cc"
+#line 146 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.enumer) = parse->newEnumerator(*(yyvsp[-2].str),*(yyvsp[0].i)); }
+#line 1591 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 45:
-#line 150 "grammar.y"
-                    { (yyval.dec) = (yyvsp[0].dec); }
-#line 1687 "grammar.cc"
+#line 150 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = (yyvsp[0].dec); }
+#line 1597 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 46:
-#line 151 "grammar.y"
-                              { (yyval.dec) = parse->mergePointer((yyvsp[-1].ptrspec),(yyvsp[0].dec)); }
-#line 1693 "grammar.cc"
+#line 151 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->mergePointer((yyvsp[-1].ptrspec),(yyvsp[0].dec)); }
+#line 1603 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 47:
-#line 155 "grammar.y"
-             { (yyval.dec) = parse->newDeclarator((yyvsp[0].str)); }
-#line 1699 "grammar.cc"
+#line 155 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->newDeclarator((yyvsp[0].str)); }
+#line 1609 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 48:
-#line 156 "grammar.y"
-                       { (yyval.dec) = (yyvsp[-1].dec); }
-#line 1705 "grammar.cc"
+#line 156 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = (yyvsp[-1].dec); }
+#line 1615 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 49:
-#line 157 "grammar.y"
-                                                                        { (yyval.dec) = parse->newArray((yyvsp[-4].dec),(yyvsp[-2].flags),(yyvsp[-1].i)); }
-#line 1711 "grammar.cc"
+#line 157 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->newArray((yyvsp[-4].dec),(yyvsp[-2].flags),(yyvsp[-1].i)); }
+#line 1621 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 50:
-#line 158 "grammar.y"
-                                                    { (yyval.dec) = parse->newArray((yyvsp[-3].dec),0,(yyvsp[-1].i)); }
-#line 1717 "grammar.cc"
+#line 158 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->newArray((yyvsp[-3].dec),0,(yyvsp[-1].i)); }
+#line 1627 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 51:
-#line 160 "grammar.y"
-                                                  { (yyval.dec) = parse->newFunc((yyvsp[-3].dec),(yyvsp[-1].declist)); }
-#line 1723 "grammar.cc"
+#line 160 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->newFunc((yyvsp[-3].dec),(yyvsp[-1].declist)); }
+#line 1633 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 52:
-#line 165 "grammar.y"
-      { (yyval.ptrspec) = parse->newPointer(); (yyval.ptrspec)->push_back(0); }
-#line 1729 "grammar.cc"
+#line 165 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.ptrspec) = parse->newPointer(); (yyval.ptrspec)->push_back(0); }
+#line 1639 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 53:
-#line 166 "grammar.y"
-                            { (yyval.ptrspec) = parse->newPointer(); (yyval.ptrspec)->push_back((yyvsp[0].flags)); }
-#line 1735 "grammar.cc"
+#line 166 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.ptrspec) = parse->newPointer(); (yyval.ptrspec)->push_back((yyvsp[0].flags)); }
+#line 1645 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 54:
-#line 167 "grammar.y"
-                { (yyval.ptrspec) = (yyvsp[0].ptrspec); (yyval.ptrspec)->push_back(0); }
-#line 1741 "grammar.cc"
+#line 167 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.ptrspec) = (yyvsp[0].ptrspec); (yyval.ptrspec)->push_back(0); }
+#line 1651 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 55:
-#line 168 "grammar.y"
-                                    { (yyval.ptrspec) = (yyvsp[0].ptrspec); (yyval.ptrspec)->push_back((yyvsp[-1].flags)); }
-#line 1747 "grammar.cc"
+#line 168 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.ptrspec) = (yyvsp[0].ptrspec); (yyval.ptrspec)->push_back((yyvsp[-1].flags)); }
+#line 1657 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 56:
-#line 172 "grammar.y"
-                 { (yyval.flags) = parse->convertFlag((yyvsp[0].str)); }
-#line 1753 "grammar.cc"
+#line 172 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.flags) = parse->convertFlag((yyvsp[0].str)); }
+#line 1663 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 57:
-#line 173 "grammar.y"
-                                       { (yyval.flags) = (yyvsp[-1].flags); (yyval.flags) |= parse->convertFlag((yyvsp[0].str)); }
-#line 1759 "grammar.cc"
+#line 173 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.flags) = (yyvsp[-1].flags); (yyval.flags) |= parse->convertFlag((yyvsp[0].str)); }
+#line 1669 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 58:
-#line 177 "grammar.y"
-                 { (yyval.declist) = (yyvsp[0].declist); }
-#line 1765 "grammar.cc"
+#line 177 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = (yyvsp[0].declist); }
+#line 1675 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 59:
-#line 178 "grammar.y"
-                                 { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((TypeDeclarator *)0); }
-#line 1771 "grammar.cc"
+#line 178 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((TypeDeclarator *)0); }
+#line 1681 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 60:
-#line 182 "grammar.y"
-                        { (yyval.declist) = parse->newVecDeclarator(); (yyval.declist)->push_back((yyvsp[0].dec)); }
-#line 1777 "grammar.cc"
+#line 182 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = parse->newVecDeclarator(); (yyval.declist)->push_back((yyvsp[0].dec)); }
+#line 1687 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 61:
-#line 183 "grammar.y"
-                                             { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((yyvsp[0].dec)); }
-#line 1783 "grammar.cc"
+#line 183 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.declist) = (yyvsp[-2].declist); (yyval.declist)->push_back((yyvsp[0].dec)); }
+#line 1693 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 62:
-#line 187 "grammar.y"
-                                    { (yyval.dec) = parse->mergeSpecDec((yyvsp[-1].spec),(yyvsp[0].dec)); }
-#line 1789 "grammar.cc"
+#line 187 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->mergeSpecDec((yyvsp[-1].spec),(yyvsp[0].dec)); }
+#line 1699 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 63:
-#line 188 "grammar.y"
-                           { (yyval.dec) = parse->mergeSpecDec((yyvsp[0].spec)); }
-#line 1795 "grammar.cc"
+#line 188 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->mergeSpecDec((yyvsp[0].spec)); }
+#line 1705 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 64:
-#line 189 "grammar.y"
-                                               { (yyval.dec) = parse->mergeSpecDec((yyvsp[-1].spec),(yyvsp[0].dec)); }
-#line 1801 "grammar.cc"
+#line 189 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->mergeSpecDec((yyvsp[-1].spec),(yyvsp[0].dec)); }
+#line 1711 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 65:
-#line 193 "grammar.y"
-          { (yyval.dec) = parse->newDeclarator(); parse->mergePointer((yyvsp[0].ptrspec),(yyval.dec)); }
-#line 1807 "grammar.cc"
+#line 193 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->newDeclarator(); parse->mergePointer((yyvsp[0].ptrspec),(yyval.dec)); }
+#line 1717 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 66:
-#line 194 "grammar.y"
-                               { (yyval.dec) = (yyvsp[0].dec); }
-#line 1813 "grammar.cc"
+#line 194 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = (yyvsp[0].dec); }
+#line 1723 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 67:
-#line 195 "grammar.y"
-                                       { (yyval.dec) = parse->mergePointer((yyvsp[-1].ptrspec),(yyvsp[0].dec)); }
-#line 1819 "grammar.cc"
+#line 195 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->mergePointer((yyvsp[-1].ptrspec),(yyvsp[0].dec)); }
+#line 1729 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 68:
-#line 199 "grammar.y"
-                              { (yyval.dec) = (yyvsp[-1].dec); }
-#line 1825 "grammar.cc"
+#line 199 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = (yyvsp[-1].dec); }
+#line 1735 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 69:
-#line 201 "grammar.y"
-                                                             { (yyval.dec) = parse->newArray((yyvsp[-3].dec),0,(yyvsp[-1].i)); }
-#line 1831 "grammar.cc"
+#line 201 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->newArray((yyvsp[-3].dec),0,(yyvsp[-1].i)); }
+#line 1741 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 70:
-#line 203 "grammar.y"
-                                                           { (yyval.dec) = parse->newFunc((yyvsp[-3].dec),(yyvsp[-1].declist)); }
-#line 1837 "grammar.cc"
+#line 203 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.dec) = parse->newFunc((yyvsp[-3].dec),(yyvsp[-1].declist)); }
+#line 1747 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
   case 71:
-#line 207 "grammar.y"
-         { (yyval.i) = (yyvsp[0].i); }
-#line 1843 "grammar.cc"
+#line 207 "src/decompile/cpp/grammar.y" /* yacc.c:1652  */
+    { (yyval.i) = (yyvsp[0].i); }
+#line 1753 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
     break;
 
 
-#line 1847 "grammar.cc"
-
+#line 1757 "src/decompile/cpp/grammar.cc" /* yacc.c:1652  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1922,7 +1831,7 @@ yyerrlab:
           {
             if (yymsg != yymsgbuf)
               YYSTACK_FREE (yymsg);
-            yymsg = YY_CAST (char *, YYSTACK_ALLOC (YY_CAST (YYSIZE_T, yymsg_alloc)));
+            yymsg = (char *) YYSTACK_ALLOC (yymsg_alloc);
             if (!yymsg)
               {
                 yymsg = yymsgbuf;
@@ -2077,7 +1986,7 @@ yyreturn:
   while (yyssp != yyss)
     {
       yydestruct ("Cleanup: popping",
-                  yystos[+*yyssp], yyvsp);
+                  yystos[*yyssp], yyvsp);
       YYPOPSTACK (1);
     }
 #ifndef yyoverflow
@@ -2090,7 +1999,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 210 "grammar.y"
+#line 210 "src/decompile/cpp/grammar.y" /* yacc.c:1918  */
 
 
 void GrammarToken::set(uint4 tp)

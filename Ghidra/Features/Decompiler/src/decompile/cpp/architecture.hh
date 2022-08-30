@@ -65,6 +65,7 @@ extern AttributeId ATTRIB_ADJUSTVMA;	///< Marshaling attribute "adjustvma"
 extern AttributeId ATTRIB_ENABLE;	///< Marshaling attribute "enable"
 extern AttributeId ATTRIB_GROUP;	///< Marshaling attribute "group"
 extern AttributeId ATTRIB_GROWTH;	///< Marshaling attribute "growth"
+extern AttributeId ATTRIB_KEY;		///< Marshaling attribute "key"
 extern AttributeId ATTRIB_LOADERSYMBOLS;	///< Marshaling attribute "loadersymbols"
 extern AttributeId ATTRIB_PARENT;	///< Marshaling attribute "parent"
 extern AttributeId ATTRIB_REGISTER;	///< Marshaling attribute "register"
@@ -92,6 +93,7 @@ extern ElementId ELEM_NOHIGHPTR;		///< Marshaling element \<nohighptr>
 extern ElementId ELEM_PROCESSOR_SPEC;		///< Marshaling element \<processor_spec>
 extern ElementId ELEM_PROGRAMCOUNTER;		///< Marshaling element \<programcounter>
 extern ElementId ELEM_PROPERTIES;		///< Marshaling element \<properties>
+extern ElementId ELEM_PROPERTY;			///< Marshaling element \<property>
 extern ElementId ELEM_READONLY;			///< Marshaling element \<readonly>
 extern ElementId ELEM_REGISTER_DATA;		///< Marshaling element \<register_data>
 extern ElementId ELEM_RULE;			///< Marshaling element \<rule>
@@ -214,11 +216,12 @@ public:
   void resetDefaults(void);		///< Reset defaults values for options owned by \b this
   ProtoModel *getModel(const string &nm) const;		///< Get a specific PrototypeModel
   bool hasModel(const string &nm) const;		///< Does this Architecture have a specific PrototypeModel
+  ProtoModel *createUnknownModel(const string &modelName);	///< Create a model for an unrecognized name
   bool highPtrPossible(const Address &loc,int4 size) const; ///< Are pointers possible to the given location?
   AddrSpace *getSpaceBySpacebase(const Address &loc,int4 size) const; ///< Get space associated with a \e spacebase register
   const LanedRegister *getLanedRegister(const Address &loc,int4 size) const;	///< Get LanedRegister associated with storage
   int4 getMinimumLanedRegisterSize(void) const;		///< Get the minimum size of a laned register in bytes
-  void setDefaultModel(const string &nm);		///< Set the default PrototypeModel
+  void setDefaultModel(ProtoModel *model);		///< Set the default PrototypeModel
   void clearAnalysis(Funcdata *fd);			///< Clear analysis specific to a function
   void readLoaderSymbols(const string &delim);		 ///< Read any symbols from loader into database
   void collectBehaviors(vector<OpBehavior *> &behave) const;	///< Provide a list of OpBehavior objects
@@ -245,7 +248,7 @@ public:
 #endif
 protected:
   void addSpacebase(AddrSpace *basespace,const string &nm,const VarnodeData &ptrdata,
-		    int4 truncSize,bool isreversejustified,bool stackGrowth); ///< Create a new space and associated pointer
+		    int4 truncSize,bool isreversejustified,bool stackGrowth,bool isFormal);
   void addNoHighPtr(const Range &rng); ///< Add a new region where pointers do not exist
 
   // Factory routines for building this architecture

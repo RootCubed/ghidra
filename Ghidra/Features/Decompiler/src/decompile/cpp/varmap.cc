@@ -16,10 +16,10 @@
 #include "varmap.hh"
 #include "funcdata.hh"
 
-AttributeId ATTRIB_LOCK = AttributeId("lock",129);
-AttributeId ATTRIB_MAIN = AttributeId("main",130);
+AttributeId ATTRIB_LOCK = AttributeId("lock",133);
+AttributeId ATTRIB_MAIN = AttributeId("main",134);
 
-ElementId ELEM_LOCALDB = ElementId("localdb",206);
+ElementId ELEM_LOCALDB = ElementId("localdb",228);
 
 /// \brief Can the given intersecting RangeHint coexist with \b this at their given offsets
 ///
@@ -302,7 +302,7 @@ void ScopeLocal::collectNameRecs(void)
 	    // If the "this" pointer points to a class, try to preserve the data-type
 	    // even though the symbol is not preserved.
 	    SymbolEntry *entry = sym->getFirstWholeMap();
-	    typeRecommend.push_back(TypeRecommend(entry->getAddr(),dt));
+	    addTypeRecommendation(entry->getAddr(), dt);
 	  }
 	}
       }
@@ -1383,6 +1383,16 @@ void ScopeLocal::applyTypeRecommendations(void)
     if (vn != (Varnode *)0)
       vn->updateType(dt, true, false);
   }
+}
+
+/// Associate a data-type with a particular storage address. If we see an input Varnode at this address,
+/// if no other info is available, the given data-type is applied.
+/// \param addr is the storage address
+/// \param dt is the given data-type
+void ScopeLocal::addTypeRecommendation(const Address &addr,Datatype *dt)
+
+{
+  typeRecommend.push_back(TypeRecommend(addr,dt));
 }
 
 /// The symbol is stored as a name recommendation and then removed from the scope.

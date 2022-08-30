@@ -61,6 +61,7 @@ extern ElementId ELEM_SETLANGUAGE;		///< Marshaling element \<setlanguage>
 extern ElementId ELEM_STRUCTALIGN;		///< Marshaling element \<structalign>
 extern ElementId ELEM_TOGGLERULE;		///< Marshaling element \<togglerule>
 extern ElementId ELEM_WARNING;			///< Marshaling element \<warning>
+extern ElementId ELEM_INDENTATIONSTYLE;		///< Marshaling element \<indentationstyle>
 
 /// \brief Base class for options classes that affect the configuration of the Architecture object
 ///

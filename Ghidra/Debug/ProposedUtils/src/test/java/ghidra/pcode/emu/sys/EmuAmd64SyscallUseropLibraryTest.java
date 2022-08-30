@@ -26,6 +26,7 @@ import ghidra.app.plugin.assembler.Assemblers;
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
 import ghidra.pcode.emu.*;
 import ghidra.pcode.exec.*;
+import ghidra.pcode.exec.PcodeArithmetic.Purpose;
 import ghidra.program.model.address.*;
 import ghidra.program.model.data.DataTypeConflictHandler;
 import ghidra.program.model.data.PointerDataType;
@@ -62,7 +63,7 @@ public class EmuAmd64SyscallUseropLibraryTest extends AbstractGhidraHeadlessInte
 
 		@Override
 		public long readSyscallNumber(PcodeExecutorStatePiece<byte[], byte[]> state) {
-			return machine.getArithmetic().toConcrete(state.getVar(regRAX)).longValue();
+			return machine.getArithmetic().toLong(state.getVar(regRAX), Purpose.OTHER);
 		}
 
 		@PcodeUserop
@@ -87,7 +88,7 @@ public class EmuAmd64SyscallUseropLibraryTest extends AbstractGhidraHeadlessInte
 		protected SyscallTestUseropLibrary syscalls;
 
 		public SyscallTestPcodeEmulator() {
-			super((SleighLanguage) program.getLanguage());
+			super(program.getLanguage());
 		}
 
 		@Override
@@ -128,7 +129,7 @@ public class EmuAmd64SyscallUseropLibraryTest extends AbstractGhidraHeadlessInte
 		start = space.getAddress(0x00400000);
 		size = 0x1000;
 
-		try (UndoableTransaction tid = UndoableTransaction.start(program, "Initialize", true)) {
+		try (UndoableTransaction tid = UndoableTransaction.start(program, "Initialize")) {
 			block = program.getMemory()
 					.createInitializedBlock(".text", start, size, (byte) 0, TaskMonitor.DUMMY,
 						false);
@@ -177,7 +178,7 @@ public class EmuAmd64SyscallUseropLibraryTest extends AbstractGhidraHeadlessInte
 
 	@Test
 	public void testSyscallWithStdcallConvention() throws Exception {
-		try (UndoableTransaction tid = UndoableTransaction.start(program, "Initialize", true)) {
+		try (UndoableTransaction tid = UndoableTransaction.start(program, "Initialize")) {
 			asm.assemble(start,
 				"MOV RAX,0",
 				"MOV RCX,0xbeef",
@@ -196,7 +197,7 @@ public class EmuAmd64SyscallUseropLibraryTest extends AbstractGhidraHeadlessInte
 
 	@Test
 	public void testSyscallWithSyscallConvention() throws Exception {
-		try (UndoableTransaction tid = UndoableTransaction.start(program, "Initialize", true)) {
+		try (UndoableTransaction tid = UndoableTransaction.start(program, "Initialize")) {
 			asm.assemble(start,
 				"MOV RAX,1",
 				"MOV RCX,0xdead",

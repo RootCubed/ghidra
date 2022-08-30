@@ -33,11 +33,11 @@ import ghidra.app.services.DebuggerStateEditingService.StateEditor;
 import ghidra.app.services.TraceRecorder;
 import ghidra.dbg.target.TargetRegisterBank;
 import ghidra.pcode.exec.AsyncPcodeExecutor;
-import ghidra.pcode.exec.TracePcodeUtils;
+import ghidra.pcode.exec.DebuggerPcodeUtils;
 import ghidra.program.model.lang.*;
 import ghidra.program.model.mem.MemoryAccessException;
 import ghidra.trace.database.DBTraceUtils;
-import ghidra.trace.database.memory.DBTraceMemoryRegisterSpace;
+import ghidra.trace.model.memory.TraceMemorySpace;
 import ghidra.trace.model.thread.TraceThread;
 import ghidra.trace.model.time.schedule.TraceSchedule;
 import ghidra.util.database.UndoableTransaction;
@@ -138,19 +138,20 @@ public class DebuggerStateEditingServiceTest extends AbstractGhidraHeadedDebugge
 	@Test
 	public void testWriteEmuMemoryAfterStep() throws Throwable {
 		createAndOpenTrace();
-		editingService.setCurrentMode(tb.trace, StateEditingMode.WRITE_EMULATOR);
+		editingService.setCurrentMode(tb.trace, StateEditingMode.WRITE_TRACE);
 
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			// NB. TraceManager should automatically activate the first thread
 			TraceThread thread = tb.getOrAddThread("Threads[0]", 0);
-			AsyncPcodeExecutor<byte[]> executor =
-				TracePcodeUtils.executorForCoordinates(
-					DebuggerCoordinates.all(tb.trace, null, thread, null, TraceSchedule.ZERO, 0));
+			AsyncPcodeExecutor<byte[]> executor = DebuggerPcodeUtils
+					.executorForCoordinates(DebuggerCoordinates.NOWHERE.thread(thread));
 
 			Assembler asm = Assemblers.getAssembler(tb.trace.getFixedProgramView(0));
 			asm.assemble(tb.addr(0x00400000), "imm r0,#123");
 			executor.executeSleighLine("pc = 0x00400000");
 		}
+		traceManager.activateTrace(tb.trace);
+		editingService.setCurrentMode(tb.trace, StateEditingMode.WRITE_EMULATOR);
 		waitForSwing();
 
 		TraceSchedule step1 = TraceSchedule.parse("0:t0-1");
@@ -162,7 +163,7 @@ public class DebuggerStateEditingServiceTest extends AbstractGhidraHeadedDebugge
 		waitForSwing();
 
 		DebuggerCoordinates current = traceManager.getCurrent();
-		assertEquals(0, current.getSnap().longValue()); // Chain edits, don't source from scratch
+		assertEquals(0, current.getSnap()); // Chain edits, don't source from scratch
 		long snap = current.getViewSnap();
 		assertTrue(DBTraceUtils.isScratch(snap));
 
@@ -174,20 +175,21 @@ public class DebuggerStateEditingServiceTest extends AbstractGhidraHeadedDebugge
 	@Test
 	public void testWriteEmuRegisterAfterStep() throws Throwable {
 		createAndOpenTrace();
-		editingService.setCurrentMode(tb.trace, StateEditingMode.WRITE_EMULATOR);
+		editingService.setCurrentMode(tb.trace, StateEditingMode.WRITE_TRACE);
 
 		TraceThread thread;
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			// NB. TraceManager should automatically activate the first thread
 			thread = tb.getOrAddThread("Threads[0]", 0);
-			AsyncPcodeExecutor<byte[]> executor =
-				TracePcodeUtils.executorForCoordinates(
-					DebuggerCoordinates.all(tb.trace, null, thread, null, TraceSchedule.ZERO, 0));
+			AsyncPcodeExecutor<byte[]> executor = DebuggerPcodeUtils
+					.executorForCoordinates(DebuggerCoordinates.NOWHERE.thread(thread));
 
 			Assembler asm = Assemblers.getAssembler(tb.trace.getFixedProgramView(0));
 			asm.assemble(tb.addr(0x00400000), "imm r0,#123");
 			executor.executeSleighLine("pc = 0x00400000");
 		}
+		traceManager.activateTrace(tb.trace);
+		editingService.setCurrentMode(tb.trace, StateEditingMode.WRITE_EMULATOR);
 		waitForSwing();
 
 		TraceSchedule step1 = TraceSchedule.parse("0:t0-1");
@@ -199,7 +201,7 @@ public class DebuggerStateEditingServiceTest extends AbstractGhidraHeadedDebugge
 		waitForSwing();
 
 		DebuggerCoordinates current = traceManager.getCurrent();
-		assertEquals(0, current.getSnap().longValue()); // Chain edits, don't source from scratch
+		assertEquals(0, current.getSnap()); // Chain edits, don't source from scratch
 		long snap = current.getViewSnap();
 		assertTrue(DBTraceUtils.isScratch(snap));
 
@@ -364,8 +366,8 @@ public class DebuggerStateEditingServiceTest extends AbstractGhidraHeadedDebugge
 		StateEditor editor = editingService.createStateEditor(tb.trace);
 		waitOn(editor.setRegister(rv1234));
 		waitForPass(() -> {
-			DBTraceMemoryRegisterSpace regs = tb.trace.getMemoryManager()
-					.getMemoryRegisterSpace(thread, false);
+			TraceMemorySpace regs =
+				tb.trace.getMemoryManager().getMemoryRegisterSpace(thread, false);
 			assertNotNull(regs);
 			RegisterValue value = regs.getValue(traceManager.getCurrentSnap(), r0);
 			assertEquals(rv1234, value);

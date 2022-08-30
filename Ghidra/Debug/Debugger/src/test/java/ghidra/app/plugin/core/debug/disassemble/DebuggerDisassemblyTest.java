@@ -56,7 +56,7 @@ import ghidra.program.util.ProgramSelection;
 import ghidra.trace.database.listing.DBTraceInstruction;
 import ghidra.trace.database.listing.DBTraceInstructionsMemoryView;
 import ghidra.trace.database.memory.DBTraceMemoryManager;
-import ghidra.trace.database.memory.DBTraceMemoryRegisterSpace;
+import ghidra.trace.database.memory.DBTraceMemorySpace;
 import ghidra.trace.database.program.DBTraceVariableSnapProgramView;
 import ghidra.trace.database.target.DBTraceObject;
 import ghidra.trace.database.target.DBTraceObjectManager;
@@ -225,7 +225,7 @@ public class DebuggerDisassemblyTest extends AbstractGhidraHeadedDebuggerGUITest
 		TraceThread thread;
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			thread = tb.getOrAddThread("Threads[0]", 0);
-			DBTraceMemoryRegisterSpace regs =
+			DBTraceMemorySpace regs =
 				tb.trace.getMemoryManager().getMemoryRegisterSpace(thread, true);
 			regs.setValue(0, new RegisterValue(tb.language.getRegister("cpsr"), BigInteger.ZERO));
 		}
@@ -259,7 +259,7 @@ public class DebuggerDisassemblyTest extends AbstractGhidraHeadedDebuggerGUITest
 		TraceThread thread;
 		try (UndoableTransaction tid = tb.startTransaction()) {
 			thread = tb.getOrAddThread("Threads[0]", 0);
-			DBTraceMemoryRegisterSpace regs =
+			DBTraceMemorySpace regs =
 				tb.trace.getMemoryManager().getMemoryRegisterSpace(thread, true);
 			regs.setValue(0,
 				new RegisterValue(tb.language.getRegister("cpsr"), BigInteger.ONE.shiftLeft(5)));
@@ -346,10 +346,10 @@ public class DebuggerDisassemblyTest extends AbstractGhidraHeadedDebuggerGUITest
 			listingProvider, view, new ProgramLocation(view, start),
 			new ProgramSelection(start, start.addWrap(3)), null);
 		DockingActionIf action =
-			Unique.assertOne(disassemblerPlugin.getPopupActions(tool, actionContext)
+			runSwing(() -> Unique.assertOne(disassemblerPlugin.getPopupActions(tool, actionContext)
 					.stream()
 					.filter(a -> a.isAddToPopup(actionContext))
-					.filter(actionPred));
+					.filter(actionPred)));
 		performAction(action, actionContext, true);
 		waitForTasks();
 	}
@@ -555,11 +555,11 @@ public class DebuggerDisassemblyTest extends AbstractGhidraHeadedDebuggerGUITest
 			listingProvider, view, new ProgramLocation(view, start),
 			new ProgramSelection(start, start.addWrap(1)), null);
 		FixedPlatformTracePatchInstructionAction action =
-			Unique.assertOne(disassemblerPlugin.getPopupActions(tool, actionContext)
+			runSwing(() -> Unique.assertOne(disassemblerPlugin.getPopupActions(tool, actionContext)
 					.stream()
 					.filter(a -> a instanceof FixedPlatformTracePatchInstructionAction)
 					.map(a -> (FixedPlatformTracePatchInstructionAction) a)
-					.filter(actionPred));
+					.filter(actionPred)));
 
 		AssemblerPluginTestHelper helper =
 			new AssemblerPluginTestHelper(action, null, listingProvider, tb.trace.getProgramView());

@@ -45,7 +45,7 @@ import ghidra.dbg.*;
 import ghidra.dbg.target.*;
 import ghidra.dbg.util.PathUtils;
 import ghidra.framework.main.AppInfo;
-import ghidra.framework.main.FrontEndOnly;
+import ghidra.framework.main.ApplicationLevelOnlyPlugin;
 import ghidra.framework.options.SaveState;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.util.PluginStatus;
@@ -71,7 +71,7 @@ import ghidra.util.datastruct.ListenerSet;
 	servicesProvided = {
 		DebuggerModelService.class, })
 public class DebuggerModelServicePlugin extends Plugin
-		implements DebuggerModelServiceInternal, FrontEndOnly {
+		implements DebuggerModelServiceInternal, ApplicationLevelOnlyPlugin {
 
 	private static final String PREFIX_FACTORY = "Factory_";
 
@@ -208,8 +208,7 @@ public class DebuggerModelServicePlugin extends Plugin
 	protected final ChangeListener classChangeListener = new ChangeListenerForFactoryInstances();
 	protected final ListenerOnRecorders listenerOnRecorders = new ListenerOnRecorders();
 
-	protected final DebuggerSelectMappingOfferDialog offerDialog =
-		new DebuggerSelectMappingOfferDialog();
+	protected final DebuggerSelectMappingOfferDialog offerDialog;
 	protected final DebuggerConnectDialog connectDialog = new DebuggerConnectDialog();
 
 	DockingAction actionDisconnectAll;
@@ -218,7 +217,7 @@ public class DebuggerModelServicePlugin extends Plugin
 
 	public DebuggerModelServicePlugin(PluginTool tool) {
 		super(tool);
-
+		offerDialog = new DebuggerSelectMappingOfferDialog(tool);
 		ClassSearcher.addChangeListener(classChangeListener);
 		refreshFactoryInstances();
 		connectDialog.setModelService(this);

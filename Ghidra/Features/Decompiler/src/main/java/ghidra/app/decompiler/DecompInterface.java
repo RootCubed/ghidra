@@ -27,14 +27,12 @@ import generic.jar.ResourceFile;
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
 import ghidra.app.plugin.processors.sleigh.UniqueLayout;
 import ghidra.program.model.address.Address;
-import ghidra.program.model.address.AddressFactory;
 import ghidra.program.model.lang.*;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.pcode.*;
 import ghidra.util.task.CancelledListener;
 import ghidra.util.task.TaskMonitor;
-import ghidra.xml.XmlPullParser;
 
 /**
  * This is a self-contained interface to a single decompile
@@ -50,7 +48,7 @@ import ghidra.xml.XmlPullParser;
  *   DecompInterface ifc = new DecompInterface();
  *   
  *   // Setup any options or other initialization
- *   ifc.setOptions(xmlOptions); // Inform interface of global options
+ *   ifc.setOptions(options); // Inform interface of global options
  *   // ifc.toggleSyntaxTree(false);  // Don't produce syntax trees
  *   // ifc.toggleCCode(false);       // Don't produce C code
  *   // ifc.setSimplificationStyle("normalize"); // Alternate analysis style
@@ -89,6 +87,9 @@ public class DecompInterface {
 	protected CompilerSpec compilerSpec;
 	protected DecompileProcess decompProcess;
 	protected DecompileCallback decompCallback;
+	protected PackedEncode paramEncode;			// Encoder for decompiler command parameters
+	protected Decoder decoder;					// Decoder for the Decompiler's main outputs
+	protected StringIngest stringResponse = new StringIngest();	// Ingester for simple responses
 	private DecompileDebug debug;
 	protected CancelledListener monitorListener = new CancelledListener() {
 		@Override
@@ -99,7 +100,7 @@ public class DecompInterface {
 
 	// Initialization state
 	private String actionname; // Name of simplification action
-	private DecompileOptions xmlOptions; // Current decompiler options
+	private DecompileOptions options; // Current decompiler options
 	private boolean printSyntaxTree; // Whether syntax tree is returned
 	private boolean printCCode; // Whether C code is returned
 	private boolean sendParamMeasures; // Whether Parameter Measures are returned
@@ -110,7 +111,9 @@ public class DecompInterface {
 		pcodelanguage = null;
 		dtmanage = null;
 		decompCallback = null;
-		xmlOptions = null;
+		options = null;
+		paramEncode = null;
+		decoder = null;
 		debug = null;
 		decompileMessage = "";
 		compilerSpec = null;
@@ -214,28 +217,33 @@ public class DecompInterface {
 			decompProcess = DecompileProcessFactory.get();
 		}
 		long uniqueBase = UniqueLayout.SLEIGH_BASE.getOffset(pcodelanguage);
-		String tspec =
-			pcodelanguage.buildTranslatorTag(program.getAddressFactory(), uniqueBase, null);
-		String coretypes = dtmanage.buildCoreTypes();
+		XmlEncode xmlEncode = new XmlEncode();
+		pcodelanguage.encodeTranslator(xmlEncode, program.getAddressFactory(), uniqueBase);
+		String tspec = xmlEncode.toString();
+		xmlEncode.clear();
+		dtmanage.encodeCoreTypes(xmlEncode);
+		String coretypes = xmlEncode.toString();
 		SleighLanguageDescription sleighdescription =
 			(SleighLanguageDescription) pcodelanguage.getLanguageDescription();
 		ResourceFile pspecfile = sleighdescription.getSpecFile();
 		String pspecxml = fileToString(pspecfile);
-		StringBuilder buffer = new StringBuilder();
-		compilerSpec.saveXml(buffer);
-		String cspecxml = buffer.toString();
+		xmlEncode.clear();
+		compilerSpec.encode(xmlEncode);
+		String cspecxml = xmlEncode.toString();
 
 		decompCallback.setNativeMessage(null);
-		decompProcess.registerProgram(decompCallback, pspecxml, cspecxml, tspec, coretypes);
+		decompProcess.registerProgram(decompCallback, pspecxml, cspecxml, tspec, coretypes,
+			program);
 		String nativeMessage = decompCallback.getNativeMessage();
 		if ((nativeMessage != null) && (nativeMessage.length() != 0)) {
 			throw new IOException("Could not register program: " + nativeMessage);
 		}
-		if (xmlOptions != null) {
-			decompProcess.setMaxResultSize(xmlOptions.getMaxPayloadMBytes());
-			if (!decompProcess.sendCommand1Param("setOptions", xmlOptions.getXML(this))
-					.toString()
-					.equals("t")) {
+		if (options != null) {
+			paramEncode.clear();
+			options.encode(paramEncode, this);
+			decompProcess.setMaxResultSize(options.getMaxPayloadMBytes());
+			decompProcess.sendCommand1Param("setOptions", paramEncode, stringResponse);
+			if (!stringResponse.toString().equals("t")) {
 				throw new IOException("Did not accept decompiler options");
 			}
 		}
@@ -243,35 +251,32 @@ public class DecompInterface {
 			throw new IOException("Decompile action not specified");
 		}
 		if (!actionname.equals("decompile")) {
-			if (!decompProcess.sendCommand2Params("setAction", actionname, "")
-					.toString()
-					.equals("t")) {
+			decompProcess.sendCommand2Params("setAction", actionname, "", stringResponse);
+			if (!stringResponse.toString().equals("t")) {
 				throw new IOException("Could not set decompile action");
 			}
 		}
 		if (!printSyntaxTree) {
-			if (!decompProcess.sendCommand2Params("setAction", "", "notree")
-					.toString()
-					.equals("t")) {
+			decompProcess.sendCommand2Params("setAction", "", "notree", stringResponse);
+			if (!stringResponse.toString().equals("t")) {
 				throw new IOException("Could not turn off syntax tree");
 			}
 		}
 		if (!printCCode) {
-			if (!decompProcess.sendCommand2Params("setAction", "", "noc").toString().equals("t")) {
+			decompProcess.sendCommand2Params("setAction", "", "noc", stringResponse);
+			if (!stringResponse.toString().equals("t")) {
 				throw new IOException("Could not turn off C printing");
 			}
 		}
 		if (sendParamMeasures) {
-			if (!decompProcess.sendCommand2Params("setAction", "", "parammeasures")
-					.toString()
-					.equals("t")) {
+			decompProcess.sendCommand2Params("setAction", "", "parammeasures", stringResponse);
+			if (!stringResponse.toString().equals("t")) {
 				throw new IOException("Could not turn on sending of parameter measures");
 			}
 		}
 		if (jumpLoad) {
-			if (!decompProcess.sendCommand2Params("setAction", "", "jumpload")
-					.toString()
-					.equals("t")) {
+			decompProcess.sendCommand2Params("setAction", "", "jumpload", stringResponse);
+			if (!stringResponse.toString().equals("t")) {
 				throw new IOException("Could not turn on jumptable loads");
 			}
 		}
@@ -318,6 +323,8 @@ public class DecompInterface {
 		compilerSpec = spec;
 
 		dtmanage = new PcodeDataTypeManager(prog);
+		paramEncode = new PackedEncode();
+		decoder = new PackedDecode(prog.getAddressFactory());
 		try {
 			decompCallback =
 				new DecompileCallback(prog, pcodelanguage, program.getCompilerSpec(), dtmanage);
@@ -339,6 +346,8 @@ public class DecompInterface {
 		}
 		program = null;
 		decompCallback = null;
+		paramEncode = null;
+		decoder = null;
 
 		return false;
 	}
@@ -354,6 +363,8 @@ public class DecompInterface {
 		if (program != null) {
 			program = null;
 			decompCallback = null;
+			paramEncode = null;
+			decoder = null;
 			try {
 				if ((decompProcess != null) && decompProcess.isReady()) {
 					decompProcess.deregisterProgram();
@@ -415,9 +426,8 @@ public class DecompInterface {
 		}
 		try {
 			verifyProcess();
-			return decompProcess.sendCommand2Params("setAction", actionstring, "")
-					.toString()
-					.equals("t");
+			decompProcess.sendCommand2Params("setAction", actionstring, "", stringResponse);
+			return stringResponse.toString().equals("t");
 		}
 		catch (IOException e) {
 			// don't care
@@ -453,9 +463,8 @@ public class DecompInterface {
 		String printstring = val ? "tree" : "notree";
 		try {
 			verifyProcess();
-			return decompProcess.sendCommand2Params("setAction", "", printstring)
-					.toString()
-					.equals("t");
+			decompProcess.sendCommand2Params("setAction", "", printstring, stringResponse);
+			return stringResponse.toString().equals("t");
 		}
 		catch (IOException e) {
 			// don't care
@@ -492,9 +501,8 @@ public class DecompInterface {
 		String printstring = val ? "c" : "noc";
 		try {
 			verifyProcess();
-			return decompProcess.sendCommand2Params("setAction", "", printstring)
-					.toString()
-					.equals("t");
+			decompProcess.sendCommand2Params("setAction", "", printstring, stringResponse);
+			return stringResponse.toString().equals("t");
 		}
 		catch (IOException e) {
 			// don't care
@@ -530,9 +538,8 @@ public class DecompInterface {
 		String printstring = val ? "parammeasures" : "noparammeasures";
 		try {
 			verifyProcess();
-			return decompProcess.sendCommand2Params("setAction", "", printstring)
-					.toString()
-					.equals("t");
+			decompProcess.sendCommand2Params("setAction", "", printstring, stringResponse);
+			return stringResponse.toString().equals("t");
 		}
 		catch (IOException e) {
 			// don't care
@@ -561,9 +568,8 @@ public class DecompInterface {
 		String jumpstring = val ? "jumpload" : "nojumpload";
 		try {
 			verifyProcess();
-			return decompProcess.sendCommand2Params("setAction", "", jumpstring)
-					.toString()
-					.equals("t");
+			decompProcess.sendCommand2Params("setAction", "", jumpstring, stringResponse);
+			return stringResponse.toString().equals("t");
 		}
 		catch (IOException e) {
 			// don't care
@@ -586,11 +592,11 @@ public class DecompInterface {
 	 * recovering from decompiler process crash, the interface
 	 * keeps the options object around and automatically
 	 * sends it to the new decompiler process.
-	 * @param xmloptions the new (or changed) option object
+	 * @param options the new (or changed) option object
 	 * @return true if the decompiler process accepted the new options
 	 */
-	public synchronized boolean setOptions(DecompileOptions xmloptions) {
-		this.xmlOptions = xmloptions;
+	public synchronized boolean setOptions(DecompileOptions options) {
+		this.options = options;
 		decompileMessage = "";
 		// Property can be set before process exists
 		if (decompProcess == null) {
@@ -598,10 +604,11 @@ public class DecompInterface {
 		}
 		try {
 			verifyProcess();
-			decompProcess.setMaxResultSize(xmlOptions.getMaxPayloadMBytes());
-			return decompProcess.sendCommand1Param("setOptions", xmloptions.getXML(this))
-					.toString()
-					.equals("t");
+			paramEncode.clear();
+			options.encode(paramEncode, this);
+			decompProcess.setMaxResultSize(options.getMaxPayloadMBytes());
+			decompProcess.sendCommand1Param("setOptions", paramEncode, stringResponse);
+			return stringResponse.toString().equals("t");
 		}
 		catch (IOException e) {
 			// don't care
@@ -619,7 +626,7 @@ public class DecompInterface {
 	 * @return options that will be passed to the decompiler
 	 */
 	public synchronized DecompileOptions getOptions() {
-		return this.xmlOptions;
+		return this.options;
 	}
 
 	/**
@@ -636,8 +643,8 @@ public class DecompInterface {
 		int res = -1;
 		try {
 			if ((decompProcess != null) && decompProcess.isReady()) {
-				String retval = decompProcess.sendCommand("flushNative").toString();
-				return Integer.parseInt(retval);
+				decompProcess.sendCommand("flushNative", stringResponse);
+				return Integer.parseInt(stringResponse.toString());
 			}
 		}
 		catch (IOException e) {
@@ -650,8 +657,8 @@ public class DecompInterface {
 		return res;
 	}
 
-	public synchronized BlockGraph structureGraph(BlockGraph ingraph, AddressFactory factory,
-			int timeoutSecs, TaskMonitor monitor) {
+	public synchronized BlockGraph structureGraph(BlockGraph ingraph, int timeoutSecs,
+			TaskMonitor monitor) {
 		decompileMessage = "";
 		if (monitor != null && monitor.isCancelled()) {
 			return null;
@@ -659,20 +666,17 @@ public class DecompInterface {
 		if (monitor != null) {
 			monitor.addCancelledListener(monitorListener);
 		}
-		LimitedByteBuffer res = null;
 		BlockGraph resgraph = null;
 		try {
-			StringWriter writer = new StringWriter();
-			ingraph.saveXml(writer);
 			verifyProcess();
-			res = decompProcess.sendCommand1ParamTimeout("structureGraph", writer.toString(),
-				timeoutSecs);
+			paramEncode.clear();
+			ingraph.encode(paramEncode);
+			decompProcess.sendCommand1ParamTimeout("structureGraph", paramEncode, timeoutSecs,
+				decoder);
 			decompileMessage = decompCallback.getNativeMessage();
-			if (res != null) {
-				XmlPullParser parser = HighFunction.stringTree(res.getInputStream(),
-					HighFunction.getErrorHandler(this, "Results for structureGraph command"));
+			if (!decoder.isEmpty()) {
 				resgraph = new BlockGraph();
-				resgraph.restoreXml(parser, factory);
+				resgraph.decode(decoder);
 				resgraph.transferObjectRef(ingraph);
 			}
 		}
@@ -703,7 +707,6 @@ public class DecompInterface {
 			return null;
 		}
 
-		LimitedByteBuffer res = null;
 		if (monitor != null) {
 			monitor.addCancelledListener(monitorListener);
 		}
@@ -719,12 +722,18 @@ public class DecompInterface {
 				debug.setFunction(func);
 			}
 			decompCallback.setFunction(func, funcEntry, debug);
-			StringBuilder addrBuf = new StringBuilder();
-			AddressXML.buildXML(addrBuf, funcEntry);
 			verifyProcess();
-			res = decompProcess.sendCommand1ParamTimeout("decompileAt", addrBuf.toString(),
-				timeoutSecs);
+			paramEncode.clear();
+			AddressXML.encode(paramEncode, funcEntry);
+			decompProcess.sendCommand1ParamTimeout("decompileAt", paramEncode, timeoutSecs,
+				decoder);
 			decompileMessage = decompCallback.getNativeMessage();
+			if (debug != null) {
+				XmlEncode xmlEncode = new XmlEncode();
+				options.encode(xmlEncode, this);
+				debug.shutdown(pcodelanguage, xmlEncode.toString());
+				debug = null;
+			}
 		}
 		catch (Exception ex) {
 			decompileMessage = "Exception while decompiling " + func.getEntryPoint() + ": " +
@@ -734,10 +743,6 @@ public class DecompInterface {
 			if (monitor != null) {
 				monitor.removeCancelledListener(monitorListener);
 			}
-		}
-		if (debug != null) {
-			debug.shutdown(pcodelanguage, xmlOptions.getXML(this));
-			debug = null;
 		}
 
 		DecompileProcess.DisposeState processState;
@@ -751,12 +756,8 @@ public class DecompInterface {
 			processState = DecompileProcess.DisposeState.DISPOSED_ON_CANCEL;
 		}
 
-		InputStream stream = null;
-		if (res != null) {
-			stream = res.getInputStream();
-		}
 		return new DecompileResults(func, pcodelanguage, compilerSpec, dtmanage, decompileMessage,
-			stream, processState);
+			decoder, processState);
 	}
 
 	/**

@@ -4,18 +4,18 @@
 <title>SLEIGH</title>
 <link rel="stylesheet" type="text/css" href="Frontpage.css">
 <link rel="stylesheet" type="text/css" href="languages.css">
-<meta name="generator" content="DocBook XSL Stylesheets V1.77.1">
+<meta name="generator" content="DocBook XSL Stylesheets V1.79.1">
 <link rel="home" href="sleigh.html" title="SLEIGH">
-<link rel="next" href="sleigh_layout.html" title="2. Basic Specification Layout">
+<link rel="next" href="sleigh_layout.html" title="2.ï¿½Basic Specification Layout">
 </head>
 <body bgcolor="white" text="black" link="#0000FF" vlink="#840084" alink="#0000FF">
 <div class="navheader">
 <table width="100%" summary="Navigation header">
 <tr><th colspan="3" align="center">SLEIGH</th></tr>
 <tr>
-<td width="20%" align="left"> </td>
-<th width="60%" align="center"> </th>
-<td width="20%" align="right"> <a accesskey="n" href="sleigh_layout.html">Next</a>
+<td width="20%" align="left">ï¿½</td>
+<th width="60%" align="center">ï¿½</th>
+<td width="20%" align="right">ï¿½<a accesskey="n" href="sleigh_layout.html">Next</a>
 </td>
 </tr>
 </table>
@@ -25,61 +25,61 @@
 <div class="titlepage">
 <div>
 <div><h1 class="title">
-<a name="idp15165373584"></a>SLEIGH</h1></div>
+<a name="sleigh_title"></a>SLEIGH</h1></div>
 <div><h3 class="subtitle"><i>A Language for Rapid Processor Specification</i></h3></div>
-<div><p class="releaseinfo">Last updated March 4, 2021</p></div>
+<div><p class="releaseinfo">Last updated August 24, 2022</p></div>
 <div><p class="pubdate">Originally published December 16, 2005</p></div>
 </div>
 <hr>
 </div>
 <div class="toc">
 <p><b>Table of Contents</b></p>
-<dl>
-<dt><span class="sect1"><a href="sleigh.html#idp15165406720">1. Introduction to P-Code</a></span></dt>
+<dl class="toc">
+<dt><span class="sect1"><a href="sleigh.html#sleigh_introduction">1. Introduction to P-Code</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="sleigh.html#idp15165418320">1.1. Address Spaces</a></span></dt>
+<dt><span class="sect2"><a href="sleigh.html#sleigh_address_spaces">1.1. Address Spaces</a></span></dt>
 <dt><span class="sect2"><a href="sleigh.html#sleigh_varnodes">1.2. Varnodes</a></span></dt>
-<dt><span class="sect2"><a href="sleigh.html#idp15165438912">1.3. Operations</a></span></dt>
+<dt><span class="sect2"><a href="sleigh.html#sleigh_operations">1.3. Operations</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="sleigh_layout.html">2. Basic Specification Layout</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="sleigh_layout.html#idp15165479888">2.1. Comments</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_layout.html#idp15165482400">2.2. Identifiers</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_layout.html#idp15165484176">2.3. Strings</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_layout.html#idp15165486032">2.4. Integers</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_layout.html#idp15165490752">2.5. White Space</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_layout.html#sleigh_comments">2.1. Comments</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_layout.html#sleigh_identifiers">2.2. Identifiers</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_layout.html#sleigh_strings">2.3. Strings</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_layout.html#sleigh_integers">2.4. Integers</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_layout.html#sleigh_white_space">2.5. White Space</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="sleigh_preprocessing.html">3. Preprocessing</a></span></dt>
 <dd><dl>
 <dt><span class="sect2"><a href="sleigh_preprocessing.html#sleigh_including_files">3.1. Including Files</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_preprocessing.html#idp15165498448">3.2. Preprocessor Macros</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_preprocessing.html#idp15165504896">3.3. Conditional Compilation</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_preprocessing.html#sleigh_preprocessor_macros">3.2. Preprocessor Macros</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_preprocessing.html#sleigh_conditional_compilation">3.3. Conditional Compilation</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="sleigh_definitions.html">4. Basic Definitions</a></span></dt>
 <dd><dl>
 <dt><span class="sect2"><a href="sleigh_definitions.html#sleigh_endianess_definition">4.1. Endianess Definition</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_definitions.html#idp15165542864">4.2. Alignment Definition</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_definitions.html#idp15165546272">4.3. Space Definitions</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_definitions.html#sleigh_alignment_definition">4.2. Alignment Definition</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_definitions.html#sleigh_space_definitions">4.3. Space Definitions</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_definitions.html#sleigh_naming_registers">4.4. Naming Registers</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_definitions.html#idp15165586416">4.5. Bit Range Registers</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_definitions.html#idp15165601296">4.6. User-Defined Operations</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_definitions.html#sleigh_bitrange_registers">4.5. Bit Range Registers</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_definitions.html#sleigh_userdefined_operations">4.6. User-Defined Operations</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="sleigh_symbols.html">5. Introduction to Symbols</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="sleigh_symbols.html#idp15165624272">5.1. Notes on Namespaces</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_symbols.html#sleigh_notes_namespaces">5.1. Notes on Namespaces</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_symbols.html#sleigh_predefined_symbols">5.2. Predefined Symbols</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="sleigh_tokens.html">6. Tokens and Fields</a></span></dt>
 <dd><dl>
 <dt><span class="sect2"><a href="sleigh_tokens.html#sleigh_defining_tokens">6.1. Defining Tokens and Fields</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_tokens.html#idp15165671824">6.2. Fields as Family Symbols</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_tokens.html#idp15165678192">6.3. Attaching Alternate Meanings to Fields</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_tokens.html#sleigh_fields_family">6.2. Fields as Family Symbols</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_tokens.html#sleigh_alternate_meanings">6.3. Attaching Alternate Meanings to Fields</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_tokens.html#sleigh_context_variables">6.4. Context Variables</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="sleigh_constructors.html">7. Constructors</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="sleigh_constructors.html#idp15165727616">7.1. The Five Sections of a Constructor</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_constructors.html#idp15165732704">7.2. The Table Header</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_sections_constructor">7.1. The Five Sections of a Constructor</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_table_header">7.2. The Table Header</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_display_section">7.3. The Display Section</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_bit_pattern">7.4. The Bit Pattern Section</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_disassembly_actions">7.5. Disassembly Actions Section</a></span></dt>
@@ -87,12 +87,12 @@
 <dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_semantic_section">7.7. The Semantic Section</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_tables">7.8. Tables</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_macros">7.9. P-code Macros</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_constructors.html#idp15166232880">7.10. Build Directives</a></span></dt>
-<dt><span class="sect2"><a href="sleigh_constructors.html#idp15166242736">7.11. Delay Slot Directives</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_build_directives">7.10. Build Directives</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_constructors.html#sleigh_delayslot_directives">7.11. Delay Slot Directives</a></span></dt>
 </dl></dd>
 <dt><span class="sect1"><a href="sleigh_context.html">8. Using Context</a></span></dt>
 <dd><dl>
-<dt><span class="sect2"><a href="sleigh_context.html#idp15166265440">8.1. Basic Use of Context Variables</a></span></dt>
+<dt><span class="sect2"><a href="sleigh_context.html#sleigh_context_basic">8.1. Basic Use of Context Variables</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_context.html#sleigh_local_change">8.2. Local Context Change</a></span></dt>
 <dt><span class="sect2"><a href="sleigh_context.html#sleigh_global_change">8.3. Global Context Change</a></span></dt>
 </dl></dd>
@@ -101,7 +101,7 @@
 </div>
 <div class="simplesect">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idp15165376160"></a>History</h2></div></div></div>
+<a name="sleigh_history"></a>History</h2></div></div></div>
 <p>
   This document describes the syntax for the SLEIGH processor
   specification language, which was developed for the GHIDRA
@@ -129,7 +129,7 @@
 </div>
 <div class="simplesect">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idp15165400464"></a>Overview</h2></div></div></div>
+<a name="sleigh_overview"></a>Overview</h2></div></div></div>
 <p>
 SLEIGH is a language for describing the instruction sets of general
 purpose microprocessors, in order to facilitate the reverse
@@ -162,13 +162,13 @@ Italics are used when defining terms and for named entities. Bold is used for SL
 </div>
 <div class="sect1">
 <div class="titlepage"><div><div><h2 class="title" style="clear: both">
-<a name="idp15165406720"></a>1. Introduction to P-Code</h2></div></div></div>
+<a name="sleigh_introduction"></a>1.ï¿½Introduction to P-Code</h2></div></div></div>
 <p>
 Although p-code is a distinct language from SLEIGH, because a major
 purpose of SLEIGH is to specify the translation from machine code to
 p-code, this document serves as a primer for p-code. The key concepts
 and terminology are presented in this section, and more detail is
-given in <a class="xref" href="sleigh_constructors.html#sleigh_semantic_section" title="7.7. The Semantic Section">Section 7.7, &#8220;The Semantic Section&#8221;</a>. There is also a complete set
+given in <a class="xref" href="sleigh_constructors.html#sleigh_semantic_section" title="7.7.ï¿½The Semantic Section">Sectionï¿½7.7, &#8220;The Semantic Section&#8221;</a>. There is also a complete set
 of tables which list syntax and descriptions for p-code operations in
 the Appendix.
 </p>
@@ -221,7 +221,7 @@ respectively.
 </p>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idp15165418320"></a>1.1. Address Spaces</h3></div></div></div>
+<a name="sleigh_address_spaces"></a>1.1.ï¿½Address Spaces</h3></div></div></div>
 <p>
 An <span class="emphasis"><em>address</em></span> space for p-code is a generalization of
 the indexed memory (RAM) that a typical processor has access to, and
@@ -279,7 +279,7 @@ interpreted as constants.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="sleigh_varnodes"></a>1.2. Varnodes</h3></div></div></div>
+<a name="sleigh_varnodes"></a>1.2.ï¿½Varnodes</h3></div></div></div>
 <p>
 A <span class="emphasis"><em>varnode</em></span> is the unit of data manipulated by
 p-code. It is simply a contiguous sequence of bytes in some address
@@ -305,7 +305,7 @@ forces an interpretation on each varnode that it uses, as either an
 integer, a floating-point number, or a boolean value. In the case of
 an integer, the varnode is interpreted as having a big endian or
 little endian encoding, depending on the specification (see
-<a class="xref" href="sleigh_definitions.html#sleigh_endianess_definition" title="4.1. Endianess Definition">Section 4.1, &#8220;Endianess Definition&#8221;</a>). Certain instructions
+<a class="xref" href="sleigh_definitions.html#sleigh_endianess_definition" title="4.1.ï¿½Endianess Definition">Sectionï¿½4.1, &#8220;Endianess Definition&#8221;</a>). Certain instructions
 also distinguish between signed and unsigned interpretations. For a
 signed integer, the varnode is considered to have a standard twos
 complement encoding. For a boolean interpretation, the varnode must be
@@ -322,7 +322,7 @@ must be provided and enforced by the specification designer.
 </div>
 <div class="sect2">
 <div class="titlepage"><div><div><h3 class="title">
-<a name="idp15165438912"></a>1.3. Operations</h3></div></div></div>
+<a name="sleigh_operations"></a>1.3.ï¿½Operations</h3></div></div></div>
 <p>
 P-code is intended to emulate a target processor by substituting a
 sequence of p-code operations for each machine instruction. Thus every
@@ -352,8 +352,8 @@ general purpose processor instruction sets. They break up into groups.
 </p>
 <div class="informalexample">
 <div class="table">
-<a name="ops.htmltable"></a><p class="title"><b>Table 1. P-code Operations</b></p>
-<div class="table-contents"><table width="70%" frame="box" rules="all" id="ops.htmltable">
+<a name="ops.htmltable"></a><p class="title"><b>Tableï¿½1.ï¿½P-code Operations</b></p>
+<div class="table-contents"><table xml:id="ops.htmltable" width="70%" frame="box" rules="all">
 <col width="40%">
 <col width="60%">
 <thead><tr>
@@ -414,7 +414,7 @@ general purpose processor instruction sets. They break up into groups.
 <br class="table-break">
 </div>
 <p>
-We postpone a full discussion of the individual operations until <a class="xref" href="sleigh_constructors.html#sleigh_semantic_section" title="7.7. The Semantic Section">Section 7.7, &#8220;The Semantic Section&#8221;</a>.
+We postpone a full discussion of the individual operations until <a class="xref" href="sleigh_constructors.html#sleigh_semantic_section" title="7.7.ï¿½The Semantic Section">Sectionï¿½7.7, &#8220;The Semantic Section&#8221;</a>.
 </p>
 </div>
 </div>
@@ -423,15 +423,15 @@ We postpone a full discussion of the individual operations until <a class="xref"
 <hr>
 <table width="100%" summary="Navigation footer">
 <tr>
-<td width="40%" align="left"> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right"> <a accesskey="n" href="sleigh_layout.html">Next</a>
+<td width="40%" align="left">ï¿½</td>
+<td width="20%" align="center">ï¿½</td>
+<td width="40%" align="right">ï¿½<a accesskey="n" href="sleigh_layout.html">Next</a>
 </td>
 </tr>
 <tr>
-<td width="40%" align="left" valign="top"> </td>
-<td width="20%" align="center"> </td>
-<td width="40%" align="right" valign="top"> 2. Basic Specification Layout</td>
+<td width="40%" align="left" valign="top">ï¿½</td>
+<td width="20%" align="center">ï¿½</td>
+<td width="40%" align="right" valign="top">ï¿½2.ï¿½Basic Specification Layout</td>
 </tr>
 </table>
 </div>
