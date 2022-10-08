@@ -24,12 +24,12 @@
 //@toolbar
 
 import java.nio.charset.Charset;
-import java.util.List;
 
 import ghidra.app.plugin.assembler.Assembler;
 import ghidra.app.plugin.assembler.Assemblers;
 import ghidra.app.plugin.core.debug.service.emulation.BytesDebuggerPcodeEmulator;
 import ghidra.app.plugin.core.debug.service.emulation.ProgramEmulationUtils;
+import ghidra.app.plugin.core.debug.service.emulation.data.DefaultPcodeDebuggerAccess;
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
 import ghidra.app.script.GhidraScript;
 import ghidra.app.services.DebuggerTraceManagerService;
@@ -37,6 +37,7 @@ import ghidra.app.services.ProgramManager;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.pcode.emu.PcodeThread;
 import ghidra.pcode.exec.*;
+import ghidra.pcode.exec.PcodeExecutorStatePiece.Reason;
 import ghidra.pcode.exec.trace.TraceSleighUtils;
 import ghidra.pcode.utils.Utils;
 import ghidra.program.database.ProgramDB;
@@ -47,6 +48,7 @@ import ghidra.program.model.listing.InstructionIterator;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.mem.Memory;
 import ghidra.trace.model.Trace;
+import ghidra.trace.model.guest.TracePlatform;
 import ghidra.trace.model.thread.TraceThread;
 import ghidra.trace.model.time.TraceSnapshot;
 import ghidra.trace.model.time.TraceTimeManager;
@@ -136,7 +138,9 @@ public class DebuggerEmuExampleScript extends GhidraScript {
 		 * library. This emulator will still know how to integrate with the UI, reading through to
 		 * open programs and writing state back into the trace.
 		 */
-		BytesDebuggerPcodeEmulator emulator = new BytesDebuggerPcodeEmulator(tool, trace, 0, null) {
+		TracePlatform host = trace.getPlatformManager().getHostPlatform();
+		DefaultPcodeDebuggerAccess access = new DefaultPcodeDebuggerAccess(tool, null, host, 0);
+		BytesDebuggerPcodeEmulator emulator = new BytesDebuggerPcodeEmulator(access) {
 			@Override
 			protected PcodeUseropLibrary<byte[]> createUseropLibrary() {
 				return new DemoPcodeUseropLibrary(language, DebuggerEmuExampleScript.this);
@@ -149,9 +153,10 @@ public class DebuggerEmuExampleScript extends GhidraScript {
 		 * Inject a call to our custom print userop. Otherwise, the language itself will never
 		 * invoke it.
 		 */
-		emulator.inject(injectHere, List.of(
-			"print_utf8(RCX);",
-			"emu_exec_decoded();"));
+		emulator.inject(injectHere, """
+				print_utf8(RCX);
+				emu_exec_decoded();
+				""");
 
 		/*
 		 * Run the experiment: This should interrupt on the second SYSCALL, because any value other
@@ -169,7 +174,7 @@ public class DebuggerEmuExampleScript extends GhidraScript {
 				thread.stepInstruction();
 				snapshot =
 					time.createSnapshot("Stepped to " + thread.getCounter());
-				emulator.writeDown(trace, snapshot.getKey(), 0);
+				emulator.writeDown(host, snapshot.getKey(), 0);
 			}
 			printerr("We should not have completed 10 steps!");
 		}
@@ -187,8 +192,8 @@ public class DebuggerEmuExampleScript extends GhidraScript {
 		 * This works the same as in the stand-alone case.
 		 */
 		println("RCX = " +
-			Utils.bytesToLong(thread.getState().getVar(language.getRegister("RCX")), 8,
-				language.isBigEndian()));
+			Utils.bytesToLong(thread.getState().getVar(language.getRegister("RCX"), Reason.INSPECT),
+				8, language.isBigEndian()));
 
 		println("RCX = " + Utils.bytesToLong(
 			SleighProgramCompiler.compileExpression(language, "RCX").evaluate(thread.getExecutor()),

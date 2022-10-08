@@ -22,7 +22,6 @@
 //@toolbar
 
 import java.nio.charset.Charset;
-import java.util.List;
 
 import ghidra.app.plugin.assembler.Assembler;
 import ghidra.app.plugin.assembler.Assemblers;
@@ -33,6 +32,7 @@ import ghidra.pcode.emu.PcodeThread;
 import ghidra.pcode.emu.sys.EmuInvalidSystemCallException;
 import ghidra.pcode.emu.sys.EmuSyscallLibrary;
 import ghidra.pcode.exec.*;
+import ghidra.pcode.exec.PcodeExecutorStatePiece.Reason;
 import ghidra.pcode.utils.Utils;
 import ghidra.program.database.ProgramDB;
 import ghidra.program.model.address.*;
@@ -184,10 +184,11 @@ public class StandAloneSyscallEmuExampleScript extends GhidraScript {
 			/*
 			 * Initialize the thread
 			 */
-			PcodeProgram init = SleighProgramCompiler.compileProgram(language, "init", List.of(
-				"RIP = 0x" + entry + ";",
-				"RSP = 0x00001000;"),
-				library);
+			PcodeProgram init =
+				SleighProgramCompiler.compileProgram(language, "init", String.format("""
+						RIP = 0x%s;
+						RSP = 0x00001000;
+						""", entry), library);
 			thread.getExecutor().execute(init, library);
 			thread.overrideContextWithDefault();
 			thread.reInitialize();
@@ -210,7 +211,8 @@ public class StandAloneSyscallEmuExampleScript extends GhidraScript {
 			 * convenient.
 			 */
 			println("RDI = " +
-				Utils.bytesToLong(thread.getState().getVar(language.getRegister("RDI")), 8,
+				Utils.bytesToLong(
+					thread.getState().getVar(language.getRegister("RDI"), Reason.INSPECT), 8,
 					language.isBigEndian()));
 
 			println("RDI = " + Utils.bytesToLong(

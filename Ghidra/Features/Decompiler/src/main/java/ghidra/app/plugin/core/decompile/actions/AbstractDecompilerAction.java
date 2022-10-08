@@ -28,9 +28,7 @@ import ghidra.program.model.address.Address;
 import ghidra.program.model.data.*;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.pcode.*;
-import ghidra.program.model.symbol.Symbol;
-import ghidra.program.model.symbol.SymbolTable;
-import ghidra.program.util.ProgramLocation;
+import ghidra.program.model.symbol.*;
 import ghidra.util.UndefinedFunction;
 import ghidra.util.data.DataTypeParser.AllowedDataTypes;
 
@@ -231,19 +229,29 @@ public abstract class AbstractDecompilerAction extends DockingAction {
 		return symbolTable.getPrimarySymbol(address);
 	}
 
+	/**
+	 * Get the function corresponding to the specified decompiler context.
+	 * 
+	 * @param context decompiler action context
+	 * @return the function associated with the current context token or null if none identified.
+	 */
 	protected Function getFunction(DecompilerActionContext context) {
-		ProgramLocation location = context.getLocation();
-		if (!(location instanceof DecompilerLocation)) {
-			return null;
-		}
+		ClangToken token = context.getTokenAtCursor();
 
-		ClangToken token = ((DecompilerLocation) location).getToken();
-		if (!(token instanceof ClangFuncNameToken)) {
-			return null;
+		Function f = null;
+		if (token instanceof ClangFuncNameToken) {
+			f = DecompilerUtils.getFunction(context.getProgram(), (ClangFuncNameToken) token);
 		}
-
-		Program program = location.getProgram();
-		return DecompilerUtils.getFunction(program, (ClangFuncNameToken) token);
+		else {
+			HighSymbol highSymbol = findHighSymbolFromToken(token, context.getHighFunction());
+			if (highSymbol instanceof HighFunctionShellSymbol) {
+				f = (Function) highSymbol.getSymbol().getObject();
+			}
+		}
+		while (f != null && f.isThunk() && f.getSymbol().getSource() == SourceType.DEFAULT) {
+			f = f.getThunkedFunction(false);
+		}
+		return f;
 	}
 
 	/**

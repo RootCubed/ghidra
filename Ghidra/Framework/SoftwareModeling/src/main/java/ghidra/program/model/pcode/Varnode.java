@@ -337,10 +337,6 @@ public class Varnode {
 		StringBuilder buffer = new StringBuilder();
 		Address addr = address;
 		AddressSpace space = addr.getAddressSpace();
-		if (space.isOverlaySpace()) {
-			space = space.getPhysicalSpace();
-			addr = space.getAddress(addr.getOffset());
-		}
 		buffer.append(space.getName());
 		buffer.append(":0x");
 		long off = addr.getUnsignedOffset();
@@ -440,6 +436,11 @@ public class Varnode {
 			else if (attribId == ATTRIB_INPUT.id()) {
 				if (decoder.readBool()) {
 					vn = factory.setInput(vn, true);
+				}
+			}
+			else if (attribId == ATTRIB_VOLATILE.id()) {
+				if (decoder.readBool()) {
+					factory.setVolatile(vn, true);
 				}
 			}
 		}

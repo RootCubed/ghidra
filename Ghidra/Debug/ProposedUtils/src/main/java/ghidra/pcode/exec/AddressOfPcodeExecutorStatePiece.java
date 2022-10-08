@@ -21,6 +21,7 @@ import java.util.Map;
 import ghidra.pcode.exec.PcodeArithmetic.Purpose;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressSpace;
+import ghidra.program.model.lang.Language;
 import ghidra.program.model.mem.MemBuffer;
 
 /**
@@ -35,6 +36,7 @@ import ghidra.program.model.mem.MemBuffer;
  */
 public class AddressOfPcodeExecutorStatePiece
 		implements PcodeExecutorStatePiece<byte[], Address> {
+	private final Language language;
 	private final BytesPcodeArithmetic addressArithmetic;
 	private final Map<Long, Address> unique = new HashMap<>();
 
@@ -43,8 +45,14 @@ public class AddressOfPcodeExecutorStatePiece
 	 * 
 	 * @param isBigEndian true if the control language is big endian
 	 */
-	public AddressOfPcodeExecutorStatePiece(boolean isBigEndian) {
-		this.addressArithmetic = BytesPcodeArithmetic.forEndian(isBigEndian);
+	public AddressOfPcodeExecutorStatePiece(Language language) {
+		this.language = language;
+		this.addressArithmetic = BytesPcodeArithmetic.forEndian(language.isBigEndian());
+	}
+
+	@Override
+	public Language getLanguage() {
+		return language;
 	}
 
 	@Override
@@ -62,12 +70,14 @@ public class AddressOfPcodeExecutorStatePiece
 		if (!space.isUniqueSpace()) {
 			return;
 		}
+		// TODO: size is not considered
 		long lOffset = addressArithmetic.toLong(offset, Purpose.STORE);
 		unique.put(lOffset, val);
 	}
 
 	@Override
-	public Address getVar(AddressSpace space, byte[] offset, int size, boolean quantize) {
+	public Address getVar(AddressSpace space, byte[] offset, int size, boolean quantize,
+			Reason reason) {
 		long lOffset = addressArithmetic.toLong(offset, Purpose.LOAD);
 		if (!space.isUniqueSpace()) {
 			return space.getAddress(lOffset);
@@ -78,5 +88,10 @@ public class AddressOfPcodeExecutorStatePiece
 	@Override
 	public MemBuffer getConcreteBuffer(Address address, Purpose purpose) {
 		throw new ConcretionError("Cannot make 'address of' concrete buffers", purpose);
+	}
+
+	@Override
+	public void clear() {
+		unique.clear();
 	}
 }

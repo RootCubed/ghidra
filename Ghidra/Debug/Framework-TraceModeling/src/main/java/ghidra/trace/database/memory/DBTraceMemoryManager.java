@@ -49,7 +49,8 @@ import ghidra.util.exception.*;
 import ghidra.util.task.TaskMonitor;
 
 public class DBTraceMemoryManager extends AbstractDBTraceSpaceBasedManager<DBTraceMemorySpace>
-		implements TraceMemoryManager, DBTraceDelegatingManager<DBTraceMemorySpace> {
+		implements TraceMemoryManager, InternalTraceMemoryOperations,
+		DBTraceDelegatingManager<DBTraceMemorySpace> {
 
 	protected static final String NAME = "Memory";
 
@@ -66,9 +67,19 @@ public class DBTraceMemoryManager extends AbstractDBTraceSpaceBasedManager<DBTra
 	}
 
 	@Override
+	public AddressSpace getSpace() {
+		return null;
+	}
+
+	@Override
 	public AddressSpace createOverlayAddressSpace(String name, AddressSpace base)
 			throws DuplicateNameException {
 		return overlayAdapter.createOverlayAddressSpace(name, base);
+	}
+
+	@Override
+	public AddressSpace getOrCreateOverlayAddressSpace(String name, AddressSpace base) {
+		return overlayAdapter.getOrCreateOverlayAddressSpace(name, base);
 	}
 
 	@Override
@@ -260,7 +271,8 @@ public class DBTraceMemoryManager extends AbstractDBTraceSpaceBasedManager<DBTra
 
 	@Override
 	public Entry<Long, TraceMemoryState> getViewState(long snap, Address address) {
-		return delegateRead(address.getAddressSpace(), m -> m.getViewState(snap, address));
+		return delegateReadOr(address.getAddressSpace(), m -> m.getViewState(snap, address),
+			() -> Map.entry(snap, TraceMemoryState.UNKNOWN));
 	}
 
 	@Override

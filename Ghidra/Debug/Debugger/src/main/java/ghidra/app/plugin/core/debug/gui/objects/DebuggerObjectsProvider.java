@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.event.MouseEvent;
 import java.io.PrintWriter;
 import java.lang.invoke.MethodHandles;
+import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.CompletableFuture;
@@ -70,7 +71,8 @@ import ghidra.framework.options.annotation.*;
 import ghidra.framework.plugintool.*;
 import ghidra.framework.plugintool.annotation.AutoConfigStateField;
 import ghidra.framework.plugintool.annotation.AutoServiceConsumed;
-import ghidra.program.model.address.*;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.address.AddressRange;
 import ghidra.program.model.listing.Program;
 import ghidra.program.util.ProgramLocation;
 import ghidra.program.util.ProgramSelection;
@@ -1591,7 +1593,7 @@ public class DebuggerObjectsProvider extends ComponentProviderAdapter
 		try {
 			script = provider.getScriptInstance(sourceFile, writer);
 		}
-		catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+		catch (GhidraScriptLoadException e) {
 			Msg.error(this, e.getMessage());
 			return;
 		}
@@ -2097,9 +2099,9 @@ public class DebuggerObjectsProvider extends ComponentProviderAdapter
 		if (listingService == null || listingService == null) {
 			return;
 		}
+		// TODO: Could probably inspect schema for any attribute of type Address[Range], or String
 		if (value == null) {
-			value =
-				object.getCachedAttribute(TargetBreakpointLocation.ADDRESS_ATTRIBUTE_NAME);
+			value = object.getCachedAttribute(TargetObject.PREFIX_INVISIBLE + "address");
 		}
 		if (value == null) {
 			value = object.getCachedAttribute(TargetObject.PREFIX_INVISIBLE + "range");
@@ -2112,19 +2114,16 @@ public class DebuggerObjectsProvider extends ComponentProviderAdapter
 		}
 
 		Address addr = null;
-		if (value instanceof Address) {
-			addr = (Address) value;
+		if (value instanceof Address a) {
+			addr = a;
 		}
-		else if (value instanceof AddressRangeImpl) {
-			AddressRangeImpl range = (AddressRangeImpl) value;
+		else if (value instanceof AddressRange range) {
 			addr = range.getMinAddress();
 		}
-		else if (value instanceof Long) {
-			Long lval = (Long) value;
+		else if (value instanceof Long lval) {
 			addr = object.getModel().getAddress("ram", lval);
 		}
-		else if (value instanceof String) {
-			String sval = (String) value;
+		else if (value instanceof String sval) {
 			addr = stringToAddress(object, addr, sval);
 		}
 		if (addr != null) {

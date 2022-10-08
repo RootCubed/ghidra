@@ -28,11 +28,9 @@ import com.google.common.cache.RemovalNotification;
 import com.google.common.collect.Range;
 
 import db.DBHandle;
-import ghidra.lifecycle.Unfinished;
 import ghidra.program.model.address.*;
 import ghidra.program.model.mem.MemBuffer;
-import ghidra.trace.database.DBTrace;
-import ghidra.trace.database.DBTraceUtils;
+import ghidra.trace.database.*;
 import ghidra.trace.database.DBTraceUtils.AddressRangeMapSetter;
 import ghidra.trace.database.DBTraceUtils.OffsetSnap;
 import ghidra.trace.database.listing.DBTraceCodeSpace;
@@ -44,7 +42,6 @@ import ghidra.trace.model.*;
 import ghidra.trace.model.Trace.*;
 import ghidra.trace.model.memory.*;
 import ghidra.trace.model.thread.TraceThread;
-import ghidra.trace.util.DefaultTraceTimeViewport;
 import ghidra.trace.util.TraceChangeRecord;
 import ghidra.util.*;
 import ghidra.util.AddressIteratorAdapter;
@@ -57,7 +54,8 @@ import ghidra.util.task.TaskMonitor;
 /**
  * Implements {@link TraceMemorySpace} using a database-backed copy-on-write store.
  */
-public class DBTraceMemorySpace implements Unfinished, TraceMemorySpace, DBTraceSpaceBased {
+public class DBTraceMemorySpace
+		implements TraceMemorySpace, InternalTraceMemoryOperations, DBTraceSpaceBased {
 	public static final int BLOCK_SHIFT = 12;
 	public static final int BLOCK_SIZE = 1 << BLOCK_SHIFT;
 	public static final int BLOCK_MASK = -1 << BLOCK_SHIFT;
@@ -95,7 +93,7 @@ public class DBTraceMemorySpace implements Unfinished, TraceMemorySpace, DBTrace
 			.build()
 			.asMap();
 
-	protected final DefaultTraceTimeViewport viewport;
+	protected final DBTraceTimeViewport viewport;
 
 	public DBTraceMemorySpace(DBTraceMemoryManager manager, DBHandle dbh, AddressSpace space,
 			DBTraceSpaceEntry ent, TraceThread thread) throws IOException, VersionException {
@@ -135,7 +133,17 @@ public class DBTraceMemorySpace implements Unfinished, TraceMemorySpace, DBTrace
 		this.blocksByOffset =
 			blockStore.getIndex(OffsetSnap.class, DBTraceMemoryBlockEntry.LOCATION_COLUMN);
 
-		this.viewport = new DefaultTraceTimeViewport(trace);
+		this.viewport = trace.createTimeViewport();
+	}
+
+	@Override
+	public AddressSpace getSpace() {
+		return space;
+	}
+
+	@Override
+	public ReadWriteLock getLock() {
+		return lock;
 	}
 
 	private void regionCacheEntryRemoved(
@@ -666,16 +674,18 @@ public class DBTraceMemorySpace implements Unfinished, TraceMemorySpace, DBTrace
 
 				// Read back the written bytes and fire event
 				byte[] bytes = Arrays.copyOfRange(buf.array(), arrOff, arrOff + result);
+				ImmutableTraceAddressSnapRange tasr = new ImmutableTraceAddressSnapRange(start,
+					start.add(result - 1), snap, lastSnap.snap);
 				trace.setChanged(new TraceChangeRecord<>(TraceMemoryBytesChangeType.CHANGED,
-					this, new ImmutableTraceAddressSnapRange(start, start.add(result - 1),
-						snap, lastSnap.snap),
-					oldBytes.array(), bytes));
+					this, tasr, oldBytes.array(), bytes));
 
 				// Fixup affected code units
 				DBTraceCodeSpace codeSpace = trace.getCodeManager().get(this, false);
 				if (codeSpace != null) {
 					codeSpace.bytesChanged(changed, snap, start, oldBytes.array(), bytes);
 				}
+				// Clear program view caches
+				trace.updateViewsBytesChanged(tasr.getRange());
 			}
 			return result;
 		}
@@ -733,6 +743,7 @@ public class DBTraceMemorySpace implements Unfinished, TraceMemorySpace, DBTrace
 
 	@Override
 	public int getViewBytes(long snap, Address start, ByteBuffer buf) {
+		assertInSpace(start);
 		AddressRange toRead;
 		int len = truncateLen(buf.remaining(), start);
 		if (len == 0) {
@@ -849,7 +860,6 @@ public class DBTraceMemorySpace implements Unfinished, TraceMemorySpace, DBTrace
 		return null;
 	}
 
-	// TODO: Test this
 	protected boolean doCheckBytesChanged(OffsetSnap loc, int srcOffset, int maxLen,
 			ByteBuffer eBuf, ByteBuffer pBuf) throws IOException {
 		DBTraceMemoryBlockEntry ent = findMostRecentBlockEntry(loc, true);
@@ -1037,6 +1047,7 @@ public class DBTraceMemorySpace implements Unfinished, TraceMemorySpace, DBTrace
 			regionMapSpace.invalidateCache();
 			regionCache.clear();
 			trace.updateViewsRefreshBlocks();
+			trace.updateViewsBytesChanged(null);
 			stateMapSpace.invalidateCache();
 			bufferStore.invalidateCache();
 			blockStore.invalidateCache();

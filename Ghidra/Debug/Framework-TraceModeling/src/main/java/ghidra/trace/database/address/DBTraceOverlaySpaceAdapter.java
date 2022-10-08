@@ -26,6 +26,8 @@ import db.*;
 import ghidra.program.model.address.*;
 import ghidra.trace.database.DBTrace;
 import ghidra.trace.database.DBTraceManager;
+import ghidra.trace.model.Trace.TraceOverlaySpaceChangeType;
+import ghidra.trace.util.TraceChangeRecord;
 import ghidra.util.LockHold;
 import ghidra.util.database.*;
 import ghidra.util.database.DBCachedObjectStoreFactory.AbstractDBFieldCodec;
@@ -225,6 +227,20 @@ public class DBTraceOverlaySpaceAdapter implements DBTraceManager {
 		}
 	}
 
+	protected AddressSpace doCreateOverlaySpace(String name, AddressSpace base) {
+		TraceAddressFactory factory = trace.getInternalAddressFactory();
+		OverlayAddressSpace space =
+			factory.addOverlayAddressSpace(name, true, base, base.getMinAddress().getOffset(),
+				base.getMaxAddress().getOffset());
+		// Only if it succeeds do we store the record
+		DBTraceOverlaySpaceEntry ent = overlayStore.create();
+		ent.set(space.getName(), base.getName());
+		trace.updateViewsAddSpaceBlock(space);
+		trace.setChanged(new TraceChangeRecord<>(TraceOverlaySpaceChangeType.ADDED, null,
+			trace, null, space));
+		return space;
+	}
+
 	public AddressSpace createOverlayAddressSpace(String name, AddressSpace base)
 			throws DuplicateNameException {
 		// TODO: Exclusive lock?
@@ -233,15 +249,19 @@ public class DBTraceOverlaySpaceAdapter implements DBTraceManager {
 			if (factory.getAddressSpace(name) != null) {
 				throw new DuplicateNameException("Address space " + name + " already exists.");
 			}
+			return doCreateOverlaySpace(name, base);
+		}
+	}
 
-			OverlayAddressSpace space =
-				factory.addOverlayAddressSpace(name, true, base, base.getMinAddress().getOffset(),
-					base.getMaxAddress().getOffset());
-			// Only if it succeeds do we store the record
-			DBTraceOverlaySpaceEntry ent = overlayStore.create();
-			ent.set(space.getName(), base.getName());
-			trace.updateViewsAddSpaceBlock(space);
-			return space;
+	public AddressSpace getOrCreateOverlayAddressSpace(String name, AddressSpace base) {
+		// TODO: Exclusive lock?
+		try (LockHold hold = LockHold.lock(lock.writeLock())) {
+			TraceAddressFactory factory = trace.getInternalAddressFactory();
+			AddressSpace space = factory.getAddressSpace(name);
+			if (space != null) {
+				return space.getPhysicalSpace() == base ? space : null;
+			}
+			return doCreateOverlaySpace(name, base);
 		}
 	}
 
@@ -258,6 +278,8 @@ public class DBTraceOverlaySpaceAdapter implements DBTraceManager {
 			assert space != null;
 			factory.removeOverlaySpace(name);
 			trace.updateViewsDeleteSpaceBlock(space);
+			trace.setChanged(new TraceChangeRecord<>(TraceOverlaySpaceChangeType.DELETED, null,
+				trace, space, null));
 		}
 	}
 }

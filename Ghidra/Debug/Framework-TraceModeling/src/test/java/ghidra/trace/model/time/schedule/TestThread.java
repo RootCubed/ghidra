@@ -15,12 +15,11 @@
  */
 package ghidra.trace.model.time.schedule;
 
-import java.util.List;
-
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
 import ghidra.pcode.emu.PcodeThread;
 import ghidra.pcode.emu.ThreadPcodeExecutorState;
 import ghidra.pcode.exec.*;
+import ghidra.pcode.exec.PcodeExecutorStatePiece.Reason;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.lang.RegisterValue;
 import ghidra.program.model.listing.Instruction;
@@ -63,7 +62,7 @@ class TestThread implements PcodeThread<Void> {
 	@Override
 	public PcodeExecutor<Void> getExecutor() {
 		return new PcodeExecutor<>(TraceScheduleTest.TOY_BE_64_LANG, machine.getArithmetic(),
-			getState()) {
+			getState(), Reason.EXECUTE) {
 			public PcodeFrame execute(PcodeProgram program, PcodeUseropLibrary<Void> library) {
 				machine.record.add("x:" + name);
 				// TODO: Verify the actual effect
@@ -167,7 +166,7 @@ class TestThread implements PcodeThread<Void> {
 	}
 
 	@Override
-	public void inject(Address address, List<String> sleigh) {
+	public void inject(Address address, String source) {
 	}
 
 	@Override

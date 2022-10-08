@@ -47,6 +47,7 @@ import ghidra.program.model.address.Address;
 import ghidra.program.model.listing.Program;
 import ghidra.program.util.ProgramLocation;
 import ghidra.trace.model.*;
+import ghidra.trace.model.guest.TracePlatform;
 import ghidra.trace.model.program.TraceProgramView;
 import ghidra.trace.model.thread.TraceThread;
 import ghidra.trace.model.time.TraceSnapshot;
@@ -81,12 +82,15 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 	protected static final int MAX_CACHE_SIZE = 5;
 
 	protected static class CacheKey implements Comparable<CacheKey> {
+		// TODO: Should key on platform, not trace
 		protected final Trace trace;
+		protected final TracePlatform platform;
 		protected final TraceSchedule time;
 		private final int hashCode;
 
-		public CacheKey(Trace trace, TraceSchedule time) {
-			this.trace = Objects.requireNonNull(trace);
+		public CacheKey(TracePlatform platform, TraceSchedule time) {
+			this.platform = Objects.requireNonNull(platform);
+			this.trace = platform.getTrace();
 			this.time = Objects.requireNonNull(time);
 			this.hashCode = Objects.hash(trace, time);
 		}
@@ -182,6 +186,8 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 	private DebuggerTraceManagerService traceManager;
 	@AutoServiceConsumed
 	private DebuggerModelService modelService;
+	@AutoServiceConsumed
+	private DebuggerPlatformService platformService;
 	@AutoServiceConsumed
 	private DebuggerStaticMappingService staticMappings;
 	@SuppressWarnings("unused")
@@ -422,7 +428,8 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 	}
 
 	@Override
-	public CompletableFuture<Long> backgroundEmulate(Trace trace, TraceSchedule time) {
+	public CompletableFuture<Long> backgroundEmulate(TracePlatform platform, TraceSchedule time) {
+		Trace trace = platform.getTrace();
 		if (!traceManager.getOpenTraces().contains(trace)) {
 			throw new IllegalArgumentException(
 				"Cannot emulate a trace unless it's opened in the tool.");
@@ -430,7 +437,7 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 		if (time.isSnapOnly()) {
 			return CompletableFuture.completedFuture(time.getSnap());
 		}
-		return requests.get(new CacheKey(trace, time));
+		return requests.get(new CacheKey(platform, time));
 	}
 
 	protected TraceSnapshot findScratch(Trace trace, TraceSchedule time) {
@@ -456,7 +463,9 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 
 	protected long doEmulate(CacheKey key, TaskMonitor monitor) throws CancelledException {
 		Trace trace = key.trace;
+		TracePlatform platform = key.platform;
 		TraceSchedule time = key.time;
+
 		CachedEmulator ce;
 		DebuggerPcodeMachine<?> emu;
 		Map.Entry<CacheKey, CachedEmulator> ancestor = findNearestPrefix(key);
@@ -473,19 +482,23 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 			ce = ancestor.getValue();
 			emu = ce.emulator;
 			monitor.initialize(time.totalTickCount() - prevKey.time.totalTickCount());
+			createRegisterSpaces(trace, time, monitor);
+			monitor.setMessage("Emulating");
 			time.finish(trace, prevKey.time, emu, monitor);
 		}
 		else {
-			emu = emulatorFactory.create(tool, trace, time.getSnap(),
+			emu = emulatorFactory.create(tool, platform, time.getSnap(),
 				modelService == null ? null : modelService.getRecorder(trace));
 			ce = new CachedEmulator(emu);
 			monitor.initialize(time.totalTickCount());
+			createRegisterSpaces(trace, time, monitor);
+			monitor.setMessage("Emulating");
 			time.execute(trace, emu, monitor);
 		}
 		TraceSnapshot destSnap;
 		try (UndoableTransaction tid = UndoableTransaction.start(trace, "Emulate")) {
 			destSnap = findScratch(trace, time);
-			emu.writeDown(trace, destSnap.getKey(), time.getSnap());
+			emu.writeDown(platform, destSnap.getKey(), time.getSnap());
 		}
 
 		synchronized (cache) {
@@ -502,9 +515,24 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 		return destSnap.getKey();
 	}
 
+	protected void createRegisterSpaces(Trace trace, TraceSchedule time, TaskMonitor monitor) {
+		if (trace.getObjectManager().getRootObject() == null) {
+			return;
+		}
+		// Cause object-register support to copy values into new register spaces
+		// TODO: I wish this were not necessary
+		monitor.setMessage("Creating register spaces");
+		try (UndoableTransaction tid = UndoableTransaction.start(trace, "Prepare emulation")) {
+			for (TraceThread thread : time.getThreads(trace)) {
+				trace.getMemoryManager().getMemoryRegisterSpace(thread, 0, true);
+			}
+		}
+	}
+
 	@Override
-	public long emulate(Trace trace, TraceSchedule time, TaskMonitor monitor)
+	public long emulate(TracePlatform platform, TraceSchedule time, TaskMonitor monitor)
 			throws CancelledException {
+		Trace trace = platform.getTrace();
 		if (!traceManager.getOpenTraces().contains(trace)) {
 			throw new IllegalArgumentException(
 				"Cannot emulate a trace unless it's opened in the tool.");
@@ -512,12 +540,13 @@ public class DebuggerEmulationServicePlugin extends Plugin implements DebuggerEm
 		if (time.isSnapOnly()) {
 			return time.getSnap();
 		}
-		return doEmulate(new CacheKey(trace, time), monitor);
+		return doEmulate(new CacheKey(platform, time), monitor);
 	}
 
 	@Override
 	public DebuggerPcodeMachine<?> getCachedEmulator(Trace trace, TraceSchedule time) {
-		CachedEmulator ce = cache.get(new CacheKey(trace, time));
+		CachedEmulator ce =
+			cache.get(new CacheKey(trace.getPlatformManager().getHostPlatform(), time));
 		return ce == null ? null : ce.emulator;
 	}
 

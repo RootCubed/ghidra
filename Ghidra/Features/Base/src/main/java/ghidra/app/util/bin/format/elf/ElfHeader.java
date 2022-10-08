@@ -15,10 +15,11 @@
  */
 package ghidra.app.util.bin.format.elf;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.util.*;
 import java.util.function.Consumer;
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
 
 import ghidra.app.util.bin.*;
 import ghidra.app.util.bin.format.Writeable;
@@ -531,7 +532,7 @@ public class ElfHeader implements StructConverter, Writeable {
 						" linked to symbol table section " + symbolTableSection.getNameAsString() +
 						" affecting " + relocaBaseName);
 
-				if (section.getOffset() < 0) {
+				if (section.isInvalidOffset()) {
 					return;
 				}
 
@@ -613,7 +614,7 @@ public class ElfHeader implements StructConverter, Writeable {
 					Long.toHexString(relocTableAddr));
 				return;
 			}
-			if (relocTableLoadHeader.getOffset() < 0) {
+			if (relocTableLoadHeader.isInvalidOffset()) {
 				return;
 			}
 
@@ -880,7 +881,7 @@ public class ElfHeader implements StructConverter, Writeable {
 		for (ElfSectionHeader symbolTableSectionHeader : sectionHeaders) {
 			if (symbolTableSectionHeader.getType() == ElfSectionHeaderConstants.SHT_SYMTAB ||
 				symbolTableSectionHeader.getType() == ElfSectionHeaderConstants.SHT_DYNSYM) {
-				if (symbolTableSectionHeader.getOffset() < 0) {
+				if (symbolTableSectionHeader.isInvalidOffset()) {
 					continue;
 				}
 
@@ -1277,24 +1278,17 @@ public class ElfHeader implements StructConverter, Writeable {
 		}
 		preLinkImageBase = -1L;
 		try {
-			long ptr = reader.getPointerIndex();
-
 			long fileLength = reader.getByteProvider().length();
 
 			// not enough bytes
 			if (fileLength < 8) {
 				return -1;
 			}
-			//reader.setPointerIndex(fileLength - 8);
-			int readInt = reader.readInt(fileLength - 8);
-			String readAsciiString = reader.readAsciiString(fileLength - 4, 4);
+			int preLinkImageBaseInt = reader.readInt(fileLength - 8);
+			String preLinkMagicString = reader.readAsciiString(fileLength - 4, 4).trim();
 
-			if (reader.getPointerIndex() != ptr) {
-				reader.setPointerIndex(ptr);
-			}
-
-			if (readAsciiString.equals("PRE")) {
-				preLinkImageBase = (readInt) & 0xffffffffL;
+			if (preLinkMagicString.equals("PRE")) {
+				preLinkImageBase = Integer.toUnsignedLong(preLinkImageBaseInt);
 			}
 		}
 		catch (IOException e) {
@@ -1627,7 +1621,8 @@ public class ElfHeader implements StructConverter, Writeable {
 			long fileRangeLength) {
 		long maxOffset = fileOffset + fileRangeLength - 1;
 		for (ElfSectionHeader section : sectionHeaders) {
-			if (section.getType() == ElfSectionHeaderConstants.SHT_NULL) {
+			if (section.getType() == ElfSectionHeaderConstants.SHT_NULL ||
+				section.isInvalidOffset()) {
 				continue;
 			}
 			long size = section.getSize();
@@ -1754,7 +1749,8 @@ public class ElfHeader implements StructConverter, Writeable {
 	public ElfProgramHeader getProgramLoadHeaderContainingFileOffset(long offset) {
 		for (ElfProgramHeader programHeader : programHeaders) {
 			if (programHeader == null ||
-				programHeader.getType() != ElfProgramHeaderConstants.PT_LOAD) {
+				programHeader.getType() != ElfProgramHeaderConstants.PT_LOAD ||
+				programHeader.isInvalidOffset()) {
 				continue;
 			}
 			long start = programHeader.getOffset();

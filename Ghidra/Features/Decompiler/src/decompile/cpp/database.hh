@@ -225,6 +225,7 @@ public:
   bool isTypeLocked(void) const { return ((flags&Varnode::typelock)!=0); }	///< Is the Symbol type-locked
   bool isNameLocked(void) const { return ((flags&Varnode::namelock)!=0); }	///< Is the Symbol name-locked
   bool isSizeTypeLocked(void) const { return ((dispflags & size_typelock)!=0); }	///< Is the Symbol size type-locked
+  bool isVolatile(void) const { return ((flags & Varnode::volatil)!=0); }	///< Is the Symbol volatile
   bool isThisPointer(void) const { return ((dispflags & is_this_ptr)!=0); }		///< Is \b this the "this" pointer
   bool isIndirectStorage(void) const { return ((flags&Varnode::indirectstorage)!=0); }	///< Is storage really a pointer to the true Symbol
   bool isHiddenReturn(void) const { return ((flags&Varnode::hiddenretparm)!=0); }	///< Is this a reference to the function return value
@@ -762,6 +763,7 @@ public:
   LabSymbol *addCodeLabel(const Address &addr,const string &nm);
   Symbol *addDynamicSymbol(const string &nm,Datatype *ct,const Address &caddr,uint8 hash);
   Symbol *addEquateSymbol(const string &nm,uint4 format,uintb value,const Address &addr,uint8 hash);
+  Symbol *addUnionFacetSymbol(const string &nm,Datatype *dt,int4 fieldNum,const Address &addr,uint8 hash);
   string buildDefaultName(Symbol *sym,int4 &base,Varnode *vn) const;	///< Create a default name for the given Symbol
   bool isReadOnly(const Address &addr,int4 size,const Address &usepoint) const;
   void printBounds(ostream &s) const { rangetree.printBounds(s); }	///< Print a description of \b this Scope's \e owned memory ranges
