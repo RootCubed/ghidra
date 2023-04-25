@@ -911,7 +911,8 @@ public class DecompilerPanel extends JPanel implements FieldMouseListener, Field
 			return;		// Don't goto if symbol is on the stack or in a register
 		}
 		else if (vn.isConstant()) {
-			controller.goToScalar(vn.getOffset(), newWindow);
+			Address addr = token.getMinAddress().getNewAddress(vn.getOffset(), true);
+			controller.goToScalar(addr.getOffset(), newWindow);
 		}
 	}
 
