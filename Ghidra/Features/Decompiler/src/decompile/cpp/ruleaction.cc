@@ -10624,6 +10624,184 @@ int4 RuleLzcountShiftBool::applyOp(PcodeOp *op,Funcdata &data)
   }
   return 0;
 }
+void RuleSimplifyPPCInt2Float::getOpList(vector<uint4> &oplist) const
+
+{
+
+  oplist.push_back(CPUI_FLOAT_SUB);
+}
+
+int4 RuleSimplifyPPCInt2Float::applyOp(PcodeOp *op,Funcdata &data)
+
+{
+  /*
+              ┌──────────┐          ┌──┐
+           vA │0x80000000│          │rX│ vB
+              └──────────┴──┐ ┌─────┴──┘
+                           ┌V─V┐
+                           │XOR│ pC // or ZEXT with rX as input; also XOR might come after PIECE
+      vE            pF     └─┬─┘
+  ┌──────────┐    ┌─────┐    │
+  │0x43300000├────>PIECE<───vD
+  └──────────┘    └──┬──┘
+                    vG
+                 ┌───V──┐
+                 │(CAST)│ pH
+                 └───┬──┘
+                    vK
+             ┌───────V─────┐
+             │(FLOAT2FLOAT)│ pL
+             └───────┬─────┘
+                    vI
+                ┌────V────┐   ┌──────────────────┐
+             pK │FLOAT_SUB<───┤0x4330000080000000│ vJ
+                └────┬────┘   └──────────────────┘
+                     │
+                     V
+  */
+  Varnode *vI = op->getIn(0);
+  Varnode *vJ = op->getIn(1);
+  if (!vJ->isConstant() || !vI->isWritten()) return 0;
+  
+  Varnode *vK = vI;
+  if (vI->isWritten() && vI->getDef()->code() == CPUI_FLOAT_FLOAT2FLOAT) {
+    vK = vI->getDef()->getIn(0);
+  }
+  Varnode *vG = vK;
+  if (vK->isWritten() && vK->getDef()->code() == CPUI_CAST) {
+    vG = vK->getDef()->getIn(0);
+  }
+
+  if (!vG->isWritten()) return 0;
+  
+  Varnode *inReg;
+  PcodeOp *pF;
+  uintb signedMask = 0;
+  if (vG->getDef()->code() == CPUI_PIECE) {
+    pF = vG->getDef();
+
+    Varnode *vD = pF->getIn(1);
+    inReg = vD;
+    
+    // Verify correct value of vA (if existent)
+    if (vD->isWritten() && vD->getDef()->code() == CPUI_INT_XOR) {
+      signedMask = 1UL << (vD->getSize() * 8 - 1);
+
+      Varnode *vA = vD->getDef()->getIn(0);
+      Varnode *vB = vD->getDef()->getIn(1);
+
+      if (vA->isConstant()) {
+        if (vA->getAddr().getOffset() != signedMask) 
+          return 0;
+        inReg = vB;
+      } else if (vB->isConstant()) {
+        if (vB->getAddr().getOffset() != signedMask)
+          return 0;
+        inReg = vA;
+      } else {
+        return 0;
+      }
+    }
+  } else if (vG->getDef()->code() == CPUI_INT_XOR) {
+    // Verify correct value of vA
+    Varnode *xorConst, *xorVar;
+
+    Varnode *vLeft = vG->getDef()->getIn(0);
+    Varnode *vRight = vG->getDef()->getIn(1);
+
+    if (vLeft->isConstant()) {
+      xorConst = vLeft;
+      xorVar = vRight;
+    } else if (vRight->isConstant()) {
+      xorConst = vRight;
+      xorVar = vLeft;
+    } else {
+      return 0;
+    }
+    
+    pF = xorVar->getDef();
+    
+    if (pF->code() != CPUI_PIECE) return 0;
+    if (pF->getIn(1)->isConstant()) return 0;
+    inReg = pF->getIn(1);
+
+    signedMask = 1UL << (inReg->getSize() * 8 - 1);
+    if (xorConst->getAddr().getOffset() != signedMask) return 0;
+  } else {
+    return 0;
+  }
+
+  // Verify correct value of vE
+  Varnode *vE = pF->getIn(0);
+  // This is to circumvent a limitation of the decompiler's alias analysis.
+  // Ideally, this would just be:
+  // if (!vE->isConstant) return 0;
+  while (!vE->isConstant()) {
+    if (!vE->isWritten()) return 0;
+    PcodeOp *pieceLeftDef = vE->getDef();
+    if (pieceLeftDef->code() != CPUI_INDIRECT && pieceLeftDef->code() != CPUI_COPY) return 0;
+    vE = pieceLeftDef->getIn(0);
+  }
+
+  int concatpieceSize = vE->getSize();
+
+  int significandBits;
+  int exponentBias;
+  switch (concatpieceSize) {
+    case 1:
+      // 16-bit float
+      significandBits = 10;
+      exponentBias = 15;
+      break;
+    case 2:
+      // 32-bit float
+      significandBits = 22;
+      exponentBias = 127;
+      break;
+    case 4:
+      // 64-bit float
+      significandBits = 52;
+      exponentBias = 1023;
+      break;
+    default:
+      return 0; // invalid size
+  }
+
+  uintb concatpiece = vE->getAddr().getOffset();
+
+  uintb exponent = exponentBias + significandBits;
+  if (concatpiece != exponent << (significandBits - concatpieceSize * 8)) return 0;
+
+  // Verify correct value of vJ
+  uintb expVJ = (exponent << significandBits) | signedMask;
+  uintb actualVJ = vJ->getAddr().getOffset();
+  
+  // We have to use floating point comparisons because
+  // getOffset() is in floating point format
+  float expVJFloat = (float) (*(double *) &expVJ);
+  float vJFloat = *(float *) &actualVJ;
+  if (vJ->getSize() == 8) {
+    vJFloat = (float) (*(double *) &actualVJ);
+  } else if (vJ->getSize() != 4) {
+    return 0;
+  }
+  if (vJFloat != expVJFloat) return 0;
+
+  // add cast
+  Datatype *ct;
+  if (signedMask != 0) {
+    ct = data.getArch()->types->getBase(inReg->getSize(), TYPE_INT);
+  } else {
+    ct = data.getArch()->types->getBase(inReg->getSize(), TYPE_UINT);
+  }
+  inReg->updateType(ct, true, true);
+
+  data.opRemoveInput(op, 1);
+  data.opSetOpcode(op, CPUI_FLOAT_INT2FLOAT);
+  data.opSetInput(op, inReg, 0);
+
+  return 1;
+}
 
 /// \class RuleFloatSign
 /// \brief Convert floating-point \e sign bit manipulation into FLOAT_ABS or FLOAT_NEG
