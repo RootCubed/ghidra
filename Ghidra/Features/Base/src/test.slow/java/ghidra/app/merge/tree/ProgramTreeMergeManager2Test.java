@@ -537,7 +537,7 @@ public class ProgramTreeMergeManager2Test extends AbstractProgramTreeMergeManage
 		assertNotNull(resultProgram.getListing().getRootModule("Main Tree"));
 		assertNotNull(resultProgram.getListing().getModule("My Tree", "my module"));
 		assertNotNull(resultProgram.getListing().getFragment("My Tree", "frag_one"));
-		String newName = "Another Main Tree." + System.getProperty("user.name");
+		String newName = "Another Main Tree." + SystemUtilities.getUserName();
 
 		assertNotNull(resultProgram.getListing().getRootModule("Another Main Tree"));
 		assertNull(resultProgram.getListing().getModule(newName, "my new module"));

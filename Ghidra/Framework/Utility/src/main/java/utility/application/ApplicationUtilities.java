@@ -212,7 +212,7 @@ public class ApplicationUtilities {
 		}
 		
 		// Use platform-specific default location
-		String userDirName = SystemUtilities.getUserName() + "-" + appName;
+		String userDirName = SystemUtilities.getUserName(true) + "-" + appName;
 
 		try {
 			return createDir(switch (OperatingSystem.CURRENT_OPERATING_SYSTEM) {
@@ -423,7 +423,7 @@ public class ApplicationUtilities {
 			throws FileNotFoundException {
 		String userSpecificDirName = appName;
 		if (!FileUtilities.isPathContainedWithin(getJavaUserHomeDir(), parentDir)) {
-			userSpecificDirName = SystemUtilities.getUserName() + "-" + appName;
+			userSpecificDirName = SystemUtilities.getUserName(true) + "-" + appName;
 		}
 		return userSpecificDirName;
 	}

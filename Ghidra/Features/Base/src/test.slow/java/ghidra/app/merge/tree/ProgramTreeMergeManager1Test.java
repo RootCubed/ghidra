@@ -568,7 +568,7 @@ public class ProgramTreeMergeManager1Test extends AbstractProgramTreeMergeManage
 
 		executeMerge(ProgramTreeMergeManager.RENAME_PRIVATE);
 		// should  have "Some Other Tree" and "Another Main Tree.<sid>"
-		String newName = "Another Main Tree." + System.getProperty("user.name");
+		String newName = "Another Main Tree." + SystemUtilities.getUserName();
 		assertNotNull(resultProgram.getListing().getRootModule("Some Other Tree"));
 		assertNotNull(resultProgram.getListing().getRootModule(newName));
 
@@ -890,7 +890,7 @@ public class ProgramTreeMergeManager1Test extends AbstractProgramTreeMergeManage
 		executeMerge(ProgramTreeMergeManager.ADD_NEW_TREE);
 		assertNotNull(resultProgram.getListing().getModule("Main Tree", "my module"));
 		assertNotNull(resultProgram.getListing().getFragment("Main Tree", "frag_one"));
-		String newName = "Main Tree." + System.getProperty("user.name");
+		String newName = "Main Tree." + SystemUtilities.getUserName();
 		assertNotNull(resultProgram.getListing().getModule(newName, "my new module"));
 		assertNotNull(resultProgram.getListing().getFragment(newName, "my fragment"));
 
@@ -942,7 +942,7 @@ public class ProgramTreeMergeManager1Test extends AbstractProgramTreeMergeManage
 		executeMerge(ProgramTreeMergeManager.RENAME_PRIVATE);
 		assertNotNull(resultProgram.getListing().getModule("Main Tree", "my module"));
 		assertNotNull(resultProgram.getListing().getFragment("Main Tree", "frag_one"));
-		String newName = "Main Tree." + System.getProperty("user.name");
+		String newName = "Main Tree." + SystemUtilities.getUserName();
 		assertNotNull(resultProgram.getListing().getModule(newName, "my new module"));
 		assertNotNull(resultProgram.getListing().getFragment(newName, "my fragment"));
 
@@ -1112,7 +1112,7 @@ public class ProgramTreeMergeManager1Test extends AbstractProgramTreeMergeManage
 		executeMerge(ProgramTreeMergeManager.ADD_NEW_TREE);
 		assertNotNull(resultProgram.getListing().getModule("My Tree", "my module"));
 		assertNotNull(resultProgram.getListing().getFragment("My Tree", "frag_one"));
-		String newName = "Another Main Tree." + System.getProperty("user.name");
+		String newName = "Another Main Tree." + SystemUtilities.getUserName();
 		assertNotNull(resultProgram.getListing().getRootModule("Another Main Tree"));
 		assertNotNull(resultProgram.getListing().getModule(newName, "my new module"));
 		assertNotNull(resultProgram.getListing().getFragment(newName, "my fragment"));
@@ -1173,7 +1173,7 @@ public class ProgramTreeMergeManager1Test extends AbstractProgramTreeMergeManage
 		assertNotNull(resultProgram.getListing().getRootModule("Main Tree"));
 		assertNotNull(resultProgram.getListing().getModule("My Tree", "my module"));
 		assertNotNull(resultProgram.getListing().getFragment("My Tree", "frag_one"));
-		String newName = "Another Main Tree." + System.getProperty("user.name");
+		String newName = "Another Main Tree." + SystemUtilities.getUserName();
 
 		assertNotNull(resultProgram.getListing().getRootModule("Another Main Tree"));
 		assertNull(resultProgram.getListing().getModule(newName, "my new module"));

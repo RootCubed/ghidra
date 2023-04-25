@@ -645,7 +645,7 @@ public abstract class GhidraScript extends FlatProgramAPI {
 	 * @return the username of the user running the script
 	 */
 	public String getUserName() {
-		return System.getProperty("user.name");
+		return SystemUtilities.getUserName();
 	}
 
 	@Override

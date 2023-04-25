@@ -230,7 +230,7 @@ public class DefaultProjectData implements ProjectData {
 	 * @return current user name using legacy formatting.
 	 */
 	private String getUserName() {
-		String uname = System.getProperty("user.name");
+		String uname = SystemUtilities.getUserName(true);
 
 		// Remove the spaces since some operating systems allow
 		// spaces and some do not, Java's File class doesn't
