@@ -90,7 +90,8 @@ public:
     postsurround,		///< Function or array operator form
     presurround,		///< Modifier form (like a cast operation)
     space,			///< No explicitly printed token
-    hiddenfunction		///< Operation that isn't explicitly printed
+    hiddenfunction,		///< Operation that isn't explicitly printed
+    unary_postfix		///< Unary operator form (printed after its input)
   };
   string print1;		///< Printing characters for the token
   string print2;		///< (terminating) characters for the token
