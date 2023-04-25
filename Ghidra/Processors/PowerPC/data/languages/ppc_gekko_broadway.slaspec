@@ -1,0 +1,12 @@
+# PowerPC assembly SLA spec for the Gekko and Broadway variant
+
+@define 750CL
+
+@define ENDIAN "big"
+
+@define REGISTER_SIZE "4"
+
+@define NoLegacyIntegerMultiplyAccumulate
+
+@include "ppc_common.sinc"
+@include "750cl.sinc"
