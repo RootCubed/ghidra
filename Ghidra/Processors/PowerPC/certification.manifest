@@ -1,6 +1,7 @@
 ##VERSION: 2.0
 Module.manifest||GHIDRA||||END|
 data/languages/4xx.sinc||GHIDRA||||END|
+data/languages/750cl.sinc||GHIDRA||||END|
 data/languages/FPRC.sinc||GHIDRA||||END|
 data/languages/PowerPC.opinion||GHIDRA||||END|
 data/languages/SPEF_SCR.sinc||GHIDRA||||END|
@@ -53,6 +54,9 @@ data/languages/ppc_64_le.slaspec||GHIDRA||||END|
 data/languages/ppc_a2.sinc||GHIDRA||||END|
 data/languages/ppc_common.sinc||GHIDRA||||END|
 data/languages/ppc_embedded.sinc||GHIDRA||||END|
+data/languages/ppc_gekko_broadway.cspec||GHIDRA||||END|
+data/languages/ppc_gekko_broadway.pspec||GHIDRA||||END|
+data/languages/ppc_gekko_broadway.slaspec||GHIDRA||||END|
 data/languages/ppc_instructions.sinc||GHIDRA||||END|
 data/languages/ppc_isa.sinc||GHIDRA||||END|
 data/languages/ppc_vle.sinc||GHIDRA||||END|
