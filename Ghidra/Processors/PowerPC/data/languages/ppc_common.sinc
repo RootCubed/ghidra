@@ -167,6 +167,14 @@ define register offset=0x4000 size=8 [
 	_ f16 _ f17 _ f18 _ f19 _ f20 _ f21 _ f22 _ f23 _ f24 _ f25 _ f26 _ f27 _ f28 _ f29 _ f30 _ f31 ];
 @endif
 
+@ifdef 750CL
+define register offset=0x11000 size=8 [
+         ps0_1 ps1_1  ps2_1  ps3_1  ps4_1  ps5_1  ps6_1  ps7_1
+         ps8_1 ps9_1  ps10_1 ps11_1 ps12_1 ps13_1 ps14_1 ps15_1
+        ps16_1 ps17_1 ps18_1 ps19_1 ps20_1 ps21_1 ps22_1 ps23_1
+        ps24_1 ps25_1 ps26_1 ps27_1 ps28_1 ps29_1 ps30_1 ps31_1];
+@endif
+
 # All the altivec regs need to start at offset 0x4200
 # Sleigh does not allow registers of the same size to overlay. This presents some issues as the normal
 # Altivec registers overlay the top 32 VSX registers. What we have to do is use a sub-table to display
@@ -700,6 +708,14 @@ define token instr(32)
 	fB=(11,15)
 	fC=(6,10)
 	fD=(21,25)
+	ps0A=(16,20)
+	ps1A=(16,20)
+	ps0B=(11,15)
+	ps1B=(11,15)
+	ps0C=(6,10)
+	ps1C=(6,10)
+	ps0D=(21,25)
+	ps1D=(21,25)
 	FM0=(24,24)
 	FM1=(23,23)
 	FM=(17,24)
@@ -712,7 +728,13 @@ define token instr(32)
 	FNC=(11,15)
 	fS=(21,25)
 	fT=(21,25)
+	ps0S=(21,25)
+	ps1S=(21,25)
+	ps1T=(21,25)
 	IMM=(11,15)
+
+	I=(12,14)
+	IX=(7,9)
 
 	EVUIMM=(11,15)
 	BU_UIMM=(16,20)
@@ -758,6 +780,7 @@ define token instr(32)
 	S8IMM=(0,7) signed
 	S5IMM=(11,15) signed
 	SIMM=(0,15) signed
+	SIMM_PS=(0,11) signed
 	SIMM_DS=(2,15) signed
 	SIMM_SIGN=(15,15)
 	SIX=(11,14)
@@ -977,6 +1000,8 @@ define token instr(32)
     vrS_8_14=(21,25)
     vrS_8_15=(21,25)
 
+	W=(15,15)
+	WX=(10,10)
 	WC=(21,22)
 	
 	XOP_0_10=(0,10)
@@ -986,6 +1011,7 @@ define token instr(32)
 	XOP_1_10=(1,10)
 	XOP_1_4=(1,4)
 	XOP_1_5=(1,5)
+	XOP_1_6=(1,6)
 	XOP_1_8=(1,8)
 	XOP_1_9=(1,9)
 	XOP_2_10=(2,10)
@@ -1094,6 +1120,27 @@ attach variables [ fD fB fA fC fS fT ]
                    f8  f9  f10 f11 f12 f13 f14 f15
                    f16 f17 f18 f19 f20 f21 f22 f23
                    f24 f25 f26 f27 f28 f29 f30 f31 ];
+
+@ifdef 750CL
+
+# fX are mirrored to psX, so we simplify and just use the fX registers as the psX_0 registers.
+# This is also how the actual hardware behaves.
+attach variables [ ps0D ps0B ps0A ps0C ps0S ]
+                 [ f0  f1  f2  f3  f4  f5  f6  f7
+                   f8  f9  f10 f11 f12 f13 f14 f15
+                   f16 f17 f18 f19 f20 f21 f22 f23
+                   f24 f25 f26 f27 f28 f29 f30 f31 ];
+
+attach variables [ ps1D ps1B ps1A ps1C ps1S ps1T ]
+                 [  ps0_1  ps1_1  ps2_1  ps3_1  ps4_1  ps5_1  ps6_1  ps7_1
+                    ps8_1  ps9_1 ps10_1 ps11_1 ps12_1 ps13_1 ps14_1 ps15_1
+                   ps16_1 ps17_1 ps18_1 ps19_1 ps20_1 ps21_1 ps22_1 ps23_1
+                   ps24_1 ps25_1 ps26_1 ps27_1 ps28_1 ps29_1 ps30_1 ps31_1 ];
+
+# GQR0-GQR7
+attach variables [I IX]
+	[spr390 spr391 spr392 spr393 spr394 spr395 spr396 spr397];
+@endif
 
 attach variables [ CRBD CRBR ]
          [ fp_fx 		fp_fex 		fp_vx 		fp_ox
@@ -1423,6 +1470,7 @@ define pcodeop dataCacheBlockStore;
 define pcodeop dataCacheBlockTouch;
 define pcodeop dataCacheBlockTouchForStore;
 define pcodeop dataCacheBlockClearToZero;
+define pcodeop dataCacheBlockSetToZeroLocked;
 define pcodeop dataCacheCongruenceClassInvalidate;
 define pcodeop dataCacheRead;
 define pcodeop externalControlIn;
@@ -1975,8 +2023,10 @@ UREG_A:			is A { export A; }
 UREG_B:			is B { export B; }
 @endif
 
-dPlusRaOrZeroAddress: SIMM(RA_OR_ZERO)	is SIMM & RA_OR_ZERO	{ tmp:$(REGISTER_SIZE) = RA_OR_ZERO+SIMM; export tmp; }
-dPlusRaAddress: SIMM(A)					is SIMM & A				{tmp:$(REGISTER_SIZE) = A+SIMM; export tmp;  }
+dPlusRaOrZeroAddress:   SIMM(RA_OR_ZERO)    is SIMM & RA_OR_ZERO    { tmp:$(REGISTER_SIZE) = RA_OR_ZERO+SIMM; export tmp; }
+dPlusRaOrZeroAddressPS: SIMM_PS(RA_OR_ZERO) is SIMM_PS & RA_OR_ZERO { tmp:4 = RA_OR_ZERO+SIMM_PS; export tmp; }
+dPlusRaAddress:         SIMM(A)             is SIMM & A             { tmp:$(REGISTER_SIZE) = A+SIMM; export tmp; }
+dPlusRaAddressPS:       SIMM_PS(A)          is SIMM_PS & A          { tmp:4 = A+SIMM_PS; export tmp; }
 
 dUI16PlusRAOrZeroAddress: val^"("^RA_OR_ZERO^")" is  RA_OR_ZERO & UI_16_s8 [ val = UI_16_s8 << 3; ]  { ea:$(REGISTER_SIZE) = RA_OR_ZERO + val; export ea; }
 
