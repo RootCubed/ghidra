@@ -1192,24 +1192,36 @@
 }
 
 #fadds fr0,fr0,fr0	0xec 00 00 2a
-:fadds fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=0
+:fadds fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
 	tmp:4 = float2float(fA f+ fB);
 	fD = float2float(tmp);
 	setFPAddFlags(tmpfA,tmpfB,fD);
-	
+@ifdef 750CL
+    ps1T = fD;
+@endif
+
 }
 
 #fadds. fr0,fr0,fr0	0xec 00 00 2b
-:fadds. fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=1
+:fadds. fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=21 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
 	tmp:4 = float2float(fA f+ fB);
 	fD = float2float(tmp);
 	setFPAddFlags(tmpfA,tmpfB,fD);
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -1373,22 +1385,34 @@
 }
 
 #fdivs fr0,fr0,fr0  0xec 00 00 24
-:fdivs fD,fA,fB   is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=0
+:fdivs fD,fA,fB   is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
 	tmp:4 = float2float(fA f/ fB);
 	fD = float2float(tmp);
 	setFPDivFlags(tmpfA,tmpfB,fD);
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 #fdivs. fr0,fr0,fr0  0xec 00 00 25
-:fdivs. fD,fA,fB   is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=1
+:fdivs. fD,fA,fB   is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=18 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
 	tmp:4 = float2float(fA f/ fB);
 	fD = float2float(tmp);
 	setFPDivFlags(tmpfA,tmpfB,fD);
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -1434,7 +1458,10 @@
 }
 
 #fmadds fr0,fr0,fr0,fr0	0xec 00 00 3a
-:fmadds fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=29 & Rc=0
+:fmadds fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=29 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1452,10 +1479,16 @@
 #	fp_vxisi = fp_vxisi | floatInfinityAdd(tmp, tmpfB);
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tm[fC);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #fmadds. fr0,fr0,fr0,fr0	0xec 00 00 3b
-:fmadds. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=29 & Rc=1
+:fmadds. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=29 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1473,6 +1506,9 @@
 #	fp_vxisi = fp_vxisi | floatInfinityAdd(tmp, tmpfB);
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tmpfC);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -1530,7 +1566,10 @@
 }
 
 #fmsubs fr0,fr0,fr0,fr0	0xec 00 00 38
-:fmsubs fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=28 & Rc=0
+:fmsubs fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=28 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1548,10 +1587,16 @@
 #	fp_vxisi = fp_vxisi | floatInfinitySub(tmp, tmpfB);
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tmpfC);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #fmsubs. fr0,fr0,fr0,fr0	0xfc 00 00 39
-:fmsubs. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=28 & Rc=1
+:fmsubs. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=28 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1569,6 +1614,9 @@
 #	fp_vxisi = fp_vxisi | floatInfinitySub(tmp, tmpfB);
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tmpfC);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -1591,23 +1639,35 @@
 }
 
 #fmuls fr0,fr0,fr0	0xec 00 00 32
-:fmuls fD,fA,fC	is $(NOTVLE) & OP=59 & fD & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=0
+:fmuls fD,fA,fC	is $(NOTVLE) & OP=59 & fD & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfC = fC;
 	tmp:4 = float2float(fA f* fC);
 	fD = float2float(tmp);
 	setFPMulFlags(tmpfA,tmpfC,fD);
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #fmuls. fr0,fr0,fr0	0xec 00 00 33
-:fmuls. fD,fA,fC	is $(NOTVLE) & OP=59 & fD & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=1
+:fmuls. fD,fA,fC	is $(NOTVLE) & OP=59 & fD & fA & fC & BITS_11_15=0 & XOP_1_5=25 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfC = fC;
 	tmp:4 = float2float(fA f* fC);
 	fD = float2float(tmp);
 	setFPMulFlags(tmpfA,tmpfC,fD);
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -1679,7 +1739,10 @@
 }
 
 #fnmadds fr0,fr0,fr0,fr0	0xec 00 00 3e
-:fnmadds fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=31 & Rc=0
+:fnmadds fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=31 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1697,10 +1760,16 @@
 #	fp_vxisi = fp_vxisi | floatInfinityAdd(tmp, tmpfB);
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tmpfC);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #fnmadds. fr0,fr0,fr0,fr0	0xec 00 00 3f
-:fnmadds. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=31 & Rc=1
+:fnmadds. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=31 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1718,6 +1787,9 @@
 #	fp_vxisi = fp_vxisi | floatInfinityAdd(tmp, tmpfB);
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tmpfC);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -1764,7 +1836,10 @@
 }
 
 #fnmsubs fr0,fr0,fr0,fr0	0xec 00 00 3c
-:fnmsubs fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=30 & Rc=0
+:fnmsubs fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=30 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1782,10 +1857,16 @@
 #	fp_vxisi = fp_vxisi | floatInfinitySub(tmp, tmpfB);
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tmpfC);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #fnmsubs. fr0,fr0,fr0,fr0	0xfc 00 00 3d
-:fnmsubs. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=30 & Rc=1
+:fnmsubs. fD,fA,fC,fB	is $(NOTVLE) & OP=59 & fD & fA & fC & fB & XOP_1_5=30 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
@@ -1804,10 +1885,16 @@
 #	fp_vximz = fp_vximz | floatInfinityMulZero(tmpfA,tmpfC);
 	setSummaryFPSCR();
 	cr1flags();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #fres fr0,fr0		0xec 00 00 30
 :fres fD,fB	is $(NOTVLE) & OP=59 & fD & BITS_16_20 & fB & BITS_6_10=0 & XOP_1_5=24 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfB = fB;
 	one:8 = 1;
@@ -1822,10 +1909,16 @@
 	fp_zx = fp_zx | (fB f== 0);
 	fp_vxsnan = fp_vxsnan | nan(tmpfB);
 	setSummaryFPSCR();	
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #fres. fr0,fr0		0xec 00 00 31
-:fres. fD,fB	is $(NOTVLE) & OP=59 & fD & BITS_16_20 & fB & BITS_6_10=0 & XOP_1_5=24 & Rc=1
+:fres. fD,fB	is $(NOTVLE) & OP=59 & fD & BITS_16_20 & fB & BITS_6_10=0 & XOP_1_5=24 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfB = fB;
 	one:8 = 1;
@@ -1840,6 +1933,9 @@
 	fp_zx = fp_zx | (fB f== 0);
 	fp_vxsnan = fp_vxsnan | nan(tmpfB);
 	setSummaryFPSCR();
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -2022,24 +2118,36 @@
 }
 
 #fsubs fr0,fr0,fr0	0xec 00 00 28
-:fsubs fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=0
+:fsubs fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=0 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
 	tmp:4 = float2float(fA f- fB);
 	fD = float2float(tmp);
 	setFPSubFlags(tmpfA,tmpfB,fD);
+@ifdef 750CL
+    ps1T = fD;
+@endif
 	
 }
 
 #fsubs. fr0,fr0,fr0	0xec 00 00 29
-:fsubs. fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=1
+:fsubs. fD,fA,fB	is $(NOTVLE) & OP=59 & fD & fA & fB & BITS_6_10=0 & XOP_1_5=20 & Rc=1 
+@ifdef 750CL
+& ps1T
+@endif
 {
 	local tmpfA = fA;
 	local tmpfB = fB;
 	tmp:4 = float2float(fA f- fB);
 	fD = float2float(tmp);
 	setFPSubFlags(tmpfA,tmpfB,fD);
+@ifdef 750CL
+	ps1T = fD;
+@endif
 	cr1flags();
 }
 
@@ -2154,28 +2262,52 @@
 
 #lfs fr0,8(r2)	0xc0 02 00 08	
 :lfs	fD,dPlusRaOrZeroAddress 	is $(NOTVLE) & OP=48 & fD & dPlusRaOrZeroAddress
+@ifdef 750CL
+& ps1T
+@endif
 {
 	fD = float2float(*:4(dPlusRaOrZeroAddress));
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 #lfsu fr0,8(r2)	0xc0 02 00 08	
 :lfsu	fD,dPlusRaAddress 	is $(NOTVLE) & OP=49 & fD & dPlusRaAddress & A
+@ifdef 750CL
+& ps1T
+@endif
 {
 	ea:$(REGISTER_SIZE) = dPlusRaAddress;
 	fD = float2float(*:4(ea));
 	A = ea;
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 
 #lfsux fr0,r2,r0	0x7c 02 04 6e	
 :lfsux	fD,A,B 	is $(NOTVLE) & OP=31 & fD & A & B & XOP_1_10=567 & BIT_0=0
+@ifdef 750CL
+& ps1T
+@endif
 {
 	ea:$(REGISTER_SIZE) = A+B;
 	fD = float2float(*:4(ea));
 	A = ea;
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 #lfsx fr0,r2,r0	0x7c 02 04 2e	
 :lfsx	fD,RA_OR_ZERO,B 	is $(NOTVLE) & OP=31 & fD & RA_OR_ZERO & B & XOP_1_10=535 & BIT_0=0
+@ifdef 750CL
+& ps1T
+@endif
 {
 	fD = float2float(*:4(RA_OR_ZERO+B));
+@ifdef 750CL
+    ps1T = fD;
+@endif
 }
 #lha	r0,4(0)		0xa8 00 00 04
 #lha	r0,4(r2)	0xa8 02 00 04
