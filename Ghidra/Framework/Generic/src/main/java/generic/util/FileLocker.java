@@ -22,6 +22,8 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import ghidra.util.SystemUtilities;
+
 public class FileLocker {
 
 	private static final String META_TAG = "<META> ";
@@ -127,7 +129,7 @@ public class FileLocker {
 		Properties properties = new Properties();
 
 		// user info
-		properties.put("Username", System.getProperty("user.name"));
+		properties.put("Username", SystemUtilities.getUserName());
 		String hostname = "<Unknown>";
 		try {
 			hostname = InetAddress.getLocalHost().getHostName();

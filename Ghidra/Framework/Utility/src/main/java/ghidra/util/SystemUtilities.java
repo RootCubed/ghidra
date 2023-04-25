@@ -127,13 +127,34 @@ public class SystemUtilities {
 	}
 
 	/**
+	 * Set the user that is running the ghidra application
+	 * Used to override the system username, if one wishes to do so
+	 */
+	public static void setUserName(String name) {
+		if (name.equals("")) return;
+		userName = name;
+	}
+
+	/**
 	 * Get the user that is running the application.  This name may be modified to
 	 * eliminate any spaces or leading domain name which may be present in Java's
 	 * {@code user.name} system property (see {@link #getCleanUserName(String)}).
 	 * @return the user name
 	 */
 	public static String getUserName() {
-		if (userName == null) {
+		return getUserName(false);
+	}
+
+	/**
+	 * Get the user that is running the application.  This name may be modified to 
+	 * eliminate any spaces or leading domain name which may be present in Java's 
+	 * {@code user.name} system property (see {@link #getCleanUserName(String)}).
+	 * @param mustBeSystemUsername Whether the username must be the same as the
+	 * system user name or not (needed for file paths, for example)
+	 * @return the user name
+	 */
+	public static String getUserName(boolean mustBeSystemUsername) {
+		if (userName == null || mustBeSystemUsername) {
 			userName = getCleanUserName(System.getProperty("user.name"));
 		}
 		return userName;
