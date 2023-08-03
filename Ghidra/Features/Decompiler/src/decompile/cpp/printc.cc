@@ -2469,12 +2469,20 @@ bool PrintC::emitInplaceOp(const PcodeOp *op)
 
 {
   OpToken *tok;
+
+  const HighVariable *outHigh = op->getOut()->getHigh();
+
+  if (op->code() == CPUI_COPY && op->getIn(0)->getDef() != (const PcodeOp *)0) {
+    op = op->getIn(0)->getDef();
+  }
   switch(op->code()) {
   case CPUI_INT_MULT:
+  case CPUI_FLOAT_MULT:
     tok = &multequal;
     break;
   case CPUI_INT_DIV:
   case CPUI_INT_SDIV:
+  case CPUI_FLOAT_DIV:
     tok = &divequal;
     break;
   case CPUI_INT_REM:
@@ -2482,9 +2490,13 @@ bool PrintC::emitInplaceOp(const PcodeOp *op)
     tok = &remequal;
     break;
   case CPUI_INT_ADD:
+  case CPUI_PTRADD:
+  case CPUI_FLOAT_ADD:
     tok = &plusequal;
     break;
   case CPUI_INT_SUB:
+  case CPUI_PTRSUB:
+  case CPUI_FLOAT_SUB:
     tok = &minusequal;
     break;
   case CPUI_INT_LEFT:
@@ -2507,7 +2519,7 @@ bool PrintC::emitInplaceOp(const PcodeOp *op)
     return false;
   }
   const Varnode *vn = op->getIn(0);
-  if (op->getOut()->getHigh() != vn->getHigh()) return false;
+  if (outHigh != vn->getHigh()) return false;
   pushOp(tok,op);
   pushVnExplicit(vn,op);
   pushVn(op->getIn(1),op,mods);
