@@ -5524,6 +5524,7 @@ void ActionDatabase::universalAction(Architecture *conf)
 	actprop->addRule( new RuleOrCompare("analysis") );
 	actprop->addRule( new RuleSimplifyPPCInt2Float("analysis") );
 	actprop->addRule( new RuleSimplifySignBitExtract("analysis") );
+  actprop->addRule( new RuleMultiplyAndOne("analysis") );
 	actprop->addRule( new RuleSubvarAnd("subvar") );
 	actprop->addRule( new RuleSubvarSubpiece("subvar") );
 	actprop->addRule( new RuleSplitFlow("subvar") );

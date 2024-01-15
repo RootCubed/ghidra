@@ -1617,5 +1617,16 @@ public:
   virtual int4 applyOp(PcodeOp *op,Funcdata &data);
 };
 
+class RuleMultiplyAndOne : public Rule {
+public:
+  RuleMultiplyAndOne(const string &g) : Rule( g, 0, "multiplyandone") {}       ///< Constructor
+  virtual Rule *clone(const ActionGroupList &grouplist) const {
+    if (!grouplist.contains(getGroup())) return (Rule *)0;
+    return new RuleMultiplyAndOne(getGroup());
+  }
+  virtual void getOpList(vector<uint4> &oplist) const;
+  virtual int4 applyOp(PcodeOp *op,Funcdata &data);
+};
+
 } // End namespace ghidra
 #endif

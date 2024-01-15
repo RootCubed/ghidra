@@ -10882,6 +10882,69 @@ int4 RuleSimplifySignBitExtract::applyOp(PcodeOp *op, Funcdata &data)
   return 1;
 }
 
+/// \class RuleMultiplyAndOne
+/// \brief Handles multiplications mod 2, such as `(X * (X + c)) & 1`.
+///
+/// If `c` is 0 mod 2, the result is `X & 1`. If `c` is 1 mod 2, the result is `0`.
+void RuleMultiplyAndOne::getOpList(vector<uint4> &oplist) const
+
+{
+  oplist.push_back(CPUI_INT_AND);
+}
+
+int4 RuleMultiplyAndOne::applyOp(PcodeOp *op,Funcdata &data)
+
+{
+  if (!op->getIn(1)->constantMatch(1)) return 0;
+
+  PcodeOp *mult_op = op->getIn(0)->getDef();
+
+  if (mult_op == (PcodeOp *)0) return 0;
+  if (mult_op->code() != CPUI_INT_MULT) return 0;
+
+  Varnode *lhs = mult_op->getIn(0);
+  Varnode *rhs = mult_op->getIn(1);
+  Varnode *var;
+  PcodeOp *add_op;
+
+  add_op = rhs->getDef();
+  var = lhs;
+
+  if (!((add_op != (PcodeOp *)0) && (add_op->code() == CPUI_INT_ADD) && (add_op->getIn(1) != (Varnode *)0) && (add_op->getIn(1)->isConstant()))) {
+
+    // the (X + c) term is not on the rhs of the add - maybe it's on the left hand side?
+    add_op = lhs->getDef();
+    var = rhs;
+
+    if (add_op == (PcodeOp *)0) return 0;
+    if (add_op->code() != CPUI_INT_ADD) return 0;
+    if (add_op->getIn(1) == (Varnode *)0) return 0;
+    if (!add_op->getIn(1)->isConstant()) return 0;
+  }
+
+  // check if var and add_op->getIn(0) refer to the same variable
+  if (var != add_op->getIn(0)) return 0;
+
+  // We now have (<var> * (<var> + c)) & 1. Note that mod 2, *=& and +=^
+  // If c == 0:
+  //   <var> & (<var> ^ 0) & 1 == <var> & <var> & 1
+  //     == <var> & 1
+  // If c == 1:
+  //   <var> & (<var> ^ 1) & 1 == ((<var> & <var>) ^ (<var> & 1)) & 1 == (<var> ^ <var>) & 1
+  //     == 0
+
+  if ((add_op->getIn(1)->getOffset() & 1) == 0) {
+    // Connect the var input directly to the int_and
+    data.opSetInput(op, var, 0);
+  } else {
+    // Replace the output of the INT_MULT with 0
+    Varnode *zero = data.newConstant(op->getIn(0)->getSize(), 0);
+    data.opSetInput(op, zero, 0);
+  }
+
+  return 1;
+}
+
 /// \class RuleFloatSign
 /// \brief Convert floating-point \e sign bit manipulation into FLOAT_ABS or FLOAT_NEG
 ///
