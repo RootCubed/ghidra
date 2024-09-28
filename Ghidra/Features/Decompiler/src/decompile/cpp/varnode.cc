@@ -942,7 +942,11 @@ Datatype *Varnode::getLocalType(bool &blockup) const
 bool Varnode::isBooleanValue(bool useAnnotation) const
 
 {
-  if (isWritten()) return def->isCalculatedBool();
+  if (isWritten()) {
+    if (useAnnotation && def->code() == CPUI_LOAD && size == 1 && type->getMetatype() == TYPE_BOOL)
+      return true;
+    return def->isCalculatedBool();
+  }
   if (!useAnnotation)
     return false;
   if ((flags & (input | typelock)) == (input | typelock)) {
