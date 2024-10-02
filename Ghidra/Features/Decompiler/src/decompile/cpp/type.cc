@@ -1589,8 +1589,11 @@ int4 TypeStruct::getFieldIter(int4 off) const
     if (curfield.offset > off)
       max = mid - 1;
     else {			// curfield.offset <= off
-      if ((curfield.offset + curfield.type->getSize()) > off)
-	return mid;
+      if ((curfield.offset + curfield.type->getSize()) > off) {
+        if (mid + 1 <= max && field[mid + 1].offset <= off)
+          return mid + 1;
+        return mid;
+      }
       min = mid + 1;
     }
   }
