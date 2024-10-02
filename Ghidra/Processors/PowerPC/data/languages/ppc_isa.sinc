@@ -1312,7 +1312,9 @@ define pcodeop daddqDotOp;
 # xxspltd T,A,0 	=>		xxpermdi T,A,A,0b00
 # xxswapd T,A 		=>		xxpermdi T,A,A,0b10
 
+@ifndef 750CL
 @include "vsx.sinc"
+@endif
 
 # binutils-descr: "brinc",	VX (4, 527),	VX_MASK,     PPCSPE,	PPCNONE,	{RS, RA, RB}
 define pcodeop brincOp;
