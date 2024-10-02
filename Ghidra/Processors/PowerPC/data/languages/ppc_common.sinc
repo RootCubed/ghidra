@@ -147,12 +147,15 @@ define register offset=0x1000 size=$(REGISTER_SIZE)
 
 # Support for Vector-Scalar Extension - i.e "VSX"
 
+@ifndef 750CL
 define register offset=0x4000 size=16 
 	[ vs0    vs1   vs2   vs3   vs4   vs5   vs6   vs7   vs8   vs9  vs10  vs11  vs12  vs13  vs14  vs15  
       vs16  vs17  vs18  vs19  vs20  vs21  vs22  vs23  vs24  vs25  vs26  vs27  vs28  vs29  vs30  vs31 
       vs32  vs33  vs34  vs35  vs36  vs37  vs38  vs39  vs40  vs41  vs42  vs43  vs44  vs45  vs46  vs47  
       vs48  vs49  vs50  vs51  vs52  vs53  vs54  vs55  vs56  vs57  vs58  vs59  vs60  vs61  vs62  vs63 
     ];
+@endif
+
 # Floating point registers	
 # These overlay the first 32 vsx regs with the gaps as indicated so fr0 is in vs0, fr1 is in vs1, etc.
 # This also means we have to have 2 defs of this due to endian stuff.
@@ -1094,10 +1097,12 @@ EVUIMM_2_RAt:       val^"("^A^")"	    is A & EVUIMM_2	[ val = EVUIMM_2*2; ]	{ tm
 EVUIMM_4_RAt:       val^"("^A^")"	    is A & EVUIMM_4	[ val = EVUIMM_4*4; ]	{ tmp:4 = A+(EVUIMM_4*4); export tmp; }
 EVUIMM_8_RAt:       val^"("^A^")"	    is A & EVUIMM_8	[ val = EVUIMM_8*8; ]	{ tmp:4 = A+(EVUIMM_8*8); export tmp; }
 
+@ifndef 750CL
 attach variables [ T ]
 	[ vs0    vs1   vs2   vs3   vs4   vs5   vs6   vs7   vs8   vs9  vs10  vs11  vs12  vs13  vs14  vs15  
       vs16  vs17  vs18  vs19  vs20  vs21  vs22  vs23  vs24  vs25  vs26  vs27  vs28  vs29  vs30  vs31 
     ];
+@endif
 
 attach variables [ RX_VLE RY_VLE RZ_VLE]
 	[ r0 r1 r2 r3 r4 r5 r6 r7 r24 r25 r26 r27 r28 r29 r30 r31];
@@ -1238,10 +1243,11 @@ attach variables DCRN [
 	dcr01f	dcr03f	dcr05f	dcr07f	dcr09f	dcr0bf	dcr0df	dcr0ff	dcr11f  dcr13f	dcr15f	dcr17f	dcr19f	dcr1bf	dcr1df	dcr1ff	dcr21f	dcr23f	dcr25f	dcr27f	dcr29f	dcr2bf	dcr2df	dcr2ff	dcr31f	dcr33f	dcr35f	dcr37f	dcr39f	dcr3bf	dcr3df	dcr3ff
 ];
 
+@ifndef 750CL
 attach variables [vrDR vrAR vrBR vrSR vrCR]
 	[  vs32  vs33  vs34  vs35  vs36  vs37  vs38  vs39  vs40  vs41  vs42  vs43  vs44  vs45  vs46  vs47  
        vs48  vs49  vs50  vs51  vs52  vs53  vs54  vs55  vs56  vs57  vs58  vs59  vs60  vs61  vs62  vs63 ];
-       
+
 ## These attaches are for the Altivec instructions
 attach names [ vrDD vrAD vrBD vrSD vrCD]
     [ v0  v1  v2  v3  v4  v5  v6  v7  v8  v9  v10 v11 v12 v13 v14 v15
@@ -1456,6 +1462,7 @@ attach variables vrC_8_12 [vr0_8_12 vr1_8_12 vr2_8_12 vr3_8_12 vr4_8_12 vr5_8_12
 attach variables vrC_8_13 [vr0_8_13 vr1_8_13 vr2_8_13 vr3_8_13 vr4_8_13 vr5_8_13 vr6_8_13 vr7_8_13 vr8_8_13 vr9_8_13 vr10_8_13 vr11_8_13 vr12_8_13 vr13_8_13 vr14_8_13 vr15_8_13 vr16_8_13 vr17_8_13 vr18_8_13 vr19_8_13 vr20_8_13 vr21_8_13 vr22_8_13 vr23_8_13 vr24_8_13 vr25_8_13 vr26_8_13 vr27_8_13 vr28_8_13 vr29_8_13 vr30_8_13 vr31_8_13 ];
 attach variables vrC_8_14 [vr0_8_14 vr1_8_14 vr2_8_14 vr3_8_14 vr4_8_14 vr5_8_14 vr6_8_14 vr7_8_14 vr8_8_14 vr9_8_14 vr10_8_14 vr11_8_14 vr12_8_14 vr13_8_14 vr14_8_14 vr15_8_14 vr16_8_14 vr17_8_14 vr18_8_14 vr19_8_14 vr20_8_14 vr21_8_14 vr22_8_14 vr23_8_14 vr24_8_14 vr25_8_14 vr26_8_14 vr27_8_14 vr28_8_14 vr29_8_14 vr30_8_14 vr31_8_14 ];
 attach variables vrC_8_15 [vr0_8_15 vr1_8_15 vr2_8_15 vr3_8_15 vr4_8_15 vr5_8_15 vr6_8_15 vr7_8_15 vr8_8_15 vr9_8_15 vr10_8_15 vr11_8_15 vr12_8_15 vr13_8_15 vr14_8_15 vr15_8_15 vr16_8_15 vr17_8_15 vr18_8_15 vr19_8_15 vr20_8_15 vr21_8_15 vr22_8_15 vr23_8_15 vr24_8_15 vr25_8_15 vr26_8_15 vr27_8_15 vr28_8_15 vr29_8_15 vr30_8_15 vr31_8_15 ];
+@endif # @ifndef 750CL
 
 ################################################################
 # Pseudo Instructions
