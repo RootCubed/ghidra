@@ -2907,7 +2907,33 @@ void PrintC::emitBlockCondition(const BlockCondition *bl)
     return;
   }
   if (isSet(only_branch) || isSet(comma_separate)) {
-    int4 id = emit->openParen(OPEN_PAREN);
+    // TODO: Test if this works properly with comma-lists...
+    bool outer_parens = true;
+    if (bl->getParent()->getType() == FlowBlock::block_type::t_condition) {
+      // We're emitting inside another BlockCondition. If that has the same
+      // operator, don't emit outer parentheses to avoid extra nesting levels.
+      // Alternatively, if we're the second child of our parent BlockCondition,
+      // the parent has already placed parentheses around us, so we don't need
+      // another layer.
+      BlockCondition *parent = (BlockCondition *) bl->getParent();
+      if (parent->getOpcode() == bl->getOpcode()) {
+        outer_parens = false;
+      }
+      if (parent->getBlock(1) == bl) {
+        outer_parens = false;
+      }
+    } else if (bl->getParent()->getType() == FlowBlock::block_type::t_whiledo) {
+      // We're emitting inside a BlockWhileDo. If this is actually a for-loop,
+      // characterised by 'getIterateOp()' not returning null, and this is the
+      // condition block, don't print outer parens either.
+      BlockWhileDo *parent = (BlockWhileDo *) bl->getParent();
+      if ((parent->getIterateOp() != (PcodeOp *)0) && (parent->getBlock(0) == bl)) {
+        outer_parens = false;
+      }
+    }
+    int4 id = -1;
+    if (outer_parens)
+      id = emit->openParen(OPEN_PAREN);
     bl->getBlock(0)->emit(this);
     pushMod();
     unsetMod(only_branch);
@@ -2928,7 +2954,8 @@ void PrintC::emitBlockCondition(const BlockCondition *bl)
     bl->getBlock(1)->emit(this);
     emit->closeParen(CLOSE_PAREN,id2);
     popMod();
-    emit->closeParen(CLOSE_PAREN,id);
+    if (outer_parens)
+      emit->closeParen(CLOSE_PAREN,id);
   }
 }
 
