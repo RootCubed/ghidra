@@ -23,6 +23,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -92,6 +93,7 @@ public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 	public static final String AUTOMATICALLY_SAVE_TOOLS = "Automatically Save Tools";
 	private static final String USE_ALERT_ANIMATION_OPTION_NAME = "Use Notification Animation";
 	private static final String USE_COMBINED_ALT_GRAPH_OPTION_NAME = "Use Combined Alt Keys";
+	private static final String OVERRIDE_USERNAME = "Override Username";
 	private static final String SHOW_TOOLTIPS_OPTION_NAME = "Show Tooltips";
 	private static final String BLINKING_CURSORS_OPTION_NAME = "Allow Blinking Cursors";
 
@@ -360,6 +362,8 @@ public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 			ENABLE_COMPRESSED_DATABUFFER_OUTPUT_DEFAULT, help,
 			"When enabled data buffers sent to Ghidra Server are compressed (see server " +
 				"configuration for other direction)");
+		options.registerOption(OVERRIDE_USERNAME, "", help,
+			"Use a custom username instead of the system username. (Leave blank to keep system username)");
 
 		options.registerOption(BLINKING_CURSORS_OPTION_NAME, true, help,
 			"This controls whether" + " text cursors blink when focused");
@@ -391,6 +395,9 @@ public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 		boolean blink = options.getBoolean(BLINKING_CURSORS_OPTION_NAME, true);
 		Gui.setBlinkingCursors(blink);
 
+		String overrideUsername = options.getString(OVERRIDE_USERNAME, "");
+		SystemUtilities.setUserName(overrideUsername);
+
 		options.addOptionsChangeListener(this);
 	}
 
@@ -420,6 +427,22 @@ public class FrontEndTool extends PluginTool implements OptionsChangeListener {
 		}
 		else if (BLINKING_CURSORS_OPTION_NAME.equals(optionName)) {
 			Gui.setBlinkingCursors((Boolean) newValue);
+		}
+		else if (OVERRIDE_USERNAME.equals(optionName)) {
+			String newName = (String) newValue;
+			// remove the spaces to be safe
+			if (newName.indexOf(" ") >= 0) {
+				String name = "";
+				StringTokenizer tokens = new StringTokenizer(newName, " ", false);
+				while (tokens.hasMoreTokens()) {
+					name += tokens.nextToken();
+				}
+				
+				newName = name;
+				options.setString(OVERRIDE_USERNAME, newName);
+			}
+
+			SystemUtilities.setUserName(newName);
 		}
 	}
 

@@ -129,7 +129,7 @@ public class AppCleaner implements GhidraLaunchable {
 	private Set<File> findSettingsDirs(String appName, ApplicationLayout layout) {
 		Set<File> discoveredDirs = new LinkedHashSet<>();
 		appName = ApplicationUtilities.normalizeApplicationName(appName);
-		String userNameAndAppName = SystemUtilities.getUserName() + "-" + appName;
+		String userNameAndAppName = SystemUtilities.getUserName(true) + "-" + appName;
 
 		// Legacy default settings directory
 		getDirFromProperty("user.home", "." + appName).ifPresent(dir -> {
@@ -186,13 +186,13 @@ public class AppCleaner implements GhidraLaunchable {
 			getDirFromEnv("LOCALAPPDATA", appName).ifPresent(discoveredDirs::add);
 		}
 		else {
-			String legacyName = SystemUtilities.getUserName() + "-" + appName;
+			String legacyName = SystemUtilities.getUserName(true) + "-" + appName;
 			getDirFromProperty("java.io.tmpdir", legacyName).ifPresent(discoveredDirs::add);
 		}
 
 		// Newer cache directories always use a lowercase application name
 		appName = ApplicationUtilities.normalizeApplicationName(appName);
-		String userNameAndAppName = SystemUtilities.getUserName() + "-" + appName;
+		String userNameAndAppName = SystemUtilities.getUserName(true) + "-" + appName;
 
 		// Current cache directories
 		File cacheDir = layout.getUserCacheDir();
@@ -224,7 +224,7 @@ public class AppCleaner implements GhidraLaunchable {
 		Set<File> discoveredDirs = new LinkedHashSet<>();
 
 		// Legacy temp directories
-		String legacyName = SystemUtilities.getUserName() + "-" + appName;
+		String legacyName = SystemUtilities.getUserName(true) + "-" + appName;
 		if (OperatingSystem.CURRENT_OPERATING_SYSTEM.equals(OperatingSystem.WINDOWS)) {
 			getDirFromEnv("TEMP", legacyName).ifPresent(discoveredDirs::add);
 		}
@@ -234,7 +234,7 @@ public class AppCleaner implements GhidraLaunchable {
 
 		// Newer temp directories always use a lowercase application name
 		appName = ApplicationUtilities.normalizeApplicationName(appName);
-		String userNameAndAppName = SystemUtilities.getUserName() + "-" + appName;
+		String userNameAndAppName = SystemUtilities.getUserName(true) + "-" + appName;
 
 		// Current temp directories
 		File tempDir = layout.getUserTempDir();

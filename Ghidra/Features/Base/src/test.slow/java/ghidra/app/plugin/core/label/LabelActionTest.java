@@ -41,6 +41,7 @@ import ghidra.program.model.listing.Program;
 import ghidra.program.model.symbol.*;
 import ghidra.program.util.*;
 import ghidra.test.*;
+import ghidra.util.SystemUtilities;
 
 public class LabelActionTest extends AbstractGhidraHeadedIntegrationTest
 		implements LocationCallback {
@@ -128,7 +129,7 @@ public class LabelActionTest extends AbstractGhidraHeadedIntegrationTest
 		assertEquals(label, "AnotherLocal");
 
 		Object author = model.getValueAt(0, 2);
-		assertTrue(author.toString().startsWith(System.getProperty("user.name")));
+		assertTrue(author.toString().startsWith(SystemUtilities.getUserName()));
 		close(provider);
 	}
 
